@@ -1,4 +1,4 @@
-package br.com.shubudo.ui.screens
+package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

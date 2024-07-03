@@ -9,7 +9,12 @@ import javax.inject.Inject;
 
 class FaixaRepository @Inject constructor(private val service: FaixasServices) {
 
-    fun findAll(): Flow<List<Faixa>> {
-        // Implementação da função
-    }
+//    suspend fun findAll(): Flow<List<Faixa>> {
+//       try {
+//           service.getFaixas()
+//       } catch (e: Exception) {
+//           throw e
+//       }
+//
+//    }
 }
