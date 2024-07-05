@@ -3,6 +3,8 @@ package br.com.shubudo.ui.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.SportsMartialArts
 import androidx.compose.material3.*
@@ -52,15 +54,15 @@ fun HomeScreen() {
                 modifier = Modifier.weight(1f)
             )
             CustomIconButton(
-                icon = Icons.Outlined.Newspaper,
+                icon = Icons.Outlined.Event,
                 text = "Avisos",
                 selected = navController.currentDestination?.route == "home",
                 onClick = { navController.navigate("home") },
                 modifier = Modifier.weight(1f)
             )
             CustomIconButton(
-                icon = Icons.Outlined.SportsMartialArts,
-                text = "Programação",
+                icon = Icons.Outlined.List,
+                text = "Conteudo",
                 selected = navController.currentDestination?.route == "programacao",
                 onClick = { navController.navigate("programacao") },
                 modifier = Modifier.weight(1f)
@@ -71,8 +73,8 @@ fun HomeScreen() {
 
 @Composable
 fun NavHostContainer(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController, startDestination = "home", modifier = modifier) {
-        composable("home") { AvisosContent() }
+    NavHost(navController, startDestination = "avisos", modifier = modifier) {
+        composable("avisos") { AvisosContent() }
         composable("perfil") { PerfilContent() }
         composable("programacao") { ProgramacaoContent() }
     }

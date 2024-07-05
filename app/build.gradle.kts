@@ -54,6 +54,7 @@ android {
 
 dependencies {
 
+    implementation(libs.firebase.crashlytics.buildtools)
     var room_version = "2.5.1"
 
     implementation("androidx.room:room-runtime:$room_version")
@@ -72,7 +73,7 @@ dependencies {
 
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
-
+    implementation ("com.google.code.gson:gson:2.8.9")
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

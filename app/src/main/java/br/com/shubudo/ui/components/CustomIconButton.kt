@@ -27,29 +27,35 @@ fun CustomIconButton(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
-    val shadowSize = if (selected) 6.dp else 0.dp
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.shadow(shadowSize, RoundedCornerShape(12.dp))
+        modifier = modifier
     ) {
-        IconButton(onClick = onClick,
+        IconButton(
+            enabled = enabled,
+            onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
-            ) {
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = text,
-                    tint = Color(0xFF8A2BE2),
+                    tint = if (selected) {
+                        Color(0xFF8A2BE2)
+                    } else Color.Gray,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
                     text = text,
-                    color = Color(0xFF8A2BE2),
+                    color = if (selected) {
+                        Color(0xFF8A2BE2)
+                    } else Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
             }

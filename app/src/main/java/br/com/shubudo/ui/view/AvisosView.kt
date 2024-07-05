@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,14 +66,18 @@ fun AvisosContent() {
                             thickness = 2.dp,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
-                        Image(
-                            painter = painterResource(id = R.drawable.em_obras),
-                            contentDescription = "Em manutenção",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .size(1000.dp)
-                        )
+                        Column (
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ){
+                            Text(
+                                text = "Você está avisado ;)",
+                                color = Color.Gray,
+
+                            )
+                        }
+
                     }
                 }
             }
