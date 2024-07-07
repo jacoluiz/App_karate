@@ -4,14 +4,16 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
+import br.com.shubudo.model.Movimento
 
 @Entity(tableName = "DefesasPessoais")
 data class DefesaPessoalEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey
+    val id: String,
     val faixa: String,
     val numeroOrdem: Int,
     @TypeConverters(Convertes::class)
-    val movimentos: List<MovimentoEntity>
+    val movimentos: List<Movimento>
 )
 
 

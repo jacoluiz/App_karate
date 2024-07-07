@@ -16,4 +16,7 @@ interface FaixaDao {
 
     @Query("SELECT * FROM Faixa WHERE id = :id")
     fun getFaixaById(id: String): FaixaEntity
+
+    @Query("SELECT * FROM Faixa WHERE faixa = :cor")
+    fun getFaixaByCor(cor: String): FaixaEntity
 }

@@ -1,15 +1,15 @@
 package br.com.shubudo.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import br.com.shubudo.database.dao.*
+import br.com.shubudo.database.dao.DefesaPessoalDao
+import br.com.shubudo.database.dao.FaixaDao
+import br.com.shubudo.database.dao.KataDao
+import br.com.shubudo.database.dao.MovimentoDao
 import br.com.shubudo.database.entities.DefesaPessoalEntity
 import br.com.shubudo.database.entities.FaixaEntity
 import br.com.shubudo.database.entities.KataEntity
 import br.com.shubudo.database.entities.MovimentoEntity
-
 
 @Database(
     version = 1,
@@ -21,14 +21,4 @@ abstract class KarateDatabase : RoomDatabase() {
     abstract fun faixaDao(): FaixaDao
     abstract fun kataDao(): KataDao
     abstract fun movimentoDao(): MovimentoDao
-
-    companion object {
-        fun getDataBase(context: Context): KarateDatabase {
-            return Room.databaseBuilder(
-                context,
-                KarateDatabase::class.java,
-                "karate.db"
-            ).build()
-        }
-    }
 }

@@ -9,5 +9,5 @@ data class FaixaEntity(
     val id: String,
     val faixa: String,
     val ordem: Int,
-    val dan: Int
+    val dan: Int = 0
 )
