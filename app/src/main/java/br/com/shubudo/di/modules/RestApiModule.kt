@@ -1,6 +1,10 @@
 package br.com.shubudo.di.modules
 
+import br.com.shubudo.network.services.DefesaPessoalServices
 import br.com.shubudo.network.services.FaixasServices
+import br.com.shubudo.network.services.KataServices
+import br.com.shubudo.network.services.MovimentoService
+import br.com.shubudo.network.services.SequenciaDeCombateService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -19,8 +23,11 @@ object RestApiModule {
     @Provides
     @Singleton
     fun providerRetroFit(client : OkHttpClient) : Retrofit {
-        return Retrofit.Builder().baseUrl(baseUrl)
-                .addConverterFactory(MoshiConverterFactory.create()).client(client).build()
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
     }
 
     @Provides
@@ -41,5 +48,29 @@ object RestApiModule {
     @Singleton
     fun provideFaixasService(retrofit : Retrofit) : FaixasServices {
         return retrofit.create(FaixasServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDefesaPessoalService(retrofit : Retrofit) : DefesaPessoalServices {
+        return retrofit.create(DefesaPessoalServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providerKataService(retrofit : Retrofit) : KataServices {
+        return retrofit.create(KataServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providerMovimentoService(retrofit : Retrofit) : MovimentoService {
+        return retrofit.create(MovimentoService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providerSequenciaDeCombateService(retrofit : Retrofit) : SequenciaDeCombateService {
+        return retrofit.create(SequenciaDeCombateService::class.java)
     }
 }

@@ -6,7 +6,7 @@ import br.com.shubudo.model.Movimento
 import retrofit2.http.GET
 
 data class DefesaPessoalResponse(
-    val id: String,
+    val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
     val movimentos: List<Movimento>
@@ -14,7 +14,7 @@ data class DefesaPessoalResponse(
 
 fun DefesaPessoalResponse.toDefesaPessoal(): DefesaPessoal {
     return DefesaPessoal(
-        id = id,
+        _id = _id,
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
@@ -23,7 +23,7 @@ fun DefesaPessoalResponse.toDefesaPessoal(): DefesaPessoal {
 
 fun DefesaPessoalResponse.toDefesaPessoalEntity(): DefesaPessoalEntity {
     return DefesaPessoalEntity(
-        id = id,
+        _id = _id,
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,

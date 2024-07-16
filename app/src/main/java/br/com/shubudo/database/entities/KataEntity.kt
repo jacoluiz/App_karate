@@ -4,16 +4,25 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
+import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Movimento
 
 @Entity(tableName = "Kata")
+@TypeConverters(Convertes::class)
 data class KataEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey
+    val _id: String,
     val faixa: String,
     val ordem: Int,
     val quantidadeMovimentos: Int,
-    @TypeConverters(Convertes::class)
     val movimentos: List<Movimento>
 )
 
+fun KataEntity.toKata() = Kata(
+    _id = _id,
+    faixa = faixa,
+    ordem = ordem,
+    quantidadeMovimentos = quantidadeMovimentos,
+    movimentos = movimentos
+)
 

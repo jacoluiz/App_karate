@@ -4,36 +4,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.shubudo.navigation.AppDestination
-import br.com.shubudo.ui.components.CustomIconButton
-import br.com.shubudo.ui.view.AvisosContent
-import br.com.shubudo.ui.view.PerfilContent
-import br.com.shubudo.ui.view.ProgramacaoContent
+import br.com.shubudo.navigation.KarateNavHost
+import br.com.shubudo.navigation.avisosRoute
+import br.com.shubudo.navigation.detalheFaixaArgument
+import br.com.shubudo.navigation.detalheFaixaRuteFullpath
+import br.com.shubudo.navigation.navigateToBottomAppBarItem
+import br.com.shubudo.navigation.perfilRoute
+import br.com.shubudo.navigation.programacaoRoute
+import br.com.shubudo.ui.components.BottomAppBarItem
+import br.com.shubudo.ui.components.KarateBottomAppBar
+import br.com.shubudo.ui.components.KarateTopAppBar
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +45,9 @@ class MainActivity : ComponentActivity() {
                 val isShowTopBar = when (currentDestination?.route) {
                     AppDestination.Avisos.route,
                     AppDestination.Perfil.route,
-                    AppDestination.Programacao.route -> true
+                    AppDestination.Programacao.route,
+                    detalheFaixaRuteFullpath
+                    -> true
 
                     else -> false
                 }
@@ -56,16 +58,22 @@ class MainActivity : ComponentActivity() {
 
                     else -> false
                 }
-                karateApp(
+                val topAppBarTitle = when (currentDestination?.route) {
+                    AppDestination.Avisos.route -> "Bem Vindo"
+                    detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
+                        detalheFaixaArgument
+                    ))
+
+                    else -> "Shubudo"
+                }
+                KarateApp(
                     isShowTopBar = isShowTopBar,
                     isShowBottomBar = isShowBottomBar,
+                    topAppBarTitle = topAppBarTitle,
                     navController = navController
                 ) {
-                    NavHostContainer(
+                    KarateNavHost(
                         navController = navController,
-                        modifier = Modifier
-                            .fillMaxWidth()
-
                     )
                 }
             }
@@ -75,85 +83,60 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
-fun karateApp(
+fun KarateApp(
     isShowTopBar: Boolean = false,
     isShowBottomBar: Boolean = false,
+    topAppBarTitle: String,
     navController: NavHostController,
     content: @Composable () -> Unit
 ) {
+    val currentBackStack by navController.currentBackStackEntryAsState()
+    val currentDestination = currentBackStack?.destination
+    val currentRoute = currentDestination?.route
     Scaffold(
         topBar = {
             if (isShowTopBar) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Shubudo",
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }, colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF8A2BE2)
-                    )
-                )
+                KarateTopAppBar(texto = topAppBarTitle)
             }
         },
         bottomBar = {
             if (isShowBottomBar) {
-                BottomAppBar {
-                    CustomIconButton(
-                        icon = Icons.Filled.AccountCircle,
-                        text = "Perfil",
-                        selected = navController.currentDestination?.route == AppDestination.Perfil.route,
-                        onClick = {
-                            navController.navigate(AppDestination.Perfil.route) {
-                                launchSingleTop = true
-                                popUpTo(AppDestination.Perfil.route)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    CustomIconButton(
-                        icon = Icons.Outlined.Event,
-                        text = "Avisos",
-                        selected = navController.currentDestination?.route == AppDestination.Avisos.route,
-                        onClick = {
-                            navController.navigate(AppDestination.Avisos.route) {
-                                launchSingleTop = true
-                                popUpTo(AppDestination.Avisos.route)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    CustomIconButton(
-                        icon = Icons.Outlined.List,
-                        text = "Conteudo",
-                        selected = navController.currentDestination?.route == AppDestination.Programacao.route,
-                        onClick = {
-                            navController.navigate(AppDestination.Programacao.route) {
-                                launchSingleTop = true
-                                popUpTo(AppDestination.Programacao.route)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                KarateBottomAppBar(
+                    selectedItem = when (currentRoute) {
+                        perfilRoute -> BottomAppBarItem.Perfil
+                        avisosRoute -> BottomAppBarItem.Avisos
+                        programacaoRoute -> BottomAppBarItem.Programacao
+                        else -> BottomAppBarItem.Avisos
+                    },
+                    items = remember {
+                        listOf(
+                            BottomAppBarItem.Perfil,
+                            BottomAppBarItem.Avisos,
+                            BottomAppBarItem.Programacao,
+                        )
+                    },
+                    onItemClick =
+                    { item ->
+                        navController.navigateToBottomAppBarItem(item)
+                    }
+                )
             }
         }
     )
     {
         Box(
-            modifier = Modifier.padding(it)
-        ) { content() }
-    }
-}
-
-@Composable
-fun NavHostContainer(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController, startDestination = "avisos", modifier = modifier) {
-        composable(AppDestination.Avisos.route) { AvisosContent() }
-        composable(AppDestination.Perfil.route) { PerfilContent() }
-        composable(AppDestination.Programacao.route) { ProgramacaoContent() }
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp),
+                color = Color(0xFF8A2BE2),
+                shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+            ) {}
+            content()
+        }
     }
 }

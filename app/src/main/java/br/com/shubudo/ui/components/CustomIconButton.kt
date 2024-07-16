@@ -1,13 +1,14 @@
 package br.com.shubudo.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -15,50 +16,70 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomIconButton(
-    icon: ImageVector,
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    icon: ImageVector? = null,
+    iconPainter: Painter? = null,
+    texto: String,
+    cor : Color = Color.Black,
+    enabled: Boolean = true,
+    onClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+    require(icon != null || iconPainter != null) { "Either 'icon' or 'iconPainter' must be provided." }
+
+    IconButton(
+        enabled = enabled,
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
-        IconButton(
-            enabled = enabled,
-            onClick = onClick,
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 0.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = text,
-                    tint = if (selected) {
-                        Color(0xFF8A2BE2)
-                    } else Color.Gray,
-                    modifier = Modifier.size(24.dp)
+                    contentDescription = texto,
+                    tint =  cor,
+                    modifier = Modifier.size(24.dp),
                 )
-                Text(
-                    text = text,
-                    color = if (selected) {
-                        Color(0xFF8A2BE2)
-                    } else Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
+
+            } else if (iconPainter != null) {
+                Icon(
+                    painter = iconPainter,
+                    contentDescription = texto,
+                    tint = cor,
+                    modifier = Modifier.size(24.dp),
                 )
             }
+
+            Text(
+                text = texto,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.size(24.dp))
         }
     }
+}
+
+
+@Composable
+@Preview
+fun CustomIconButtonPreview() {
+    CustomIconButton(
+        icon = Icons.Default.SelfImprovement,
+        texto = "Texto Modelo",
+        onClick = { /*TODO*/ }
+    )
 }

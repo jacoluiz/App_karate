@@ -4,15 +4,25 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
+import br.com.shubudo.model.Movimento
 
 @Entity(tableName = "Movimento")
+@TypeConverters(Convertes::class)
 data class MovimentoEntity(
     @PrimaryKey
-    val id: String,
-    val faixaCorresponde: String,
+    val _id: String,
+    val faixa: String,
     val tipoMovimento: String,
     val base: String,
     val nome: String,
-    @TypeConverters(Convertes::class)
     val observacao: List<String>
+)
+
+fun MovimentoEntity.toMovimento() = Movimento(
+    _id = _id,
+    faixa = faixa,
+    tipoMovimento = tipoMovimento,
+    base = base,
+    nome = nome,
+    observacao = observacao
 )

@@ -5,7 +5,7 @@ import br.com.shubudo.model.Faixa
 import retrofit2.http.GET
 
 data class FaixaResponse(
-    val id: String,
+    val _id: String,
     val faixa: String,
     val ordem: Int,
     val dan: Int
@@ -13,7 +13,7 @@ data class FaixaResponse(
 
 fun FaixaResponse.toFaixa() : Faixa {
     return Faixa(
-        id = id,
+        _id = _id,
         faixa = faixa,
         ordem = ordem,
         dan = dan
@@ -22,7 +22,7 @@ fun FaixaResponse.toFaixa() : Faixa {
 
 fun FaixaResponse.toFaixaEntity() : FaixaEntity {
     return FaixaEntity(
-        id = id,
+        _id = _id,
         faixa = faixa,
         ordem = ordem,
         dan = dan
@@ -30,7 +30,6 @@ fun FaixaResponse.toFaixaEntity() : FaixaEntity {
 }
 
 interface FaixasServices {
-
 
     @GET("faixa")
     suspend fun getFaixas() : List<FaixaResponse>
