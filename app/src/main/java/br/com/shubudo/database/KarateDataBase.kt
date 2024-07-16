@@ -6,14 +6,16 @@ import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.FaixaDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
+import br.com.shubudo.database.dao.SequenciaDeCombateDao
 import br.com.shubudo.database.entities.DefesaPessoalEntity
 import br.com.shubudo.database.entities.FaixaEntity
 import br.com.shubudo.database.entities.KataEntity
 import br.com.shubudo.database.entities.MovimentoEntity
+import br.com.shubudo.database.entities.SequenciaDeCombateEntity
 
 @Database(
     version = 1,
-    entities = [DefesaPessoalEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class]
+    entities = [DefesaPessoalEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class]
 )
 abstract class KarateDatabase : RoomDatabase() {
 
@@ -21,4 +23,5 @@ abstract class KarateDatabase : RoomDatabase() {
     abstract fun faixaDao(): FaixaDao
     abstract fun kataDao(): KataDao
     abstract fun movimentoDao(): MovimentoDao
+    abstract fun sequenciaDeCombateDao(): SequenciaDeCombateDao
 }

@@ -6,7 +6,7 @@ import br.com.shubudo.model.Movimento
 import retrofit2.http.GET
 
 data class KataResponse(
-    val id: String,
+    val _id: String,
     val faixa: String,
     val ordem: Int,
     val quantidadeMovimentos: Int,
@@ -15,7 +15,7 @@ data class KataResponse(
 
 fun KataResponse.toKata(): Kata {
     return Kata(
-        id = id,
+        _id = _id,
         faixa = faixa,
         ordem = ordem,
         quantidadeMovimentos = quantidadeMovimentos,
@@ -25,7 +25,7 @@ fun KataResponse.toKata(): Kata {
 
 fun KataResponse.toKataEntity(): KataEntity {
     return KataEntity(
-        id = id,
+        _id = _id,
         faixa = faixa,
         ordem = ordem,
         quantidadeMovimentos = quantidadeMovimentos,

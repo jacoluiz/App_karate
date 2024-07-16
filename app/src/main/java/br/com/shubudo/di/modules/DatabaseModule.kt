@@ -7,6 +7,7 @@ import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.FaixaDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
+import br.com.shubudo.database.dao.SequenciaDeCombateDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,5 +47,10 @@ class DatabaseModule {
     @Provides
     fun provideMoviemntoDao(db: KarateDatabase): MovimentoDao {
         return db.movimentoDao()
+    }
+
+    @Provides
+    fun provideSequenciaDeCombateDao(db: KarateDatabase): SequenciaDeCombateDao {
+        return db.sequenciaDeCombateDao()
     }
 }

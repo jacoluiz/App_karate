@@ -5,8 +5,8 @@ import br.com.shubudo.model.Movimento
 import retrofit2.http.GET
 
 data class MovimentoResponse(
-    val id: String,
-    val faixaCorresponde: String,
+    val _id: String,
+    val faixa: String,
     val tipoMovimento: String,
     val base: String,
     val nome: String,
@@ -15,8 +15,8 @@ data class MovimentoResponse(
 
 fun MovimentoResponse.toMovimento(): Movimento {
     return Movimento(
-        id = id,
-        faixaCorresponde = faixaCorresponde,
+        _id = _id,
+        faixa = faixa,
         tipoMovimento = tipoMovimento,
         base = base,
         nome = nome,
@@ -26,8 +26,8 @@ fun MovimentoResponse.toMovimento(): Movimento {
 
 fun MovimentoResponse.toMovimentoEntity(): MovimentoEntity {
     return MovimentoEntity(
-        id = id,
-        faixaCorresponde = faixaCorresponde,
+        _id = _id,
+        faixa = faixa,
         tipoMovimento = tipoMovimento,
         base = base,
         nome = nome,
@@ -35,8 +35,14 @@ fun MovimentoResponse.toMovimentoEntity(): MovimentoEntity {
     )
 }
 
-interface MovimentoServices {
+interface MovimentoService {
 
     @GET("ataqueMao")
     suspend fun getAtaquesDeMao(): List<MovimentoResponse>
+
+    @GET("chute")
+    suspend fun getChutes(): List<MovimentoResponse>
+
+    @GET("defesa")
+    suspend fun getDefesas(): List<MovimentoResponse>
 }

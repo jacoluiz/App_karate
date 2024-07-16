@@ -5,13 +5,21 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
 import br.com.shubudo.model.Movimento
+import br.com.shubudo.model.SequenciaDeCombate
 
 @Entity(tableName = "SequenciaDeCombate")
+@TypeConverters(Convertes::class)
 data class SequenciaDeCombateEntity(
     @PrimaryKey
-    val id: String,
+    val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
-    @TypeConverters(Convertes::class)
     val movimentos: List<Movimento>
+)
+
+fun SequenciaDeCombateEntity.toSequenciaDeCombate() = SequenciaDeCombate(
+    _id = _id,
+    faixa = faixa,
+    numeroOrdem = numeroOrdem,
+    movimentos = movimentos
 )

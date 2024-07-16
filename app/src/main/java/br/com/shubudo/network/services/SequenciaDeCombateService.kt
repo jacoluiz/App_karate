@@ -6,7 +6,7 @@ import br.com.shubudo.model.SequenciaDeCombate
 import retrofit2.http.GET
 
 data class SequenciaDeCombateResponse(
-    val id: String,
+    val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
     val movimentos: List<Movimento>
@@ -14,7 +14,7 @@ data class SequenciaDeCombateResponse(
 
 fun SequenciaDeCombateResponse.toSequenciaDeCombate(): SequenciaDeCombate {
     return SequenciaDeCombate(
-        id = id,
+        _id = _id,
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
@@ -23,14 +23,14 @@ fun SequenciaDeCombateResponse.toSequenciaDeCombate(): SequenciaDeCombate {
 
 fun SequenciaDeCombateResponse.toSequenciaDeCombateEntity(): SequenciaDeCombateEntity {
     return SequenciaDeCombateEntity(
-        id = id,
+        _id = _id,
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
     )
 }
 
-interface SequenciaDeCombateServices {
+interface SequenciaDeCombateService {
     @GET("sequenciaDeCombate")
     suspend fun getSequenciaDeCombate(): List<SequenciaDeCombateResponse>
 }

@@ -1,7 +1,7 @@
 package br.com.shubudo.model
 
 data class Kata(
-    val id: String,
+    val _id: String,
     val faixa: String,
     val ordem: Int,
     val quantidadeMovimentos: Int,
