@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -66,21 +67,27 @@ fun CardSelecaoTipoConteudo(programacao: Programacao) {
 fun preencherLista(p: Programacao): List<Conteudo> {
     val itensTemp: MutableList<Conteudo> = mutableListOf()
     if (p.ataquesDeMao.isNotEmpty()) {
+        Log.i("Bug", "Ataques de Mão ${p.ataquesDeMao}")
         itensTemp.add(Conteudo.AtaquesDeMao)
     }
     if (p.chutes.isNotEmpty()) {
+        Log.i("Bug", "Chutes ${p.chutes}")
         itensTemp.add(Conteudo.Chutes)
     }
     if (p.defesas.isNotEmpty()) {
+        Log.i("Bug", "Defesas ${p.defesas}")
         itensTemp.add(Conteudo.Defesas)
     }
     if (p.defesaPessoal.isNotEmpty()) {
+        Log.i("Bug", "Defesa Pessoal ${p.defesaPessoal}")
         itensTemp.add(Conteudo.DefesaPessoal)
     }
     if (p.katas.isNotEmpty()) {
+        Log.i("Bug", "Katas ${p.katas}")
         itensTemp.add(Conteudo.Katas)
     }
     if (p.sequenciaDeCombate.isNotEmpty()) {
+        Log.i("Bug", "Sequência de Combate ${p.sequenciaDeCombate}")
         itensTemp.add(Conteudo.SequenciaDeCombate)
     }
     return itensTemp

@@ -26,5 +26,5 @@ interface MovimentoDao {
     fun getMovimentosByFaixa(idFaixa: String): Flow<List<MovimentoEntity>>
 
     @Query("SELECT * FROM Movimento WHERE faixa = :idFaixa AND tipoMovimento = :tipo")
-    fun getMovimentosByFaixaETipo(idFaixa: String, tipo: String): List<MovimentoEntity>
+    fun getMovimentosByFaixaETipo(idFaixa: String, tipo: String): Flow<List<MovimentoEntity>>
 }

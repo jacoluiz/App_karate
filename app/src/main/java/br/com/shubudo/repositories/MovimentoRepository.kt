@@ -2,12 +2,9 @@ package br.com.shubudo.repositories
 
 import android.util.Log
 import br.com.shubudo.database.dao.MovimentoDao
-import br.com.shubudo.database.entities.toDefesaPessoal
 import br.com.shubudo.database.entities.toMovimento
-import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.network.services.MovimentoService
-import br.com.shubudo.network.services.toDefesaPessoalEntity
 import br.com.shubudo.network.services.toMovimentoEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -73,9 +70,9 @@ class MovimentoRepository @Inject constructor(
     suspend fun findMovimentoByFaixa(faixa: String, tipoMovimento: String): Flow<List<Movimento>> {
         CoroutineScope(coroutineContext).launch {
             try {
-                val response = if (tipoMovimento == "ataqueMao") {
+                val response = if (tipoMovimento == "Ataque de mão") {
                     service.getAtaquesDeMao()
-                } else if (tipoMovimento == "chute") {
+                } else if (tipoMovimento == "Chute") {
                     service.getChutes()
                 } else {
                     service.getDefesas()
@@ -87,7 +84,7 @@ class MovimentoRepository @Inject constructor(
             }
         }
 
-        return dao.getMovimentosByFaixa(faixa).map { entities ->
+        return dao.getMovimentosByFaixaETipo(faixa, tipoMovimento).map { entities ->
             entities.map { it.toMovimento() }
         }
     }

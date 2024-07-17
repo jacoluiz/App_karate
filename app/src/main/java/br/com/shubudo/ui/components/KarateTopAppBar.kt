@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,20 +21,19 @@ import androidx.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KarateTopAppBar(
+    showBottomBack: Boolean = false,
+    onBackNavigationClick: () -> Unit = {},
     texto: String,
-    navigationIcon: ImageVector? = null,
-    navigationIconClick: (() -> Unit)? = null,
 ) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
         navigationIcon = {
-            if (navigationIconClick != null) {
-                IconButton(onClick = { navigationIconClick?.invoke() }) {
-                    if (navigationIcon != null) {
-                        Icon(imageVector = navigationIcon, contentDescription = null)
-                    }
+            if (showBottomBack) {
+                IconButton(onClick = { onBackNavigationClick() }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Localized description"
+                    )
                 }
-            } else {
-                null
             }
         },
         title = {
@@ -54,7 +54,6 @@ fun KarateTopAppBar(
 fun PreviewCustomTopAppBar() {
     KarateTopAppBar(
         texto = "My App",
-        navigationIcon = Icons.Default.ArrowBack,
-        navigationIconClick = { /* Do something */ }
+        showBottomBack = true
     )
 }

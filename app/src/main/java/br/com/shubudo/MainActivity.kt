@@ -59,18 +59,26 @@ class MainActivity : ComponentActivity() {
                     else -> false
                 }
                 val topAppBarTitle = when (currentDestination?.route) {
-                    AppDestination.Avisos.route -> "Bem Vindo"
+                    AppDestination.Avisos.route -> "Bem-Vindo"
                     detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
                         detalheFaixaArgument
                     ))
 
                     else -> "Shubudo"
                 }
+
+                val showBottomBack = when (currentDestination?.route) {
+                    detalheFaixaRuteFullpath -> true
+                    else -> false
+                }
+
                 KarateApp(
                     isShowTopBar = isShowTopBar,
                     isShowBottomBar = isShowBottomBar,
                     topAppBarTitle = topAppBarTitle,
+                    showBottomBack = showBottomBack,
                     navController = navController
+
                 ) {
                     KarateNavHost(
                         navController = navController,
@@ -87,6 +95,7 @@ fun KarateApp(
     isShowTopBar: Boolean = false,
     isShowBottomBar: Boolean = false,
     topAppBarTitle: String,
+    showBottomBack: Boolean = false,
     navController: NavHostController,
     content: @Composable () -> Unit
 ) {
@@ -96,7 +105,12 @@ fun KarateApp(
     Scaffold(
         topBar = {
             if (isShowTopBar) {
-                KarateTopAppBar(texto = topAppBarTitle)
+                KarateTopAppBar(
+                    texto = topAppBarTitle,
+                    showBottomBack = showBottomBack,
+                    onBackNavigationClick = {
+                        navController.popBackStack()
+                    })
             }
         },
         bottomBar = {

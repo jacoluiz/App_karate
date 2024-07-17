@@ -1,8 +1,11 @@
 package br.com.shubudo.repositories
 
 import android.util.Log
-import br.com.shubudo.model.*
-import kotlinx.coroutines.flow.*
+import br.com.shubudo.model.Faixa
+import br.com.shubudo.model.Programacao
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ProgramacaoRepository @Inject constructor(
@@ -17,11 +20,9 @@ class ProgramacaoRepository @Inject constructor(
         val programacoes = mutableListOf<Programacao>()
         val faixas = faixaRepository.findAll()
 
-        faixas.first().
-            forEach { faixa ->
-               programacoes.add(findProgramacaoByFaixa(faixa).first())
-            }
-        Log.i("Conteudo", "findAllProgramacoes: programacoes: $programacoes")
+        faixas.first().forEach { faixa ->
+            programacoes.add(findProgramacaoByFaixa(faixa).first())
+        }
         return flow { emit(programacoes) }
     }
 
@@ -34,9 +35,9 @@ class ProgramacaoRepository @Inject constructor(
         val idFaixa = faixa._id
         val defesasPessoais = defesaPessoalRepository.findByFaixa(idFaixa)
         val katas = kataRepository.findByFaixa(idFaixa)
-        val ataquesDeMao = movimentoRepository.findMovimentoByFaixa(idFaixa, "ataqueMao")
-        val chutes = movimentoRepository.findMovimentoByFaixa(idFaixa, "chute")
-        val defesas = movimentoRepository.findMovimentoByFaixa(idFaixa, "defesa")
+        val ataquesDeMao = movimentoRepository.findMovimentoByFaixa(idFaixa, "Ataque de mão")
+        val chutes = movimentoRepository.findMovimentoByFaixa(idFaixa, "Chute")
+        val defesas = movimentoRepository.findMovimentoByFaixa(idFaixa, "Defesa")
         val sequenciasDeCombate = sequenciaDeCombateRepository.findByFaixa(idFaixa)
 
         val programacao = Programacao(
