@@ -7,5 +7,6 @@ data class Movimento (
     val tipoMovimento: String,
     val base: String,
     val nome: String,
+    val ordem: Int,
     val observacao: List<String>
 )

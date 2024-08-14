@@ -55,6 +55,7 @@ android {
 dependencies {
 
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.material)
     var room_version = "2.5.1"
 
     implementation("androidx.room:room-runtime:$room_version")
@@ -76,6 +77,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.core.ktx)

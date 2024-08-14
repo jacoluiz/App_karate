@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d1313a2f976f12930919f83b9a0cd628",
+    "identityHash": "497e1b0cd89c6dd426dcf62654d33597",
     "entities": [
       {
         "tableName": "DefesasPessoais",
@@ -126,7 +126,7 @@
       },
       {
         "tableName": "Movimento",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `tipoMovimento` TEXT NOT NULL, `base` TEXT NOT NULL, `nome` TEXT NOT NULL, `observacao` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `tipoMovimento` TEXT NOT NULL, `base` TEXT NOT NULL, `nome` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `observacao` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -156,6 +156,12 @@
             "fieldPath": "nome",
             "columnName": "nome",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordem",
+            "columnName": "ordem",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -216,7 +222,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd1313a2f976f12930919f83b9a0cd628')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '497e1b0cd89c6dd426dcf62654d33597')"
     ]
   }
 }

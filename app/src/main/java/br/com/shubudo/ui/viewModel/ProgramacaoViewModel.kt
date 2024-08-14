@@ -41,7 +41,7 @@ class ProgramacaoViewModel @Inject constructor(
                 } else {
                     _uiState.update {
                         ProgramacaoUiState.Success(
-                            faixas = faixas
+                            faixas = faixas.sortedBy { it.ordem }
                         )
                     }
                 }

@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +28,7 @@ fun CustomIconButton(
     icon: ImageVector? = null,
     iconPainter: Painter? = null,
     texto: String,
-    cor : Color = Color.Black,
+    cor : Color = if (isSystemInDarkTheme()) Color.White else Color.Black,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -51,7 +52,7 @@ fun CustomIconButton(
                     imageVector = icon,
                     contentDescription = texto,
                     tint =  cor,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                 )
 
             } else if (iconPainter != null) {
@@ -59,7 +60,7 @@ fun CustomIconButton(
                     painter = iconPainter,
                     contentDescription = texto,
                     tint = cor,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                 )
             }
 
@@ -68,7 +69,7 @@ fun CustomIconButton(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(28.dp))
         }
     }
 }

@@ -15,6 +15,7 @@ data class MovimentoEntity(
     val tipoMovimento: String,
     val base: String,
     val nome: String,
+    val ordem: Int,
     val observacao: List<String>
 )
 
@@ -24,5 +25,6 @@ fun MovimentoEntity.toMovimento() = Movimento(
     tipoMovimento = tipoMovimento,
     base = base,
     nome = nome,
+    ordem = ordem,
     observacao = observacao
 )

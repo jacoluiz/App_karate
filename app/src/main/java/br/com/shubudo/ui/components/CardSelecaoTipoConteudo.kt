@@ -3,6 +3,7 @@ package br.com.shubudo.ui.components
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BackHand
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,17 +51,28 @@ sealed class Conteudo(
 }
 
 @Composable
-fun CardSelecaoTipoConteudo(programacao: Programacao) {
+fun CardSelecaoTipoConteudo(
+    programacao: Programacao,
+    onNavigateToDetalheMovimento: (String, String) -> Unit
+) {
     var itens: List<Conteudo> = preencherLista(programacao)
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+        ),
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(8.dp)
     ) {
         Column {
             itens.forEach() { item ->
-                CustomIconButton(texto = item.texto, icon = item.icone) {
-                }
+                CustomIconButton(
+                    texto = item.texto,
+                    icon = item.icone,
+                    onClick = {
+                        onNavigateToDetalheMovimento(programacao.faixa.faixa, item.texto)
+                    }
+                )
             }
         }
     }

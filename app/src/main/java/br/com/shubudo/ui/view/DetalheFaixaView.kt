@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,6 +11,7 @@ import br.com.shubudo.ui.uistate.DetalheFaixaUiState
 @Composable
 fun DetalheFaixaView(
     uiState: DetalheFaixaUiState,
+    onNavigateToDetalheMovimento: (String, String) -> Unit
 ) {
     when (uiState) {
         is DetalheFaixaUiState.Loading -> {
@@ -21,7 +21,7 @@ fun DetalheFaixaView(
         is DetalheFaixaUiState.Success -> {
             val programacao = uiState.programacao
             Box(modifier = Modifier.fillMaxSize()) {
-                CardSelecaoTipoConteudo(programacao)
+                CardSelecaoTipoConteudo(programacao, onNavigateToDetalheMovimento)
             }
         }
 

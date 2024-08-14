@@ -28,4 +28,10 @@ val CustomTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     ),
+
+    titleLarge = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 22.sp,
+    ),
 )

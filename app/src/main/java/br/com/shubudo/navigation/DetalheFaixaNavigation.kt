@@ -14,13 +14,16 @@ internal const val detalherFaixaRoute = "detalheFiaxa"
 internal const val detalheFaixaArgument = "faixa"
 internal const val detalheFaixaRuteFullpath = "$detalherFaixaRoute/{$detalheFaixaArgument}"
 
-fun NavGraphBuilder.detalheFaixaScreen() {
+fun NavGraphBuilder.detalheFaixaScreen(
+    onNavigateToDetalheMovimento: (String, String) -> Unit
+) {
     composable(detalheFaixaRuteFullpath) { backStackEntry ->
         backStackEntry.arguments?.getString(detalheFaixaArgument)?.let {
             val viewModel = hiltViewModel<DetalheFaixaViewModel>()
             val uiState by viewModel.uiState.collectAsState()
             DetalheFaixaView(
                 uiState = uiState,
+                onNavigateToDetalheMovimento = onNavigateToDetalheMovimento
             )
         }
     }
