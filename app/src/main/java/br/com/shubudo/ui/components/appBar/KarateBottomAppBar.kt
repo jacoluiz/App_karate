@@ -3,7 +3,6 @@ package br.com.shubudo.ui.components.appBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -23,13 +22,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.com.shubudo.ui.theme.unselectedIconBottomAppBarColor
 
 sealed class BottomAppBarItem(
     val icon: ImageVector, val label: String
 ) {
-    object Programacao : BottomAppBarItem(
-        Icons.Default.SportsMartialArts, "Programacao"
+    object Conteudo : BottomAppBarItem(
+        Icons.Default.SportsMartialArts, "Conteudo"
     )
 
     object Avisos : BottomAppBarItem(
@@ -50,7 +48,7 @@ fun KarateBottomAppBar(
 ) {
     BottomAppBar(
         modifier,
-        containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+        containerColor = MaterialTheme.colorScheme.onBackground,
     ) {
         items.forEach {
             val isSelected = it == selectedItem
@@ -65,7 +63,7 @@ fun KarateBottomAppBar(
             )
 
             val textColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else unselectedIconBottomAppBarColor,
+                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                 animationSpec = tween(durationMillis = 300)
             )
 
@@ -101,9 +99,9 @@ fun KarateBottomAppBar(
 @Preview(showBackground = true)
 fun KarateBottomAppBarPreview() {
     KarateBottomAppBar(
-        selectedItem = BottomAppBarItem.Programacao,
+        selectedItem = BottomAppBarItem.Conteudo,
         items = listOf(
-            BottomAppBarItem.Programacao,
+            BottomAppBarItem.Conteudo,
             BottomAppBarItem.Avisos,
             BottomAppBarItem.Perfil
         )

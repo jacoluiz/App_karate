@@ -168,6 +168,7 @@ fun MovimentoViewPreview() {
             base = "Luta",
             nome = "Chute Frontal",
             ordem = 1,
+            descricao = "Descrição",
             observacao = listOf(
                 "Observação 1", "Observação 2", "Observação 3"
             )

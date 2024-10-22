@@ -45,7 +45,7 @@ class DetalheMovimentoViewModel @Inject constructor(
                 var defesaPessoal = emptyList<br.com.shubudo.model.DefesaPessoal>()
                 var sequenciaDeCombate = emptyList<br.com.shubudo.model.SequenciaDeCombate>()
                 when (movimento) {
-                    "Kata" -> {
+                    "Katas" -> {
                         kata = repository.findKatasByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()

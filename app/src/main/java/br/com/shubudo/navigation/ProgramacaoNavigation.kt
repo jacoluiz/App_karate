@@ -13,14 +13,12 @@ import br.com.shubudo.ui.viewModel.ProgramacaoViewModel
 internal const val programacaoRoute = "programacao"
 
 fun NavGraphBuilder.programacaoScreen(
-    changeFaixa: (String) -> Unit,
     onNavigateToDetalheFaixa: (String) -> Unit
 ) {
     composable(programacaoRoute) {
         val viewModel = hiltViewModel<ProgramacaoViewModel>()
         val uiState by viewModel.uiState.collectAsState()
         ProgramacaoView(
-            changeThemeFaixa = changeFaixa,
             uiState = uiState,
             onClickFaixa = onNavigateToDetalheFaixa
         )

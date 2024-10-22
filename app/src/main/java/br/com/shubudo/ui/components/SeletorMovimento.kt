@@ -70,6 +70,7 @@ fun SeletorMovimentoPreview() {
                 base = "Luta",
                 nome = "Chute Frontal",
                 ordem = 1,
+                descricao = "Descrição",
                 observacao = emptyList()
             ),
             Movimento(
@@ -79,6 +80,7 @@ fun SeletorMovimentoPreview() {
                 base = "Luta",
                 nome = "Chute Semicircular",
                 ordem = 2,
+                descricao = "Descrição",
                 observacao = listOf("observacao", "Observacao 2", "Observacao 3")
             ),
             Movimento(
@@ -88,6 +90,7 @@ fun SeletorMovimentoPreview() {
                 base = "Luta",
                 nome = "Chute Lateral",
                 ordem = 3,
+                descricao = "Descrição",
                 observacao = emptyList()
             ),
             Movimento(
@@ -97,6 +100,7 @@ fun SeletorMovimentoPreview() {
                 base = "Luta",
                 nome = "Frontal Anterior Saltando",
                 ordem = 4,
+                descricao = "Descrição",
                 observacao = emptyList()
             ),
             Movimento(
@@ -106,6 +110,7 @@ fun SeletorMovimentoPreview() {
                 base = "Luta",
                 nome = "Giro Dorsal",
                 ordem = 5,
+                descricao = "Descrição",
                 observacao = emptyList()
             ),
         )

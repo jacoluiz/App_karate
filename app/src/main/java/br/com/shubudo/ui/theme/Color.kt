@@ -2,14 +2,6 @@ package br.com.shubudo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
 // Branca
 val LightPrimaryColorBranca = Color(0xFFB0B0AE)
 val LightPrimaryContainerColorBranca = Color(0xFFD9D9D9)
@@ -54,11 +46,14 @@ val TertiaryColorVerde = Color(0xFF00FF00)
 val LightPrimaryColorRoxa = Color(0xFF785EC0)
 val LightPrimaryContainerColorRoxa = Color(0xFF6650a4)
 
-val PrimaryColorRoxa = Color(0xFF785EC0)
-val PrimaryContainerColorRoxa = Color(0xFF6650a4)
+val PrimaryColorRoxa = Color(0xFF3B226F)
+val PrimaryContainerColorRoxa = Color(0xFF3B226F)
 
-val SecondaryColorRoxa = Color(0xFF6650a4)
+val SecondaryColorRoxa = Color(0XFF712AAE)
 val TertiaryColorRoxa = Color(0xFF6650a4)
+
+val LightSurface = Color(0xFFFFFF0F5)
+val DarkSurface = Color(0xFF7851A9)
 
 // Marron
 val LightPrimaryColorMarron = Color(0xFF452900)
@@ -69,6 +64,3 @@ val PrimaryContainerColorMarron = Color(0xFF6D3A1A)
 
 val SecondaryColorMarron = Color(0xFF452900)
 val TertiaryColorMarron = Color(0xFF452900)
-
-val unselectedIconBottomAppBarColor = Color(0xFF4F4F4F)
-val unselectedTextBottomAppBarColor = Color(0xFF4F4F4F)

@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -66,21 +67,11 @@ fun CustomIconButton(
 
             Text(
                 text = texto,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.size(28.dp))
         }
     }
-}
-
-
-@Composable
-@Preview
-fun CustomIconButtonPreview() {
-    CustomIconButton(
-        icon = Icons.Default.SelfImprovement,
-        texto = "Texto Modelo",
-        onClick = { /*TODO*/ }
-    )
 }

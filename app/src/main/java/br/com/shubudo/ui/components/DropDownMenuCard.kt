@@ -39,21 +39,22 @@ fun DropDownMenuCard(
     icone: ImageVector? = null,
     iconePainter: Painter? = null,
     colorIcone: Color = if (isSystemInDarkTheme()) Color.White else Color.Black,
-    tamanhoIcone: Int = 28,
+    tamanhoIcone: Int = 24,
     conteudo: @Composable () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         animationSpec = tween(durationMillis = 300), label = "Animação de rotação do icone"
     )
+
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+            containerColor = MaterialTheme.colorScheme.onBackground,
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp, 0.dp, 8.dp, 0.dp)
             .animateContentSize(),
         elevation = CardDefaults.cardElevation(0.dp),
         onClick = { expanded = !expanded },
@@ -67,6 +68,7 @@ fun DropDownMenuCard(
                 Icon(
                     imageVector = icone,
                     contentDescription = "Icon",
+                    modifier = Modifier.size(tamanhoIcone.dp),
                     tint = colorIcone
                 )
             } else if (iconePainter != null) {
@@ -80,12 +82,14 @@ fun DropDownMenuCard(
             Text(
                 titulo,
                 modifier = Modifier.weight(3f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = colorIcone
             )
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = "Dropdown Icon",
-                modifier = Modifier.rotate(rotation)
+                modifier = Modifier.rotate(rotation),
+                tint = colorIcone
             )
         }
         AnimatedVisibility(

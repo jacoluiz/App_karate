@@ -19,6 +19,9 @@ private val DarkBrancaColorScheme = darkColorScheme(
     tertiary = TertiaryColorBranca,
     onPrimary = Color.White,
     outline = Color.Black,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
 
     )
 
@@ -48,8 +51,10 @@ private val DarkAmarelaColorScheme = darkColorScheme(
     tertiary = TertiaryColorAmarela,
     onPrimary = Color.White,
     outline = Color.White,
-
-    )
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
+)
 
 private val LightAmarelaColorScheme = lightColorScheme(
     primary = LightPrimaryColorAmarela,
@@ -68,6 +73,9 @@ private val DarkLaranjaColorScheme = darkColorScheme(
     tertiary = TertiaryColorLaranja,
     onPrimary = Color.White,
     outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
 
     )
 
@@ -88,6 +96,9 @@ private val DarkVerdeColorScheme = darkColorScheme(
     tertiary = TertiaryColorVerde,
     onPrimary = Color.White,
     outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
 
     )
 
@@ -108,6 +119,9 @@ private val DarkRoxaColorScheme = darkColorScheme(
     tertiary = TertiaryColorRoxa,
     onPrimary = Color.White,
     outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
 
     )
 
@@ -118,6 +132,7 @@ private val LightRoxaColorScheme = lightColorScheme(
     tertiary = TertiaryColorRoxa,
     onPrimary = Color.Black,
     outline = Color.White,
+    surface = LightSurface,
 
     )
 
@@ -128,8 +143,10 @@ private val DarkMarromColorScheme = darkColorScheme(
     tertiary = TertiaryColorMarron,
     onPrimary = Color.White,
     outline = Color.White,
-
-    )
+    background = Color(0xFF202020),
+    onBackground = Color(0xFF292929),
+    surface = Color(0xFF383838),
+)
 
 private val LightMarromColorScheme = lightColorScheme(
     primary = LightPrimaryColorMarron,

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -42,6 +43,7 @@ import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -51,18 +53,13 @@ class MainActivity : ComponentActivity() {
         hideSystemUI()
         super.onCreate(savedInstanceState)
         setContent {
-            var currentFaixa by remember { mutableStateOf("Roxa") } // Estado para manter a faixa atual
-
-            // Função para alterar a faixa atual
-            fun changeThemeFaixa(faixa: String) {
-                currentFaixa = faixa
-            }
+            val themeViewModel: ThemeViewModel = viewModel() // Injeção do ViewModel
 
             fun voltarTela(navController: NavHostController) {
                 navController.popBackStack()
             }
 
-            AppShubudoTheme(faixa = currentFaixa) {
+            AppShubudoTheme(faixa = themeViewModel.currentFaixa.value) {
                 val navController = rememberNavController()
                 val backStackEntryState by navController.currentBackStackEntryAsState()
                 val currentDestination = backStackEntryState?.destination
@@ -79,6 +76,7 @@ class MainActivity : ComponentActivity() {
 
                     val topAppBarTitle = when (currentDestination?.route) {
                         AppDestination.Avisos.route -> "Bem-Vindo"
+                        AppDestination.Programacao.route -> "Conteúdo"
                         detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
                             detalheFaixaArgument
                         ))
@@ -115,7 +113,7 @@ class MainActivity : ComponentActivity() {
                             showTitleTopAppBar = showTitleTopAppBar
                         ) {
                             KarateNavHost(
-                                navController = navController, changeThemeFaixa = ::changeThemeFaixa
+                                navController = navController
                             )
                         }
                     }
@@ -184,13 +182,13 @@ fun KarateApp(
                     KarateBottomAppBar(selectedItem = when (currentRoute) {
                         perfilRoute -> BottomAppBarItem.Perfil
                         avisosRoute -> BottomAppBarItem.Avisos
-                        programacaoRoute -> BottomAppBarItem.Programacao
+                        programacaoRoute -> BottomAppBarItem.Conteudo
                         else -> BottomAppBarItem.Avisos
                     }, items = remember {
                         listOf(
                             BottomAppBarItem.Perfil,
                             BottomAppBarItem.Avisos,
-                            BottomAppBarItem.Programacao,
+                            BottomAppBarItem.Conteudo,
                         )
                     }, onItemClick = { item ->
                         navController.navigateToBottomAppBarItem(item)
@@ -198,9 +196,11 @@ fun KarateApp(
                 }
             }) {
             Box(
+
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 Surface(
                     modifier = Modifier

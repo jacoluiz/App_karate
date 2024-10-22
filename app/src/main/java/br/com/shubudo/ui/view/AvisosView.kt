@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,20 +25,35 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AvisosView() {
-    Box(
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
     ) {
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp, 16.dp, 16.dp, 16.dp),
+            horizontalArrangement = Arrangement.Absolute.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text(
+                color = MaterialTheme.colorScheme.outline,
+                style = MaterialTheme.typography.bodyMedium,
+                text = "Este é o nosso quadro de avisos. Fique atento para não perder nenhuma novidade!",
+                textAlign = TextAlign.Center,
+            )
+        }
         Card(
             colors = CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                containerColor = MaterialTheme.colorScheme.onBackground,
             ),
             modifier = Modifier
-                .padding(16.dp, 0.dp, 16.dp, 8.dp)
+                .padding(28.dp, 0.dp, 28.dp, 8.dp)
                 .fillMaxSize(),
-
             shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(16.dp),
+            elevation = CardDefaults.cardElevation(0.dp),
         ) {
             Box(
                 modifier = Modifier
@@ -46,23 +62,20 @@ fun AvisosView() {
                 contentAlignment = Alignment.Center
             ) {
                 Column {
-                    Text(
-                        text = "Avisos",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                     Divider(
                         color = MaterialTheme.colorScheme.primary,
                         thickness = 2.dp,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onBackground),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Você está avisado ;)",
+                            text = "Nada aqui por enquanto",
                             color = Color.Gray,
                         )
                     }
@@ -70,7 +83,6 @@ fun AvisosView() {
             }
         }
     }
-
 }
 
 @Composable

@@ -10,13 +10,12 @@ import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 
 @Composable
 fun KarateNavHost(
-    changeThemeFaixa: (String) -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(navController, startDestination = avisosRoute) {
         programacaoScreen(onNavigateToDetalheFaixa = {
             navController.navigateToDetalheFaixa(it)
-        }, changeFaixa = changeThemeFaixa)
+        })
         avisosScreen()
         perfilScreen()
         detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->
@@ -34,7 +33,7 @@ fun NavController.navigateToBottomAppBarItem(
     item: BottomAppBarItem,
 ) {
     when (item) {
-        BottomAppBarItem.Programacao -> {
+        BottomAppBarItem.Conteudo -> {
             navigateToProgramacao(navOptions {
                 launchSingleTop = true
                 popUpTo(programacaoRoute)

@@ -126,6 +126,7 @@ fun BotaoDeMenuSuspensoPreview() {
                 base = "Luta",
                 nome = "Chute Frontal",
                 ordem = 1,
+                descricao = "Descrição",
                 observacao = listOf("Observação 1", "Observação 2"),
             ),
             Movimento(
@@ -135,6 +136,7 @@ fun BotaoDeMenuSuspensoPreview() {
                 base = "Luta",
                 nome = "Chute semicircular",
                 ordem = 2,
+                descricao = "Descrição",
                 observacao = listOf("Observação 1", "Observação 2"),
             ),
             Movimento(
@@ -144,6 +146,7 @@ fun BotaoDeMenuSuspensoPreview() {
                 base = "Luta",
                 nome = "Chute lateral",
                 ordem = 3,
+                descricao = "Descrição",
                 observacao = listOf("Observação 1", "Observação 2"),
             ),
             Movimento(
@@ -153,6 +156,7 @@ fun BotaoDeMenuSuspensoPreview() {
                 base = "Luta",
                 nome = "Chute frontal anterior saltando",
                 ordem = 4,
+                descricao = "Descrição",
                 observacao = listOf("Observação 1", "Observação 2"),
             ),
         ),
