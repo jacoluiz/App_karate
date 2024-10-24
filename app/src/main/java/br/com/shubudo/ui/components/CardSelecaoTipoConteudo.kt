@@ -64,7 +64,7 @@ fun CardSelecaoTipoConteudo(
     var itens: List<Conteudo> = preencherLista(programacao)
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onBackground,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         modifier = Modifier
             .fillMaxWidth()

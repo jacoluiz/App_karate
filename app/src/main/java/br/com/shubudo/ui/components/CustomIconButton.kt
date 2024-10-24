@@ -67,7 +67,7 @@ fun CustomIconButton(
 
             Text(
                 text = texto,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

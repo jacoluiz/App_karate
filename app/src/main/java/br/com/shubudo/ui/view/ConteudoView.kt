@@ -38,9 +38,10 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun ProgramacaoView(
-    uiState: ProgramacaoUiState, onClickFaixa: (String) -> Unit
+    uiState: ProgramacaoUiState,
+    onClickFaixa: (String) -> Unit,
+    themeViewModel: ThemeViewModel = viewModel()
 ) {
-    val themeViewModel: ThemeViewModel = viewModel() // Injeção do ViewModel
     when (uiState) {
         is ProgramacaoUiState.Success -> {
             Column(
@@ -57,10 +58,9 @@ fun ProgramacaoView(
                         text = "Explore todo o conteúdo de cada faixa e aproveite dicas e materiais extras que preparamos para você!",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-
 
                 Column(
                     modifier = Modifier
@@ -69,7 +69,7 @@ fun ProgramacaoView(
                 ) {
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.onBackground,
+                            containerColor = MaterialTheme.colorScheme.surface,
                         ),
                         modifier = Modifier
 
@@ -102,8 +102,8 @@ fun ProgramacaoView(
                                                 texto = faixa.faixa,
                                                 iconPainter = iconPainter,
                                                 onClick = {
-                                                    onClickFaixa(faixa.faixa)
                                                     themeViewModel.changeThemeFaixa(faixa.faixa)
+                                                    onClickFaixa(faixa.faixa)
                                                 },
                                                 cor = selecionaCorIcone(
                                                     faixa.faixa,

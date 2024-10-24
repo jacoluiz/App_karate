@@ -7,15 +7,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun KarateNavHost(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    themeViewModel: ThemeViewModel
 ) {
     NavHost(navController, startDestination = avisosRoute) {
         programacaoScreen(onNavigateToDetalheFaixa = {
             navController.navigateToDetalheFaixa(it)
-        })
+        },themeViewModel = themeViewModel)
         avisosScreen()
         perfilScreen()
         detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->

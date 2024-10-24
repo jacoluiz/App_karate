@@ -35,7 +35,7 @@ fun KarateTopAppBar(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Seta para voltar",
-                        tint = MaterialTheme.colorScheme.outline,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }
@@ -45,10 +45,10 @@ fun KarateTopAppBar(
                 text = if (showTitle) texto else "",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.outline,
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = if (showColor) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            containerColor = if (showColor) MaterialTheme.colorScheme.primary else Color.Transparent,
         ),
         modifier = if (showColor) Modifier else Modifier
             .zIndex(1f)

@@ -10,7 +10,7 @@ val PrimaryColorBranca = Color(0xFFD9D9D9)
 val PrimaryContainerColorBranca = Color(0xFFD9D9D9)
 
 val SecondaryColorBranca = Color(0xFFFFFFFF)
-val TertiaryColorBranca = Color(0xFFFFFFFF)
+val TertiaryColorBranca = Color(0xFF5F5F5F)
 
 // Amarela
 val LightPrimaryColorAmarela = Color(0xFFD6B601)
@@ -20,7 +20,7 @@ val PrimaryColorAmarela = Color(0xFFF4E700)
 val PrimaryContainerColorAmarela = Color(0xFFD6B601)
 
 val SecondaryColorAmarela = Color(0xFFF4E700)
-val TertiaryColorAmarela = Color(0xFFF4E700)
+val TertiaryColorAmarela = Color(0xFFBBB75F)
 
 // Laranja
 val LightPrimaryColorLaranja = Color(0xFFD66200)
@@ -30,30 +30,27 @@ val PrimaryColorLaranja = Color(0xFFD64C08)
 val PrimaryContainerColorLaranja = Color(0xFFD64C08)
 
 val SecondaryColorLaranja = Color(0xFFD64C08)
-val TertiaryColorLaranja = Color(0xFFD64C08)
+val TertiaryColorLaranja = Color(0xFF8E4F1C)
 
 // Verde
-val LightPrimaryColorVerde = Color(0xFF0D9C00)
+val LightPrimaryColorVerde = Color(0xFF32822B)
 val LightPrimaryContainerColorVerde = Color(0xFF0D9C00)
 
 val PrimaryColorVerde = Color(0xFF0D9B00)
 val PrimaryContainerColorVerde = Color(0xFF086100)
 
 val SecondaryColorVerde = Color(0xFF00FF00)
-val TertiaryColorVerde = Color(0xFF00FF00)
+val TertiaryColorVerde = Color(0xFF567654)
 
 // Roxa
 val LightPrimaryColorRoxa = Color(0xFF785EC0)
 val LightPrimaryContainerColorRoxa = Color(0xFF6650a4)
 
-val PrimaryColorRoxa = Color(0xFF3B226F)
+val PrimaryColorRoxa = Color(0xFF6441AE)
 val PrimaryContainerColorRoxa = Color(0xFF3B226F)
 
 val SecondaryColorRoxa = Color(0XFF712AAE)
-val TertiaryColorRoxa = Color(0xFF6650a4)
-
-val LightSurface = Color(0xFFFFFF0F5)
-val DarkSurface = Color(0xFF7851A9)
+val TertiaryColorRoxa = Color(0xFF746C8A)
 
 // Marron
 val LightPrimaryColorMarron = Color(0xFF452900)
@@ -63,4 +60,4 @@ val PrimaryColorMarron = Color(0xFFA85928)
 val PrimaryContainerColorMarron = Color(0xFF6D3A1A)
 
 val SecondaryColorMarron = Color(0xFF452900)
-val TertiaryColorMarron = Color(0xFF452900)
+val TertiaryColorMarron = Color(0xFF473F33)

@@ -16,9 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -84,6 +82,7 @@ class MainActivity : ComponentActivity() {
                         detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
                             detalheMovimentoArgument
                         )
+
                         else -> "Shubudo"
                     }
 
@@ -110,10 +109,12 @@ class MainActivity : ComponentActivity() {
                             showBottomBack = showBottomBack,
                             navController = navController,
                             showColorTopAppBar = showColorTopAppBar,
-                            showTitleTopAppBar = showTitleTopAppBar
+                            showTitleTopAppBar = showTitleTopAppBar,
+                            themeViewModel = themeViewModel
                         ) {
                             KarateNavHost(
-                                navController = navController
+                                navController = navController,
+                                themeViewModel = themeViewModel
                             )
                         }
                     }
@@ -144,6 +145,7 @@ fun KarateApp(
     showColorTopAppBar: Boolean = true,
     navController: NavHostController,
     showTitleTopAppBar: Boolean = true,
+    themeViewModel: ThemeViewModel,
     content: @Composable () -> Unit
 ) {
     val currentBackStack by navController.currentBackStackEntryAsState()
@@ -206,7 +208,7 @@ fun KarateApp(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
                 ) {}
                 content()

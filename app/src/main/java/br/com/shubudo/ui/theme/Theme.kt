@@ -17,10 +17,10 @@ private val DarkBrancaColorScheme = darkColorScheme(
     primaryContainer = PrimaryContainerColorBranca,
     secondary = SecondaryColorBranca,
     tertiary = TertiaryColorBranca,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     outline = Color.Black,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 
     )
@@ -32,16 +32,9 @@ private val LightBrancaColorScheme = lightColorScheme(
     tertiary = TertiaryColorBranca,
     onPrimary = Color.Black,
     outline = Color.Black,
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
 )
 
 private val DarkAmarelaColorScheme = darkColorScheme(
@@ -49,10 +42,10 @@ private val DarkAmarelaColorScheme = darkColorScheme(
     primaryContainer = PrimaryContainerColorAmarela,
     secondary = SecondaryColorAmarela,
     tertiary = TertiaryColorAmarela,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     outline = Color.White,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 )
 
@@ -63,6 +56,9 @@ private val LightAmarelaColorScheme = lightColorScheme(
     tertiary = TertiaryColorAmarela,
     onPrimary = Color.Black,
     outline = Color.Black,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
 
     )
 
@@ -71,10 +67,10 @@ private val DarkLaranjaColorScheme = darkColorScheme(
     primaryContainer = PrimaryContainerColorLaranja,
     secondary = SecondaryColorLaranja,
     tertiary = TertiaryColorLaranja,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     outline = Color.White,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 
     )
@@ -84,9 +80,11 @@ private val LightLaranjaColorScheme = lightColorScheme(
     primaryContainer = LightPrimaryContainerColorLaranja,
     secondary = SecondaryColorLaranja,
     tertiary = TertiaryColorLaranja,
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     outline = Color.Black,
-
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
     )
 
 private val DarkVerdeColorScheme = darkColorScheme(
@@ -97,7 +95,7 @@ private val DarkVerdeColorScheme = darkColorScheme(
     onPrimary = Color.White,
     outline = Color.White,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 
     )
@@ -107,9 +105,11 @@ private val LightVerdeColorScheme = lightColorScheme(
     primaryContainer = LightPrimaryContainerColorVerde,
     secondary = SecondaryColorVerde,
     tertiary = TertiaryColorVerde,
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     outline = Color.Black,
-
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
     )
 
 private val DarkRoxaColorScheme = darkColorScheme(
@@ -120,7 +120,7 @@ private val DarkRoxaColorScheme = darkColorScheme(
     onPrimary = Color.White,
     outline = Color.White,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 
     )
@@ -130,10 +130,11 @@ private val LightRoxaColorScheme = lightColorScheme(
     primaryContainer = LightPrimaryContainerColorRoxa,
     secondary = SecondaryColorRoxa,
     tertiary = TertiaryColorRoxa,
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     outline = Color.White,
-    surface = LightSurface,
-
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
     )
 
 private val DarkMarromColorScheme = darkColorScheme(
@@ -144,7 +145,7 @@ private val DarkMarromColorScheme = darkColorScheme(
     onPrimary = Color.White,
     outline = Color.White,
     background = Color(0xFF202020),
-    onBackground = Color(0xFF292929),
+    onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
 )
 
@@ -153,8 +154,11 @@ private val LightMarromColorScheme = lightColorScheme(
     primaryContainer = LightPrimaryContainerColorMarron,
     secondary = SecondaryColorMarron,
     tertiary = TertiaryColorMarron,
-    onPrimary = Color.Black,
+    onPrimary = Color.White,
     outline = Color.White,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
 
     )
 

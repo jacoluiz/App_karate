@@ -48,7 +48,7 @@ fun KarateBottomAppBar(
 ) {
     BottomAppBar(
         modifier,
-        containerColor = MaterialTheme.colorScheme.onBackground,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         items.forEach {
             val isSelected = it == selectedItem
@@ -63,7 +63,7 @@ fun KarateBottomAppBar(
             )
 
             val textColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
                 animationSpec = tween(durationMillis = 300)
             )
 

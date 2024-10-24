@@ -39,7 +39,7 @@ fun AvisosView() {
             verticalAlignment = Alignment.CenterVertically
         ){
             Text(
-                color = MaterialTheme.colorScheme.outline,
+                color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.bodyMedium,
                 text = "Este é o nosso quadro de avisos. Fique atento para não perder nenhuma novidade!",
                 textAlign = TextAlign.Center,
@@ -47,7 +47,7 @@ fun AvisosView() {
         }
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onBackground,
+                containerColor = MaterialTheme.colorScheme.surface,
             ),
             modifier = Modifier
                 .padding(28.dp, 0.dp, 28.dp, 8.dp)
@@ -70,7 +70,7 @@ fun AvisosView() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onBackground),
+                            .background(MaterialTheme.colorScheme.surface),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
