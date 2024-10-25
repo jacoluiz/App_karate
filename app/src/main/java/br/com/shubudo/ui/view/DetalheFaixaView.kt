@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.ui.components.CardSelecaoTipoConteudo
+import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.uistate.DetalheFaixaUiState
 
 @Composable
@@ -25,7 +26,18 @@ fun DetalheFaixaView(
 ) {
     when (uiState) {
         is DetalheFaixaUiState.Loading -> {
-
+            // Mostra o overlay de loading
+            LoadingOverlay(isLoading = true) {
+                // O conteúdo da tela pode ser vazio ou algo mínimo enquanto o loading é exibido
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Carregando...")
+                }
+            }
         }
 
         is DetalheFaixaUiState.Success -> {
