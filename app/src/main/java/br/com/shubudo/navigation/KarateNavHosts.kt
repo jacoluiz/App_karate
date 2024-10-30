@@ -14,18 +14,30 @@ fun KarateNavHost(
     navController: NavHostController = rememberNavController(),
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(navController, startDestination = avisosRoute) {
-        programacaoScreen(onNavigateToDetalheFaixa = {
-            navController.navigateToDetalheFaixa(it)
-        },themeViewModel = themeViewModel)
+    NavHost(navController, startDestination = loginRoute) {
+        programacaoScreen(
+            onNavigateToDetalheFaixa = { navController.navigateToDetalheFaixa(it) },
+            themeViewModel = themeViewModel
+        )
+
         avisosScreen()
+
         perfilScreen()
+
         detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->
             navController.navigateToDetalheMovimento(faixa, movimento)
         })
+
         detalheMovimentoScreen(
             onBackNavigationClick = {
                 navController.popBackStack()
+            }
+        )
+
+        loginScreen(
+            themeViewModel = themeViewModel,
+            onNavigateToHome = {
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
             }
         )
     }

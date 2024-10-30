@@ -41,6 +41,7 @@ import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
+import br.com.shubudo.ui.view.LoginView
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,10 +54,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeViewModel: ThemeViewModel = viewModel() // Injeção do ViewModel
 
-            fun voltarTela(navController: NavHostController) {
-                navController.popBackStack()
-            }
-
             AppShubudoTheme(faixa = themeViewModel.currentFaixa.value) {
                 val navController = rememberNavController()
                 val backStackEntryState by navController.currentBackStackEntryAsState()
@@ -64,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 Surface {
                     val isShowTopBar = when (currentDestination?.route) {
                         detalheMovimentoRuteFullpath -> false
+                        AppDestination.Login.route -> false
                         else -> true
                     }
 
@@ -74,6 +72,7 @@ class MainActivity : ComponentActivity() {
 
                     val topAppBarTitle = when (currentDestination?.route) {
                         AppDestination.Avisos.route -> "Bem-Vindo"
+                        AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
                         detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
                             detalheFaixaArgument
@@ -82,6 +81,7 @@ class MainActivity : ComponentActivity() {
                         detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
                             detalheMovimentoArgument
                         )
+
 
                         else -> "Shubudo"
                     }
@@ -93,11 +93,13 @@ class MainActivity : ComponentActivity() {
 
                     val showColorTopAppBar = when (currentDestination?.route) {
                         detalheMovimentoRuteFullpath -> false
+                        AppDestination.Login.route -> false
                         else -> true
                     }
 
                     val showTitleTopAppBar = when (currentDestination?.route) {
                         detalheMovimentoRuteFullpath -> false
+                        AppDestination.Login.route -> false
                         else -> true
                     }
 

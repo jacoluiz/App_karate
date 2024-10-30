@@ -92,6 +92,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.protolite.well.known.types)
     implementation(libs.androidx.navigation.compose)
+
+    implementation("com.google.accompanist:accompanist-insets:0.26.3-beta")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,6 +102,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }
 
 // Allow references to generated code
