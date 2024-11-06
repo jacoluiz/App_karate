@@ -1,10 +1,10 @@
 package br.com.shubudo.ui.viewModel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Kata
+import br.com.shubudo.model.Orientacao
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.repositories.ProgramacaoRepository
@@ -14,7 +14,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -68,8 +67,6 @@ class DetalheMovimentoViewModel @Inject constructor(
                 }
                 val movimento = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
 
-
-
                 _uiState.update {
 
                     DetalheMovimentoUiState.Success(
@@ -78,9 +75,20 @@ class DetalheMovimentoViewModel @Inject constructor(
                         defesaPessoal = defesaPessoal.sortedBy { it.numeroOrdem },
                         kata = kata.sortedBy { it.ordem },
                         sequenciaDeCombate = sequenciaDeCombate.sortedBy { it.numeroOrdem },
+
                     )
                 }
             }
         }
     }
+
+    fun pegarVideokataPelaOrientacao(orientacao: String, kata: Kata): String? {
+        // Tenta converter a string para um valor do enum Orientacao ignorando o case
+        val orientacaoEnum = Orientacao.values().find { it.name.uppercase() == orientacao.uppercase() }
+
+        return kata.video.find { it.orientacao == orientacaoEnum }?.url
+    }
+
+
+
 }

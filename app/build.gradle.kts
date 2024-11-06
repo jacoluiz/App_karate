@@ -56,30 +56,33 @@ dependencies {
 
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.material)
-    var room_version = "2.5.1"
 
-    implementation("androidx.room:room-runtime:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
-    implementation("androidx.compose.ui:ui:1.4.0")
-    implementation("androidx.compose.material3:material3:1.0.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
-    implementation("androidx.compose.ui:ui-graphics:1.4.0")
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.4.0")
-    implementation("androidx.compose.material:material-icons-extended:1.0.5")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation(libs.ui)
+    implementation(libs.material3)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.ui.graphics)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
-    implementation("com.google.code.gson:gson:2.8.9")
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.gson)
+    kapt(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation("io.coil-kt:coil-compose:2.1.0")
-    implementation("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.material.icons.extended.v143)
+
+    implementation (libs.vvalidator)
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.core.ktx)
@@ -93,7 +96,7 @@ dependencies {
     implementation(libs.protolite.well.known.types)
     implementation(libs.androidx.navigation.compose)
 
-    implementation("com.google.accompanist:accompanist-insets:0.26.3-beta")
+    implementation(libs.accompanist.insets)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -102,6 +105,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation (libs.core)
 
 }
 

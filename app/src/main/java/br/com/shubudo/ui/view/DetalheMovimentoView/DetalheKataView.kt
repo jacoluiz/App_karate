@@ -37,15 +37,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.ui.components.PlayerDeVideo
 import br.com.shubudo.ui.components.botaoVoltar
 import br.com.shubudo.ui.components.itemDetalheMovimento
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
+import br.com.shubudo.ui.viewModel.DetalheMovimentoViewModel
 import br.com.shubudo.utils.toOrdinario
 import br.com.shubudo.utils.toOrdinarioFeminino
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun telaKata(uiState: DetalheMovimentoUiState.Success, onBackNavigationClick: () -> Unit) {
+fun TelaKata(uiState: DetalheMovimentoUiState.Success, onBackNavigationClick: () -> Unit) {
     val kata = uiState.kata
 
     var indexKataExibido by remember { mutableIntStateOf(0) }
@@ -59,8 +61,12 @@ fun telaKata(uiState: DetalheMovimentoUiState.Success, onBackNavigationClick: ()
         kata[indexKataExibido].movimentos.size
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        PlayerDeVideo(videos =kata[indexKataExibido].video, temposVideos =kata[indexKataExibido].temposVideos)
+
         EsqueletoTela {
+
+
             // Horizontal Pager para rolar os movimentos horizontalmente
             HorizontalPager(
                 state = pagerState,

@@ -27,6 +27,7 @@ fun NavGraphBuilder.detalheMovimentoScreen(
             DetalheMovimentoView(
                 uiState = uiState,
                 onBackNavigationClick = onBackNavigationClick
+
             )
         }
     }

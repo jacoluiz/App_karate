@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "51a906df8904f210ae0f899751c45b0a",
+    "identityHash": "1ba8532c1a92d05140d962a0d6f00ee6",
     "entities": [
       {
         "tableName": "DefesasPessoais",
@@ -82,7 +82,7 @@
       },
       {
         "tableName": "Kata",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `quantidadeMovimentos` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `quantidadeMovimentos` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, `temposVideos` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -111,6 +111,18 @@
           {
             "fieldPath": "movimentos",
             "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temposVideos",
+            "columnName": "temposVideos",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -228,7 +240,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '51a906df8904f210ae0f899751c45b0a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1ba8532c1a92d05140d962a0d6f00ee6')"
     ]
   }
 }

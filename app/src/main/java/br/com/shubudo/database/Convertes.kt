@@ -2,6 +2,8 @@ package br.com.shubudo.database
 
 import androidx.room.TypeConverter
 import br.com.shubudo.model.Movimento
+import br.com.shubudo.model.TempoVideo
+import br.com.shubudo.model.Video
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -27,4 +29,27 @@ class Convertes {
         val listType = object : TypeToken<List<Movimento>>() {}.type
         return Gson().fromJson(movimentoString, listType)
     }
+
+    @TypeConverter
+    fun fromVideoList(videoList: List<Video>): String {
+        return Gson().toJson(videoList)
+    }
+
+    @TypeConverter
+    fun toVideoList(videoListString: String): List<Video> {
+        val listType = object : TypeToken<List<Video>>() {}.type
+        return Gson().fromJson(videoListString, listType)
+    }
+
+    @TypeConverter
+    fun fromTempoVideoList(tempoVideoList: List<TempoVideo>): String {
+        return Gson().toJson(tempoVideoList)
+    }
+
+    @TypeConverter
+    fun toTempoVideoList(tempoVideoListString: String): List<TempoVideo> {
+        val listType = object : TypeToken<List<TempoVideo>>() {}.type
+        return Gson().fromJson(tempoVideoListString, listType)
+    }
+
 }

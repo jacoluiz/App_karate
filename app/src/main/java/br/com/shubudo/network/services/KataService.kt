@@ -3,6 +3,8 @@ package br.com.shubudo.network.services
 import br.com.shubudo.database.entities.KataEntity
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Movimento
+import br.com.shubudo.model.TempoVideo
+import br.com.shubudo.model.Video
 import retrofit2.http.GET
 
 data class KataResponse(
@@ -10,7 +12,9 @@ data class KataResponse(
     val faixa: String,
     val ordem: Int,
     val quantidadeMovimentos: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: List<Video>,
+    val temposVideos: List<TempoVideo>
 )
 
 fun KataResponse.toKata(): Kata {
@@ -20,6 +24,8 @@ fun KataResponse.toKata(): Kata {
         ordem = ordem,
         quantidadeMovimentos = quantidadeMovimentos,
         movimentos = movimentos,
+        video = video,
+        temposVideos = temposVideos
     )
 }
 
@@ -30,6 +36,8 @@ fun KataResponse.toKataEntity(): KataEntity {
         ordem = ordem,
         quantidadeMovimentos = quantidadeMovimentos,
         movimentos = movimentos,
+        video = video,
+        temposVideos = temposVideos
     )
 }
 

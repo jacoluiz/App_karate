@@ -5,5 +5,7 @@ data class Kata(
     val faixa: String,
     val ordem: Int,
     val quantidadeMovimentos: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: List<Video>,
+    val temposVideos: List<TempoVideo>
 )

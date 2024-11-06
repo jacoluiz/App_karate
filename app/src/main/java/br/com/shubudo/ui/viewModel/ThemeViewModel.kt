@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.viewModel
 
-import android.util.Log
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +11,15 @@ class ThemeViewModel : ViewModel() {
     val currentFaixa: State<String> = _currentFaixa
 
     fun changeThemeFaixa(faixa: String) {
-       Log.d("ThemeViewModel", "changeThemeFaixa: $faixa")
         _currentFaixa.value = faixa
+    }
+
+    fun getFaixaTemaAtual(): String {
+        return _currentFaixa.value
+    }
+
+    @Composable
+    fun eTemaEscuro(): Boolean {
+        return isSystemInDarkTheme()
     }
 }

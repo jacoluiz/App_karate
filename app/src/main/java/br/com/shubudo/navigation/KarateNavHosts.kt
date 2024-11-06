@@ -7,22 +7,29 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
+import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun KarateNavHost(
     navController: NavHostController = rememberNavController(),
+    dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
     NavHost(navController, startDestination = loginRoute) {
+        avisosScreen()
+        perfilScreen()
+
+        esqueciMinhaSenhaScreen(
+            onSendResetRequest = {
+                navController.popBackStack()
+            }
+        )
+
         programacaoScreen(
             onNavigateToDetalheFaixa = { navController.navigateToDetalheFaixa(it) },
             themeViewModel = themeViewModel
         )
-
-        avisosScreen()
-
-        perfilScreen()
 
         detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->
             navController.navigateToDetalheMovimento(faixa, movimento)
@@ -34,12 +41,29 @@ fun KarateNavHost(
             }
         )
 
-        loginScreen(
+        novoUsuarioScreen(
             themeViewModel = themeViewModel,
+            dropDownMenuViewModel = dropDownMenuViewModel,
             onNavigateToHome = {
                 navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
             }
         )
+
+        loginScreen(
+            themeViewModel = themeViewModel,
+            onNavigateToNovoUsuario = { username ->
+                navController.navigateToNovoUsuario(username.toString()) // Passa o valor de "username"
+            },
+
+            onNavigateToHome = {
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
+            },
+
+            onNavigateToEsqueciMinhaSenha = {
+                navController.navigateToEsqueciMinhaSenha()
+            }
+        )
+
     }
 }
 

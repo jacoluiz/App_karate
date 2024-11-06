@@ -8,7 +8,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.LoginView
-import br.com.shubudo.ui.view.PerfilView
 import br.com.shubudo.ui.viewModel.ProgramacaoViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
@@ -18,13 +17,17 @@ internal const val loginRoute = "login"
 fun NavGraphBuilder.loginScreen(
     themeViewModel: ThemeViewModel,
     onNavigateToHome: (String) -> Unit,
+    onNavigateToNovoUsuario: (Any?) -> Unit,
+    onNavigateToEsqueciMinhaSenha: (Any?) -> Unit
 ) {
     composable(loginRoute) {
         val viewModel = hiltViewModel<ProgramacaoViewModel>()
         val uiState by viewModel.uiState.collectAsState()
         LoginView(
             themeViewModel = themeViewModel,
-            onNavigateToHome = onNavigateToHome
+            onNavigateToHome = onNavigateToHome,
+            onNavigateToNovoUsuario = onNavigateToNovoUsuario,
+            onNavigateToEsqueciMinhaSenha = onNavigateToEsqueciMinhaSenha
         )
     }
 }

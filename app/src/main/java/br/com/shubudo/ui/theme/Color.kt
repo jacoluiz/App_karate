@@ -18,7 +18,7 @@ val TertiaryColorBranca = Color(0xFF5F5F5F)
 val LightPrimaryColorAmarela = Color(0xFFD6B601)
 val LightPrimaryContainerColorAmarela = Color(0xFFD6B601)
 
-val PrimaryColorAmarela = Color(0xFFF4E700)
+val PrimaryColorAmarela = Color(0xFFFFBF00)
 val PrimaryContainerColorAmarela = Color(0xFFD6B601)
 
 val SecondaryColorAmarela = Color(0xFFF4E700)
@@ -28,7 +28,7 @@ val TertiaryColorAmarela = Color(0xFFBBB75F)
 val LightPrimaryColorLaranja = Color(0xFFD66200)
 val LightPrimaryContainerColorLaranja = Color(0xFFD66200)
 
-val PrimaryColorLaranja = Color(0xFFD64C08)
+val PrimaryColorLaranja = Color(0xFFE86100)
 val PrimaryContainerColorLaranja = Color(0xFFD64C08)
 
 val SecondaryColorLaranja = Color(0xFFD64C08)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -34,7 +37,11 @@ import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.navigation.detalheMovimentoRuteFullpath
+import br.com.shubudo.navigation.esqueciMinhaSenhaRote
+import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
 import br.com.shubudo.navigation.navigateToBottomAppBarItem
+import br.com.shubudo.navigation.novoUsuarioRote
+import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
 import br.com.shubudo.navigation.perfilRoute
 import br.com.shubudo.navigation.programacaoRoute
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
@@ -42,6 +49,7 @@ import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
 import br.com.shubudo.ui.view.LoginView
+import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,6 +61,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val themeViewModel: ThemeViewModel = viewModel() // Injeção do ViewModel
+            val dropDownMenuViewModel: DropDownMenuViewModel = viewModel() // Injeção do ViewModel
 
             AppShubudoTheme(faixa = themeViewModel.currentFaixa.value) {
                 val navController = rememberNavController()
@@ -82,12 +91,20 @@ class MainActivity : ComponentActivity() {
                             detalheMovimentoArgument
                         )
 
+                        novoUsuarioRote -> "Precisamos de alguns dados"
+                        novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
 
-                        else -> "Shubudo"
+
+                        else -> "Shubu-dô App"
                     }
 
                     val showBottomBack = when (currentDestination?.route) {
                         detalheFaixaRuteFullpath -> true
+                        novoUsuarioRote -> true
+                        novoUsuarioRoteSemUsername -> true
+                        esqueciMinhaSenhaRote -> true
+                        esqueciMinhaSenhaRoteSemUsername -> true
+
                         else -> false
                     }
 
@@ -116,7 +133,9 @@ class MainActivity : ComponentActivity() {
                         ) {
                             KarateNavHost(
                                 navController = navController,
-                                themeViewModel = themeViewModel
+                                themeViewModel = themeViewModel,
+                                dropDownMenuViewModel = dropDownMenuViewModel
+
                             )
                         }
                     }
@@ -153,6 +172,7 @@ fun KarateApp(
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
     val currentRoute = currentDestination?.route
+    val focusManager = LocalFocusManager.current
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -205,6 +225,11 @@ fun KarateApp(
                     .padding(it)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    }
             ) {
                 Surface(
                     modifier = Modifier

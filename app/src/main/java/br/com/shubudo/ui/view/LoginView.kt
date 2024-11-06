@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -34,18 +35,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.ui.components.SeletorDeTema
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun LoginView(
     onNavigateToHome: (String) -> Unit,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    onNavigateToNovoUsuario: (String) -> Unit,
+    onNavigateToEsqueciMinhaSenha: (String) -> Unit,
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -53,6 +60,8 @@ fun LoginView(
     val focusManager = LocalFocusManager.current
     var conter by remember { mutableStateOf(0) }
 
+    val focusRequesterUsuario = remember { FocusRequester() }
+    val focusRequesterSenha = remember { FocusRequester() }
 
     Box(
         modifier = Modifier
@@ -89,9 +98,12 @@ fun LoginView(
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.bodyLarge,
                 )
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+
+                SeletorDeTema(themeViewModel = themeViewModel)
             }
 
-            Spacer(modifier = Modifier.height(160.dp))
+            Spacer(modifier = Modifier.height(100.dp))
 
             // Card central com campos de login e botões
             Card(
@@ -110,6 +122,7 @@ fun LoginView(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TextField(
+                        singleLine = true,
                         value = username,
                         onValueChange = { username = it },
                         label = {
@@ -130,12 +143,23 @@ fun LoginView(
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         ),
-                        modifier = Modifier.fillMaxWidth()
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusRequesterSenha.requestFocus() }  // Move o foco para o próximo campo
+                        ),
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequesterUsuario),
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TextField(
+                        singleLine = true,
                         value = password,
                         onValueChange = { password = it },
                         label = {
@@ -151,7 +175,14 @@ fun LoginView(
                             )
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusRequesterSenha.requestFocus() }  // Move o foco para o próximo campo
+                        ),
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Next
+                        ),
                         trailingIcon = {
                             val image =
                                 if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
@@ -173,9 +204,10 @@ fun LoginView(
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         ),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequesterSenha),
                     )
-
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -184,7 +216,8 @@ fun LoginView(
                     ) {
                         Button(
                             onClick = {
-                                onNavigateToHome("Avisos")
+                                onNavigateToNovoUsuario(username.ifEmpty { "" }) // Passa o valor do campo "username" para a próxima tela
+
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
@@ -217,22 +250,7 @@ fun LoginView(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    Log.i("EsqueciSenha", conter.toString())
-                    conter++
-                    if (conter == 0) {
-                        themeViewModel.changeThemeFaixa("Branca")
-                    } else if (conter == 1) {
-                        themeViewModel.changeThemeFaixa("Amarela")
-                    } else if (conter == 2) {
-                        themeViewModel.changeThemeFaixa("Laranja")
-                    } else if (conter == 3) {
-                        themeViewModel.changeThemeFaixa("Verde")
-                    } else if (conter == 4) {
-                        themeViewModel.changeThemeFaixa("Roxa")
-                    } else if (conter == 5) {
-                        themeViewModel.changeThemeFaixa("Marrom")
-                        conter = -1
-                    }
+                    onNavigateToEsqueciMinhaSenha(username.ifEmpty { "" }) // Passa o valor do campo "username" para a próxima tela
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.background,
