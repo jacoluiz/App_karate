@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,27 +48,34 @@ fun PlayerDeVideo(
         modifier = Modifier.fillMaxWidth(),
         factory = { ctx ->
             YouTubePlayerView(ctx).apply {
-                initialize(
-                    object : AbstractYouTubePlayerListener() {
-                        override fun onReady(youTubePlayer: YouTubePlayer) {
-                            youTubePlayerInstance = youTubePlayer
-                            youTubePlayer.cueVideo(currentVideo.url, 0f)
-                        }
+                enableAutomaticInitialization = false
 
-                        override fun onStateChange(
-                            youTubePlayer: YouTubePlayer,
-                            state: PlayerConstants.PlayerState
-                        ) {
-                            isPlaying = state == PlayerConstants.PlayerState.PLAYING
-                        }
-                    },
-                    IFramePlayerOptions.Builder()
-                        .controls(0) // Oculta os controles padrão do YouTube Player
-                        .build()
-                )
+                // Configurações do IFramePlayerOptions para ocultar os controles do YouTube
+                val options = IFramePlayerOptions.Builder()
+                    .controls(0)       // Oculta todos os controles
+                    .rel(0)            // Desativa vídeos relacionados
+                    .ivLoadPolicy(3)   // Oculta anotações e informações do vídeo
+                    .ccLoadPolicy(0)   // Desativa legendas automáticas
+                    .build()
+
+                initialize(object : AbstractYouTubePlayerListener() {
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        youTubePlayerInstance = youTubePlayer
+                        youTubePlayer.cueVideo(currentVideo.url, 0f) // Carrega o vídeo inicial
+                    }
+
+                    override fun onStateChange(
+                        youTubePlayer: YouTubePlayer,
+                        state: PlayerConstants.PlayerState
+                    ) {
+                        isPlaying = state == PlayerConstants.PlayerState.PLAYING
+                    }
+                }, options)
             }
         }
     )
+
+
 
     Box(modifier = Modifier.fillMaxWidth()) {
         // Botão de Play/Pause
