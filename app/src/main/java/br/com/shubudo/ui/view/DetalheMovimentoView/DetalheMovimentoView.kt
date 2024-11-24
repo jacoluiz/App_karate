@@ -10,8 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
-import br.com.shubudo.ui.viewModel.DetalheMovimentoViewModel
+import br.com.shubudo.ui.viewModel.KataViewModel
 
 @Composable
 fun DetalheMovimentoView(
@@ -29,7 +30,8 @@ fun DetalheMovimentoView(
             } else if (uiState.defesaPessoal.isNotEmpty()) {
                 telaDefesaPessoal(uiState, onBackNavigationClick)
             } else if (uiState.kata.isNotEmpty()) {
-                TelaKata(uiState, onBackNavigationClick)
+                val viewModel: KataViewModel = viewModel()
+                TelaKata(viewModel ,uiState, onBackNavigationClick)
             } else if (uiState.sequenciaDeCombate.isNotEmpty()) {
                 telaSequenciaDeCombate(uiState, onBackNavigationClick)
             }
@@ -49,7 +51,7 @@ fun EsqueletoTela(content: @Composable () -> Unit) {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 200.dp),
+                .padding(top = 250.dp),
             color = MaterialTheme.colorScheme.inverseOnSurface,
             shape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp)
         ) {

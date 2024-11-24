@@ -108,6 +108,9 @@ dependencies {
 
     implementation (libs.core)
 
+    implementation (libs.accompanist.flowlayout)
+
+
 }
 
 // Allow references to generated code

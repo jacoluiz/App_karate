@@ -2,12 +2,14 @@ package br.com.shubudo.ui.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,7 +33,7 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 @Composable
 fun SeletorDeTema(
     themeViewModel: ThemeViewModel
-){
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(
@@ -50,7 +52,11 @@ fun SeletorDeTema(
 
         colors.forEach { (faixa, cor) ->
             Button(
-                border = null,
+                border = if (faixa != themeViewModel.getFaixaTemaAtual()) {
+                    null
+                } else {
+                    BorderStroke(1.dp, Color.Black)
+                },
                 onClick = { themeViewModel.changeThemeFaixa(faixa) },
                 modifier = Modifier
                     .size(32.dp), // Tamanho do botão para criar um círculo

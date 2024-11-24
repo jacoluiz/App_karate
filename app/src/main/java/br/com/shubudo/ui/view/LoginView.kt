@@ -58,7 +58,6 @@ fun LoginView(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    var conter by remember { mutableStateOf(0) }
 
     val focusRequesterUsuario = remember { FocusRequester() }
     val focusRequesterSenha = remember { FocusRequester() }

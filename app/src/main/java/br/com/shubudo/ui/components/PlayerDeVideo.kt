@@ -1,132 +1,100 @@
 package br.com.shubudo.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
+import android.content.Context
+import android.os.Environment
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.RotateRight
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import br.com.shubudo.model.TempoVideo
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import br.com.shubudo.model.Orientacao
 import br.com.shubudo.model.Video
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import br.com.shubudo.ui.viewModel.KataViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 @Composable
-fun PlayerDeVideo(
-    videos: List<Video>,
-    temposVideos: List<TempoVideo>
-) {
-    val context = LocalContext.current
-    var currentVideoIndex by remember { mutableIntStateOf(0) }
-    val currentVideo = videos[currentVideoIndex]
-    var youTubePlayerInstance by remember { mutableStateOf<YouTubePlayer?>(null) }
-    var isPlaying by remember { mutableStateOf(false) }
+fun LocalVideoPlayer(viewModel: KataViewModel, exoPlayer: ExoPlayer) {
+    val currentVideo = viewModel.currentVideo.value
+    val localFilePaths = viewModel.localFilePaths.value
 
-    AndroidView(
-        modifier = Modifier.fillMaxWidth(),
-        factory = { ctx ->
-            YouTubePlayerView(ctx).apply {
-                enableAutomaticInitialization = false
-
-                // Configurações do IFramePlayerOptions para ocultar os controles do YouTube
-                val options = IFramePlayerOptions.Builder()
-                    .controls(0)       // Oculta todos os controles
-                    .rel(0)            // Desativa vídeos relacionados
-                    .ivLoadPolicy(3)   // Oculta anotações e informações do vídeo
-                    .ccLoadPolicy(0)   // Desativa legendas automáticas
-                    .build()
-
-                initialize(object : AbstractYouTubePlayerListener() {
-                    override fun onReady(youTubePlayer: YouTubePlayer) {
-                        youTubePlayerInstance = youTubePlayer
-                        youTubePlayer.cueVideo(currentVideo.url, 0f) // Carrega o vídeo inicial
-                    }
-
-                    override fun onStateChange(
-                        youTubePlayer: YouTubePlayer,
-                        state: PlayerConstants.PlayerState
-                    ) {
-                        isPlaying = state == PlayerConstants.PlayerState.PLAYING
-                    }
-                }, options)
-            }
-        }
-    )
-
-
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-        // Botão de Play/Pause
-        IconButton(
-            onClick = {
-                youTubePlayerInstance?.let {
-                    if (isPlaying) it.pause() else it.play()
-                }
-            },
-            modifier = Modifier.align(Alignment.BottomStart)
-        ) {
-            Icon(
-                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                tint = MaterialTheme.colorScheme.primary,
-                contentDescription = "Play/Pause"
-            )
-        }
-
-        // Botão para alternar entre ângulos
-        IconButton(
-            onClick = {
-                currentVideoIndex = (currentVideoIndex + 1) % videos.size
-                youTubePlayerInstance?.cueVideo(videos[currentVideoIndex].url, 0f)
-            },
-            modifier = Modifier.align(Alignment.BottomEnd)
-        ) {
-            Icon(
-                tint = MaterialTheme.colorScheme.primary,
-                imageVector = Icons.AutoMirrored.Filled.RotateRight,
-                contentDescription = "Mudar Ângulo"
-            )
-        }
-
-        // Botões de salto para tempos específicos
-        val currentTempos =
-            temposVideos.find { it.descricao == currentVideo.orientacao }?.tempo ?: emptyList()
-        Row(
-            modifier = Modifier
-                .padding(top = 50.dp)
-                .align(Alignment.TopCenter),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            currentTempos.forEachIndexed { index, time ->
-                TextButton(
-                    onClick = {
-                        youTubePlayerInstance?.seekTo(time.toFloat()) // Salta para o tempo especificado
-                    }
-                ) {
-                    Text(text = "${index + 1}")
+    LaunchedEffect(currentVideo) {
+        currentVideo?.let { video ->
+            localFilePaths[video.orientacao]?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    exoPlayer.setMediaItem(MediaItem.fromUri(path))
+                    exoPlayer.prepare()
+                } else {
+                    Log.e("Video", "Arquivo não encontrado: $path")
                 }
             }
         }
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        AndroidView(
+            modifier = Modifier.fillMaxWidth(),
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    player = exoPlayer
+                    useController = false
+                }
+            }
+        )
+    }
+}
+
+
+// Função para baixar os vídeos localmente
+suspend fun downloadVideos(
+    context: Context,
+    videos: List<Video>
+): Map<Orientacao, String?> = withContext(Dispatchers.IO) {
+    val tempDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+    val downloadedVideos = mutableMapOf<Orientacao, String?>()
+
+    videos.forEach { video ->
+        try {
+            Log.i("Video", "Baixando vídeo para ${video.orientacao}")
+            val file = File(tempDir, "temp_video_${video.orientacao.name}.mp4")
+            val connection = URL(video.url).openConnection()
+            connection.connect()
+            connection.getInputStream().use { input ->
+                FileOutputStream(file).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            downloadedVideos[video.orientacao] = file.absolutePath
+        } catch (e: Exception) {
+            Log.i("Video", "Erro ao baixar vídeo para ${video.orientacao}")
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    context,
+                    "Erro ao baixar vídeo para ${video.orientacao}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            downloadedVideos[video.orientacao] = null
+        }
+    }
+
+    downloadedVideos
 }

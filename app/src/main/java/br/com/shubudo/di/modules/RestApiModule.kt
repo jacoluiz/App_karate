@@ -5,6 +5,7 @@ import br.com.shubudo.network.services.FaixasServices
 import br.com.shubudo.network.services.KataServices
 import br.com.shubudo.network.services.MovimentoService
 import br.com.shubudo.network.services.SequenciaDeCombateService
+import br.com.shubudo.network.services.UsuarioService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,5 +73,11 @@ object RestApiModule {
     @Singleton
     fun providerSequenciaDeCombateService(retrofit : Retrofit) : SequenciaDeCombateService {
         return retrofit.create(SequenciaDeCombateService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providerUsuarioService(retrofit : Retrofit) : UsuarioService {
+        return retrofit.create(UsuarioService::class.java)
     }
 }
