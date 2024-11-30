@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,7 @@ import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
 import br.com.shubudo.ui.viewModel.KataViewModel
 import br.com.shubudo.utils.toOrdinario
 import br.com.shubudo.utils.toOrdinarioFeminino
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,7 +65,6 @@ fun TelaKata(
     val context = LocalContext.current // Contexto obtido corretamente no escopo do Compose
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
 
-
     var indexKataExibido by remember { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
 
@@ -74,6 +75,8 @@ fun TelaKata(
     ) {
         kata[indexKataExibido].movimentos.size
     }
+    val coroutineScope = rememberCoroutineScope()
+
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Box(
@@ -163,7 +166,8 @@ fun TelaKata(
                         FlowRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.Center
                         ) {
                             // Botões para tempos específicos
                             viewModel.currentVideo.value?.let { video ->
@@ -173,8 +177,11 @@ fun TelaKata(
                                             exoPlayer,
                                             time * 1000L
                                         )
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
                                     }) {
-                                        Text(text = "${index + 1}")
+                                        Text(text = "${index + 1}º")
                                     }
                                 }
                             }
@@ -189,14 +196,22 @@ fun TelaKata(
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         IconButton(onClick = {
-                            if (indexKataExibido != 0) indexKataExibido-- else indexKataExibido =
-                                kata.size - 1
+                            // Muda para o kata anterior
+                            if (indexKataExibido > 0) {
+                                indexKataExibido--
+                            } else {
+                                indexKataExibido = kata.size - 1
+                            }
+
+                            // Troca o vídeo para o novo kata
+                            kata[indexKataExibido].video.firstOrNull()?.let { video ->
+                                viewModel.changeVideo(video, exoPlayer)
+                            }
                         }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowLeft,
                                 contentDescription = "Seta para voltar",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.weight(1f)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         AnimatedContent(
@@ -214,24 +229,33 @@ fun TelaKata(
                             label = ""
                         ) { index ->
                             Text(
-                                text = "${kata[index]?.ordem?.toOrdinarioFeminino()} forma",
+                                text = "${kata[index].ordem.toOrdinarioFeminino()} forma",
                                 style = MaterialTheme.typography.headlineSmall,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.inverseSurface
                             )
                         }
                         IconButton(onClick = {
-                            if (indexKataExibido < kata.size - 1) indexKataExibido++ else indexKataExibido =
-                                0
+                            // Muda para o próximo kata
+                            if (indexKataExibido < kata.size - 1) {
+                                indexKataExibido++
+                            } else {
+                                indexKataExibido = 0
+                            }
+
+                            // Troca o vídeo para o novo kata
+                            kata[indexKataExibido].video.firstOrNull()?.let { video ->
+                                viewModel.changeVideo(video, exoPlayer)
+                            }
                         }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                                 contentDescription = "Seta para avançar",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.weight(1f)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
+
                 }
 
                 // Exibição do conteúdo do movimento atual

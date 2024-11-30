@@ -18,39 +18,39 @@ fun PerfilView(
     uiState: PerfilUiState,
     onLogout: () -> Unit
 ) {
-    when (uiState) {
-        is PerfilUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is PerfilUiState.Empty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Nenhum dado encontrado.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        is PerfilUiState.Success -> {
-            PerfilContent(
-                nome = uiState.nome,
-                username = uiState.username,
-                email = uiState.email,
-                corFaixa = uiState.corFaixa,
-                onLogout = onLogout
-            )
-        }
-    }
+//    when (uiState) {
+//        is PerfilUiState.Loading -> {
+//            Box(
+//                modifier = Modifier.fillMaxSize(),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                CircularProgressIndicator()
+//            }
+//        }
+//
+//        is PerfilUiState.Empty -> {
+//            Box(
+//                modifier = Modifier.fillMaxSize(),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Text(
+//                    text = "Nenhum dado encontrado.",
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    textAlign = TextAlign.Center
+//                )
+//            }
+//        }
+//
+//        is PerfilUiState.Success -> {
+//            PerfilContent(
+//                nome = uiState.nome,
+//                username = uiState.username,
+//                email = uiState.email,
+//                corFaixa = uiState.corFaixa,
+//                onLogout = onLogout
+//            )
+//        }
+//    }
 }
 
 @Composable

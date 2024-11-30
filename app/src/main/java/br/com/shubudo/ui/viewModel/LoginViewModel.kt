@@ -22,8 +22,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             try {
-                val result = repository.login(username, password)
-                _uiState.value = LoginUiState.Success(result)
+//                val result = repository.login(username, password)
+//                _uiState.value = LoginUiState.Success(result)
             } catch (e: Exception) {
                 _uiState.value = LoginUiState.Error("Erro ao realizar login: ${e.message}")
             }

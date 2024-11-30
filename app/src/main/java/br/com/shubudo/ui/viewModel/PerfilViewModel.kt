@@ -29,27 +29,27 @@ class PerfilViewModel @Inject constructor(
     }
 
     private fun loadUiState() {
-        currentUiStateJob?.cancel()
-        currentUiStateJob = viewModelScope.launch {
-            repository.getUsuario().onStart {
-                _uiState.update { PerfilUiState.Loading }
-            }.collectLatest { usuario ->
-                if (usuario == null) {
-                    _uiState.update {
-                        PerfilUiState.Empty
-                    }
-                } else {
-                    _uiState.update {
-                        PerfilUiState.Success(
-                            nome = usuario.nome,
-                            username = usuario.username,
-                            email = usuario.email,
-                            corFaixa = usuario.corFaixa
-                        )
-                    }
-                }
-            }
-        }
+//        currentUiStateJob?.cancel()
+//        currentUiStateJob = viewModelScope.launch {
+//            repository.getUsuario().onStart {
+//                _uiState.update { PerfilUiState.Loading }
+//            }.collectLatest { usuario ->
+//                if (usuario == null) {
+//                    _uiState.update {
+//                        PerfilUiState.Empty
+//                    }
+//                } else {
+//                    _uiState.update {
+//                        PerfilUiState.Success(
+//                            nome = usuario.nome,
+//                            username = usuario.username,
+//                            email = usuario.email,
+//                            corFaixa = usuario.corFaixa
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun logout(onLogout: () -> Unit) {

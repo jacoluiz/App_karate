@@ -25,23 +25,31 @@ class KataViewModel : ViewModel() {
 
     fun loadVideos(videos: List<Video>, context: Context, exoPlayer: ExoPlayer) {
         viewModelScope.launch(Dispatchers.IO) {
+            // Baixa os vídeos e armazena os caminhos locais
             val downloadedVideos = downloadVideos(context, videos)
             localFilePaths.value = downloadedVideos
 
-            // Define o primeiro vídeo como padrão e configura no player
+            // Define o primeiro vídeo como padrão
             val firstVideo = videos.firstOrNull()
             currentVideo.value = firstVideo
 
             firstVideo?.let { video ->
-                downloadedVideos[video.orientacao]?.let { path ->
-                    withContext(Dispatchers.Main) { // Altere para o thread principal antes de interagir com o player
-                        exoPlayer.setMediaItem(MediaItem.fromUri(path))
-                        exoPlayer.prepare()
-                    }
+                val path = downloadedVideos[video.orientacao]
+                if (path != null) {
+                    updatePlayer(exoPlayer, path) // Atualiza o player
                 }
             }
         }
     }
+
+    private suspend fun updatePlayer(exoPlayer: ExoPlayer, videoPath: String) {
+        withContext(Dispatchers.Main) { // Garante que a operação com o player ocorre na thread principal
+            exoPlayer.setMediaItem(MediaItem.fromUri(videoPath))
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = false
+        }
+    }
+
 
     fun play(exoPlayer: ExoPlayer) {
         exoPlayer.play()
@@ -58,10 +66,13 @@ class KataViewModel : ViewModel() {
     }
 
     fun changeVideo(video: Video, exoPlayer: ExoPlayer) {
-        currentVideo.value = video
-        localFilePaths.value[video.orientacao]?.let { path ->
-            exoPlayer.setMediaItem(MediaItem.fromUri(path))
-            exoPlayer.prepare()
+        val path = localFilePaths.value[video.orientacao]
+        if (path != null) {
+            viewModelScope.launch {
+                updatePlayer(exoPlayer, path) // Reutiliza o método de atualização do player
+                currentVideo.value = video
+            }
         }
     }
+
 }

@@ -81,14 +81,4 @@ class DetalheMovimentoViewModel @Inject constructor(
             }
         }
     }
-
-    fun pegarVideokataPelaOrientacao(orientacao: String, kata: Kata): String? {
-        // Tenta converter a string para um valor do enum Orientacao ignorando o case
-        val orientacaoEnum = Orientacao.values().find { it.name.uppercase() == orientacao.uppercase() }
-
-        return kata.video.find { it.orientacao == orientacaoEnum }?.url
-    }
-
-
-
 }

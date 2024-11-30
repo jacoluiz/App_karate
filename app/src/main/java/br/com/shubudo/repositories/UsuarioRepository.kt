@@ -23,8 +23,8 @@ class UsuarioRepository @Inject constructor(
         CoroutineScope(coroutineContext).launch {
             try {
                 val response = service.getUsuario()
-                val entity = response?.toUsuarioEntity()
-                entity?.let { dao.salvarUsuario(it) }
+                val entity = response[0].toUsuarioEntity()
+                entity.let { dao.salvarUsuario(it) }
             } catch (e: ConnectException) {
                 Log.e("UsuarioRepository", "getUsuario: falha ao conectar na API", e)
             }
