@@ -17,7 +17,12 @@ fun KarateNavHost(
     themeViewModel: ThemeViewModel
 ) {
     NavHost(navController, startDestination = AppDestination.Avisos.route) {
-        avisosScreen()
+        avisosScreen(
+            onClickAviso = {
+                navController.navigateToDetalheAviso()
+            }
+        )
+        detalheAvisoScreen()
         perfilScreen()
 
         esqueciMinhaSenhaScreen(

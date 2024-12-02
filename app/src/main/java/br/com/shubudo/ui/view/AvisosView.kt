@@ -13,6 +13,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.ui.components.CardAviso
 
 @Composable
-fun AvisosView() {
+fun AvisosView(
+    onClickAviso: () -> Unit = {}
+) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -62,22 +66,25 @@ fun AvisosView() {
                 contentAlignment = Alignment.Center
             ) {
                 Column {
-                    Divider(
-                        color = MaterialTheme.colorScheme.primary,
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
                         thickness = 2.dp,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surface),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+
                     ) {
-                        Text(
-                            text = "Nada aqui por enquanto",
-                            color = Color.Gray,
+                        CardAviso(
+                            imageUrl = "https://scontent.fbfh8-2.fna.fbcdn.net/v/t39.30808-6/327439149_1698359803913606_3998713113962447530_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=oZGuTFgK7dUQ7kNvgGyiC8o&_nc_zt=23&_nc_ht=scontent.fbfh8-2.fna&_nc_gid=AJMqIoY6dczjw1HchZRz_p0&oh=00_AYDd_FCLf7J2cuq4_ROHTQOirDPRydRzitkmXqDs2KPyBA&oe=67501EC9",
+                            title = "Pre exame, inscreva-se!",
+                            description = "Se inscreva para o pre exame por dento do app",
+                            onClick = onClickAviso
                         )
+
                     }
                 }
             }
