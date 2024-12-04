@@ -1,4 +1,4 @@
-package br.com.shubudo.ui.view.DetalheMovimentoView
+package br.com.shubudo.ui.view.detalheMovimentoView
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent

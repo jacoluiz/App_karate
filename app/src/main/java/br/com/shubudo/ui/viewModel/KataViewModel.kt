@@ -9,9 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Orientacao
 import br.com.shubudo.model.Video
@@ -159,7 +157,7 @@ class KataViewModel : ViewModel() {
         }
     }
 
-    fun downloadVideos(
+    private fun downloadVideos(
         context: Context,
         videos: List<Video>,
         kataId: Int
@@ -176,7 +174,7 @@ class KataViewModel : ViewModel() {
         return downloadedPaths
     }
 
-    fun downloadFileToExternal(
+    private fun downloadFileToExternal(
         context: Context,
         url: String,
         kataId: String,

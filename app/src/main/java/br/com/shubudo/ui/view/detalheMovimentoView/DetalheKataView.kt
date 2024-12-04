@@ -1,4 +1,4 @@
-package br.com.shubudo.ui.view.DetalheMovimentoView
+package br.com.shubudo.ui.view.detalheMovimentoView
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowLeft
-import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled._360
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.FlipCameraAndroid
@@ -58,6 +56,7 @@ import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
 import br.com.shubudo.ui.viewModel.KataViewModel
 import br.com.shubudo.utils.toOrdinario
 import br.com.shubudo.utils.toOrdinarioFeminino
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -69,6 +68,7 @@ fun TelaKata(
 ) {
     val kata = uiState.kata
     val context = LocalContext.current // Contexto obtido corretamente no escopo do Compose
+
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             addListener(object : Player.Listener {
@@ -104,6 +104,11 @@ fun TelaKata(
     }
 
     var indexKataExibido by remember { mutableIntStateOf(0) }
+    val currentKata = kata.getOrNull(indexKataExibido)
+
+// Atualizando o conteúdo de temposVideos com base no kata atual.
+    val currentTemposVideos = currentKata?.temposVideos?.find { it.descricao == viewModel.currentVideo.value?.orientacao }
+
     val listState = rememberLazyListState()
 
     // PagerState para controlar o pager
@@ -115,6 +120,23 @@ fun TelaKata(
     }
 
     val coroutineScope = rememberCoroutineScope()
+
+    // Lógica para mover a página no início
+    LaunchedEffect(key1 = true) {
+        coroutineScope.launch {
+            // Aguarda um curto período para garantir que a tela esteja carregada
+            delay(500)
+
+            // Move para a metade do próximo movimento (página 1)
+            pagerState.animateScrollToPage(1, 0.5f)
+
+            // Aguarda um pouco para o usuário ver que é um scroll e retorna para o primeiro movimento
+            delay(500)
+
+            // Volta para o primeiro movimento (página 0)
+            pagerState.animateScrollToPage(0)
+        }
+    }
 
     if (!viewModel.videoCarregado.value) {
         LaunchedEffect(indexKataExibido) {
@@ -144,7 +166,6 @@ fun TelaKata(
             }
 
             EsqueletoTela {
-                // Cada página representa um movimento diferente
                 LazyColumn(
                     state = listState,
                     verticalArrangement = Arrangement.Top,
@@ -232,19 +253,17 @@ fun TelaKata(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 // Botões para tempos específicos
-                                viewModel.currentVideo.value?.let { video ->
-                                    kata.firstOrNull()?.temposVideos?.find { it.descricao == video.orientacao }?.tempo?.forEachIndexed { index, time ->
-                                        TextButton(onClick = {
-                                            viewModel.seekTo(
-                                                exoPlayer,
-                                                time * 1000L
-                                            )
-                                            coroutineScope.launch {
-                                                pagerState.animateScrollToPage(index)
-                                            }
-                                        }) {
-                                            Text(text = "${index + 1}º")
+                                currentTemposVideos?.tempo?.forEachIndexed { index, time ->
+                                    TextButton(onClick = {
+                                        viewModel.seekTo(
+                                            exoPlayer,
+                                            time * 1000L
+                                        )
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
                                         }
+                                    }) {
+                                        Text(text = "${index + 1}º")
                                     }
                                 }
                             }
@@ -254,12 +273,14 @@ fun TelaKata(
                         // Controles para alterar o kata
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(top = 16.dp)
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(start = 16.dp)
+
                         ) {
                             AnimatedContent(
                                 targetState = indexKataExibido,
-                                modifier = Modifier.weight(2f),
+
                                 transitionSpec = {
                                     slideInHorizontally(
                                         initialOffsetX = { it },
@@ -273,9 +294,9 @@ fun TelaKata(
                             ) { index ->
                                 Text(
                                     text = "${kata[index].ordem.toOrdinarioFeminino()} forma",
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.titleLarge,
                                     textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.inverseSurface
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                             IconButton(onClick = {
@@ -294,9 +315,7 @@ fun TelaKata(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-
                         }
-
                     }
 
                     // Exibição do conteúdo do movimento atual
@@ -315,7 +334,7 @@ fun TelaKata(
                                         .fillMaxWidth(),
                                     text = "${kata[indexKataExibido].movimentos[pageIndex].ordem.toOrdinario()} movimento",
                                     color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.titleLarge
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
