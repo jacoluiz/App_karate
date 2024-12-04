@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
 import br.com.shubudo.ui.viewModel.KataViewModel
 
@@ -21,7 +22,7 @@ fun DetalheMovimentoView(
 
     when (uiState) {
         is DetalheMovimentoUiState.Loading -> {
-            Text("Loading...")
+            LoadingOverlay(true) { }
         }
 
         is DetalheMovimentoUiState.Success -> {
@@ -31,6 +32,7 @@ fun DetalheMovimentoView(
                 telaDefesaPessoal(uiState, onBackNavigationClick)
             } else if (uiState.kata.isNotEmpty()) {
                 val viewModel: KataViewModel = viewModel()
+
                 TelaKata(viewModel ,uiState, onBackNavigationClick)
             } else if (uiState.sequenciaDeCombate.isNotEmpty()) {
                 telaSequenciaDeCombate(uiState, onBackNavigationClick)

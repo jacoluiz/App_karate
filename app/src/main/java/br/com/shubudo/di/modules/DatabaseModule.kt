@@ -2,6 +2,8 @@ package br.com.shubudo.di.modules
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import br.com.shubudo.database.KarateDatabase
 import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.FaixaDao
@@ -20,6 +22,31 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class DatabaseModule {
 
+    val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // Crie a tabela com o novo esquema
+            database.execSQL(
+                """
+            CREATE TABLE IF NOT EXISTS Usuario (
+                _id TEXT NOT NULL PRIMARY KEY,
+                nome TEXT NOT NULL,
+                username TEXT NOT NULL,
+                email TEXT NOT NULL,
+                senha TEXT NOT NULL,
+                idade TEXT NOT NULL,
+                peso TEXT NOT NULL,
+                altura TEXT NOT NULL,
+                corFaixa TEXT NOT NULL,
+                perfil TEXT NOT NULL
+            )
+            """.trimIndent()
+            )
+
+            // Caso seja necessário, migre os dados da tabela antiga para a nova
+            // Você pode usar SQL aqui para migrar registros da tabela antiga, se necessário.
+        }
+    }
+
     @Singleton
     @Provides
     fun provideDataBase(@ApplicationContext context: Context): KarateDatabase {
@@ -27,7 +54,7 @@ class DatabaseModule {
             context,
             KarateDatabase::class.java,
             "karate.db"
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
