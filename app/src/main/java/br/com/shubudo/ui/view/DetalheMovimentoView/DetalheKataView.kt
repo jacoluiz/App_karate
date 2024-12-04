@@ -24,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowLeft
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.filled._360
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Pause
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import br.com.shubudo.model.Orientacao
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.components.LocalVideoPlayer
 import br.com.shubudo.ui.components.botaoVoltar
@@ -111,7 +113,7 @@ fun TelaKata(
     ) {
         kata[indexKataExibido].movimentos.size
     }
-    
+
     val coroutineScope = rememberCoroutineScope()
 
     if (!viewModel.videoCarregado.value) {
@@ -182,11 +184,27 @@ fun TelaKata(
 
                                 IconButton(onClick = {
                                     if (videos.isNotEmpty()) {
-                                        // Incrementa o índice, retornando ao início se for o último vídeo
-                                        currentIndex = (currentIndex + 1) % videos.size
-                                        val nextVideo = videos[currentIndex]
-                                        viewModel.changeVideo(nextVideo, exoPlayer)
-                                        viewModel.pause(exoPlayer)
+                                        // Obtém a orientação atual
+                                        val currentVideo = viewModel.currentVideo.value
+                                        val currentOrientation = currentVideo?.orientacao
+
+                                        // Determina a próxima orientação de forma cíclica
+                                        val nextOrientation = when (currentOrientation) {
+                                            Orientacao.FRENTE -> Orientacao.ESQUERDA
+                                            Orientacao.ESQUERDA -> Orientacao.DIREITA
+                                            Orientacao.DIREITA -> Orientacao.COSTAS
+                                            Orientacao.COSTAS -> Orientacao.FRENTE
+                                            else -> Orientacao.FRENTE // Caso não tenha vídeo atual, começamos com FRENTE
+                                        }
+
+                                        // Encontra o vídeo correspondente à próxima orientação
+                                        val nextVideo =
+                                            videos.find { it.orientacao == nextOrientation }
+                                        if (nextVideo != null) {
+                                            // Altera para o próximo vídeo (próxima orientação)
+                                            viewModel.changeVideo(nextVideo, exoPlayer)
+                                            viewModel.pause(exoPlayer) // Opcionalmente, pausa o vídeo logo após a mudança
+                                        }
                                     }
                                 }) {
                                     Icon(
@@ -239,24 +257,6 @@ fun TelaKata(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
-                            IconButton(onClick = {
-                                // Muda para o kata anterior
-                                if (indexKataExibido > 0) {
-                                    indexKataExibido--
-                                } else {
-                                    indexKataExibido = kata.size - 1
-                                }
-                                // Carrega o novo vídeo para o kata atualizado
-                                kata.getOrNull(indexKataExibido)?.let { novoKata ->
-                                    viewModel.loadVideos(novoKata, context, exoPlayer)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowLeft,
-                                    contentDescription = "Seta para voltar",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
                             AnimatedContent(
                                 targetState = indexKataExibido,
                                 modifier = Modifier.weight(2f),
@@ -279,24 +279,22 @@ fun TelaKata(
                                 )
                             }
                             IconButton(onClick = {
-                                // Muda para o próximo kata
-                                if (indexKataExibido < kata.size - 1) {
-                                    indexKataExibido++
-                                } else {
-                                    indexKataExibido = 0
-                                }
+                                // Avança para o próximo kata, ou volta ao início se já estiver no último
+                                indexKataExibido = (indexKataExibido + 1) % kata.size
 
-                                // Carrega o novo vídeo para o kata atualizado
+                                // Altera para o primeiro vídeo do novo kata, na orientação "FRENTE"
                                 kata.getOrNull(indexKataExibido)?.let { novoKata ->
-                                    viewModel.loadVideos(novoKata, context, exoPlayer)
+                                    Log.i("TelaKata", "Mudando para o kata: ${novoKata.ordem}")
+                                    viewModel.changeKata(novoKata, Orientacao.FRENTE, context, exoPlayer)
                                 }
                             }) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                                    contentDescription = "Seta para avançar",
+                                    imageVector = Icons.AutoMirrored.Filled._360,
+                                    contentDescription = "Alternar kata",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+
                         }
 
                     }

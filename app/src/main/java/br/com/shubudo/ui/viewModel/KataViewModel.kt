@@ -31,7 +31,7 @@ class KataViewModel : ViewModel() {
     var currentVideo = mutableStateOf<Video?>(null)
         private set
 
-    var localFilePaths = mutableStateOf<Map<Orientacao, String?>>(emptyMap())
+    var localFilePaths = mutableStateOf<Map<Orientacao, String>>(emptyMap())
         private set
 
     var videoCarregado = mutableStateOf(false)
@@ -49,13 +49,13 @@ class KataViewModel : ViewModel() {
                 videoCarregado.value = false
                 Log.i("KataViewModel", "Iniciando o download dos vídeos para kata: ${kata.ordem}")
 
-                val downloadedVideos = downloadVideos(context, kata.video, kata.ordem.toString())
+                val downloadedVideos: Map<Orientacao, String> = downloadVideos(context, kata.video, kata.ordem)
                 localFilePaths.value = downloadedVideos
 
                 Log.i("KataViewModel", "Vídeos baixados: $downloadedVideos")
 
                 kata.video.firstOrNull()?.let { video ->
-                    val path = downloadedVideos[video.orientacao]
+                    val path: String? = downloadedVideos[video.orientacao]
                     Log.i("KataViewModel", "Tentando mudar para o vídeo: ${video.orientacao}, Path: $path")
 
                     if (path != null && File(path).exists()) {
@@ -107,7 +107,7 @@ class KataViewModel : ViewModel() {
     }
 
     fun changeVideo(video: Video, exoPlayer: ExoPlayer) {
-        val path = localFilePaths.value[video.orientacao]
+        val path: String? = localFilePaths.value[video.orientacao]
         if (path != null) {
             viewModelScope.launch(Dispatchers.Main) {
                 exoPlayer.stop()
@@ -119,18 +119,57 @@ class KataViewModel : ViewModel() {
         }
     }
 
+    fun changeKata(novoKata: Kata, orientacaoInicial: Orientacao, context: Context, exoPlayer: ExoPlayer) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Baixa os vídeos do novo kata, caso ainda não tenham sido baixados
+            val downloadedVideos = downloadVideos(context, novoKata.video, novoKata.ordem)
+            localFilePaths.value = downloadedVideos
+
+            // Atualiza o vídeo de acordo com a orientação inicial (e.g., FRENTE)
+            val path = downloadedVideos[orientacaoInicial]
+            if (path != null && File(path).exists()) {
+                withContext(Dispatchers.Main) {
+                    try {
+                        Log.i("KataViewModel", "Mudando para o kata: ${novoKata.ordem}, Path: $path")
+
+                        // Libera quaisquer itens anteriores no player e limpa
+                        exoPlayer.stop()
+                        exoPlayer.clearMediaItems()
+
+                        // Cria o novo MediaItem e adiciona ao ExoPlayer
+                        val mediaItem = MediaItem.fromUri(path)
+                        exoPlayer.setMediaItem(mediaItem)
+
+                        // Prepara o player e configura para não iniciar automaticamente
+                        exoPlayer.prepare()
+                        exoPlayer.playWhenReady = false
+
+                        // Atualiza o estado do vídeo carregado
+                        videoCarregado.value = true
+                        currentVideo.value = novoKata.video.firstOrNull { it.orientacao == orientacaoInicial }
+
+                        Log.i("KataViewModel", "Vídeo configurado e pronto para ser reproduzido.")
+                    } catch (e: Exception) {
+                        Log.e("KataViewModel", "Erro ao configurar o player: ${e.message}")
+                    }
+                }
+            } else {
+                Log.e("KataViewModel", "O path do vídeo é nulo ou o arquivo não existe: $path")
+            }
+        }
+    }
+
     fun downloadVideos(
         context: Context,
         videos: List<Video>,
-        kataId: String
+        kataId: Int
     ): Map<Orientacao, String> {
         Log.i("KataViewModel", "Iniciando o download dos vídeos para o kata: $kataId")
         val downloadedPaths = mutableMapOf<Orientacao, String>()
 
         videos.forEach { video ->
             // Inclua o identificador do kata no nome do arquivo
-            val localPath =
-                downloadFileToExternal(context, video.url, kataId, video.orientacao.name)
+            val localPath = downloadFileToExternal(context, video.url, kataId.toString(), video.orientacao.name)
             downloadedPaths[video.orientacao] = localPath
         }
 
@@ -143,12 +182,9 @@ class KataViewModel : ViewModel() {
         kataId: String,
         orientation: String
     ): String {
-        val downloadsDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val fileName = "$kataId-$orientation.mp4"
         val file = File(downloadsDir, fileName)
-
-        Log.i("KataViewModel", "IF: ${!file.exists()}")
 
         if (!file.exists()) {
             Log.i("KataViewModel", "Baixando vídeo de URL: $url para $fileName")
@@ -185,6 +221,4 @@ class KataViewModel : ViewModel() {
 
         return file.absolutePath
     }
-
-
 }
