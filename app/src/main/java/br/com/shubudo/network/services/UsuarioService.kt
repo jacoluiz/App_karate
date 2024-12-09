@@ -5,6 +5,13 @@ import br.com.shubudo.model.Usuario
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+
+data class LoginResponse(
+    val message: String,
+    val token: String,
+    val usuario: UsuarioResponse
+)
 
 data class UsuarioResponse(
     val _id: String,
@@ -52,12 +59,15 @@ fun UsuarioResponse.toUsuarioEntity(): UsuarioEntity {
 
 interface UsuarioService {
 
-    @GET("usuarios") // Endpoint para obter o usuário logado
-    suspend fun getUsuario(): List<UsuarioResponse>
+    @GET("/usuarios") // Endpoint para obter o usuário logado
+    suspend fun obterUsuarios(): List<UsuarioResponse>
+
+    @GET("/usuarios/{id}") // Endpoint para obter o usuário pelo ID
+    suspend fun getUsuarioPorId(@Path("id") id: String): UsuarioResponse
 
     @POST("/usuarios/login") // Endpoint para login
-    suspend fun login(@Body credentials: Map<String, String>): UsuarioResponse
+    suspend fun login(@Body credentials: Map<String, String>): LoginResponse
 
-    @POST("logout") // Endpoint para logout
+    @POST("/logout") // Endpoint para logout
     suspend fun logout()
 }

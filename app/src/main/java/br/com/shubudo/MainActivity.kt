@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
                     // Definições dos títulos, botões, etc., conforme o código original
                     val topAppBarTitle = when (currentDestination?.route) {
-                        AppDestination.Avisos.route -> "Bem-Vindo"
+                        AppDestination.Avisos.route -> "Seja Bem-Vindo"
                         AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
                         detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(detalheFaixaArgument))

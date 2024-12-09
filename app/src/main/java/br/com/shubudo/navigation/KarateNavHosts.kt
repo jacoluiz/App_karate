@@ -16,7 +16,7 @@ fun KarateNavHost(
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(navController, startDestination = AppDestination.Avisos.route) {
+    NavHost(navController, startDestination = AppDestination.Login.route) {
         avisosScreen()
         perfilScreen()
 

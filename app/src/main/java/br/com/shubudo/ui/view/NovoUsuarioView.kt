@@ -82,6 +82,7 @@ fun NovoUsuarioView(
 ) {
     var isPaginaDois by remember { mutableStateOf(false) }
 
+
     if (username != "" && username.contains("@")) novoUsuarioViewModel.email =
         username else novoUsuarioViewModel.nome = username
 
@@ -204,6 +205,7 @@ fun paginaUmCadastro(
     var isPasswordFocused by remember { mutableStateOf(false) }
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
+    var faixaSelecionada by remember { mutableStateOf("") }
 
     val faixas = listOf(
         "Branca",
@@ -222,7 +224,7 @@ fun paginaUmCadastro(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -246,6 +248,7 @@ fun paginaUmCadastro(
                 unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
             ),
             modifier = Modifier
+                .fillMaxWidth()
                 .focusRequester(focusRequesterNome)
                 .padding(bottom = 16.dp, top = 16.dp),
 
@@ -276,6 +279,7 @@ fun paginaUmCadastro(
                         onClick = {
                             themeViewModel.changeThemeFaixa(faixa)
                             dropDownMenuViewModel.changeExpanded(false)
+                            faixaSelecionada = faixa
                         },
                         cor = selecionaCorIcone(
                             faixa,
@@ -328,6 +332,7 @@ fun paginaUmCadastro(
             ),
             modifier = Modifier
                 .focusRequester(focusRequesterSenha)
+                .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .onFocusChanged { focusState ->
                     isPasswordFocused = focusState.isFocused
@@ -403,6 +408,7 @@ fun paginaUmCadastro(
                 unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
             ),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .focusRequester(focusRequesterConfirmarSenha)
@@ -442,7 +448,7 @@ fun paginaDoisCadastro(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextField(
@@ -464,6 +470,7 @@ fun paginaDoisCadastro(
                 unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
             ),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(bottom = 16.dp, top = 16.dp)
                 .focusRequester(focusRequesterEmail),
             keyboardActions = KeyboardActions(
@@ -500,7 +507,7 @@ fun paginaDoisCadastro(
             ),
 
             modifier = Modifier
-                .padding(16.dp)
+                .fillMaxWidth()
                 .focusRequester(focusRequesterAltura),
 
             keyboardActions = KeyboardActions(
@@ -538,6 +545,7 @@ fun paginaDoisCadastro(
             ),
 
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(bottom = 16.dp, top = 16.dp)
                 .focusRequester(focusRequesterPeso),
             keyboardActions = KeyboardActions(

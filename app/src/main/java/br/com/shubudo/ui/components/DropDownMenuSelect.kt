@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropDownMenuSelect(
     titulo: String,
@@ -70,7 +69,6 @@ fun DropDownMenuSelect(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 48.dp)
                 .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                 .background(MaterialTheme.colorScheme.tertiary)
                 .height(56.dp),

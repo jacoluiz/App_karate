@@ -1,5 +1,7 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.repositories.UsuarioRepository
@@ -22,11 +24,20 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             try {
-//                val result = repository.login(username, password)
-//                _uiState.value = LoginUiState.Success(result)
+                val result = repository.login(username, password)
+                result?.let {
+                    _uiState.value = LoginUiState.Success(it)
+                } ?: run {
+                    _uiState.value = LoginUiState.Error("Usuário ou senha inválidos.")
+                }
             } catch (e: Exception) {
-                _uiState.value = LoginUiState.Error("Erro ao realizar login: ${e.message}")
+                _uiState.value = LoginUiState.Error("${e.message}")
             }
         }
+    }
+
+
+    fun resetUiState() {
+        _uiState.value = LoginUiState.Idle // Redefine para o estado inicial
     }
 }
