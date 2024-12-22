@@ -102,10 +102,6 @@ fun telaSequenciaDeCombate(
                             IconButton(onClick = {
                                 if (indexSequencia < sequenciaDeCombate.size - 1) indexSequencia++ else indexSequencia =
                                     0
-                                Log.i(
-                                    "Conteudo",
-                                    "telaDefesaPessoal: indexDefesaExibida: $indexSequencia"
-                                )
                             }) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,

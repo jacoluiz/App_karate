@@ -107,7 +107,8 @@ fun TelaKata(
     val currentKata = kata.getOrNull(indexKataExibido)
 
 // Atualizando o conteúdo de temposVideos com base no kata atual.
-    val currentTemposVideos = currentKata?.temposVideos?.find { it.descricao == viewModel.currentVideo.value?.orientacao }
+    val currentTemposVideos =
+        currentKata?.temposVideos?.find { it.descricao == viewModel.currentVideo.value?.orientacao }
 
     val listState = rememberLazyListState()
 
@@ -141,7 +142,6 @@ fun TelaKata(
     if (!viewModel.videoCarregado.value) {
         LaunchedEffect(indexKataExibido) {
             kata.getOrNull(indexKataExibido)?.let { currentKata ->
-                Log.i("TelaKata", "Carregando vídeos para kata: ${currentKata.ordem}")
                 viewModel.loadVideos(currentKata, context, exoPlayer)
             }
         }
@@ -274,7 +274,8 @@ fun TelaKata(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(start = 16.dp)
 
                         ) {
@@ -305,8 +306,12 @@ fun TelaKata(
 
                                 // Altera para o primeiro vídeo do novo kata, na orientação "FRENTE"
                                 kata.getOrNull(indexKataExibido)?.let { novoKata ->
-                                    Log.i("TelaKata", "Mudando para o kata: ${novoKata.ordem}")
-                                    viewModel.changeKata(novoKata, Orientacao.FRENTE, context, exoPlayer)
+                                    viewModel.changeKata(
+                                        novoKata,
+                                        Orientacao.FRENTE,
+                                        context,
+                                        exoPlayer
+                                    )
                                 }
                             }) {
                                 Icon(

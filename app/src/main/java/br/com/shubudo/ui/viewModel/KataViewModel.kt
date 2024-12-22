@@ -45,20 +45,16 @@ class KataViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 videoCarregado.value = false
-                Log.i("KataViewModel", "Iniciando o download dos vídeos para kata: ${kata.ordem}")
 
                 val downloadedVideos: Map<Orientacao, String> = downloadVideos(context, kata.video, kata.ordem)
                 localFilePaths.value = downloadedVideos
 
-                Log.i("KataViewModel", "Vídeos baixados: $downloadedVideos")
 
                 kata.video.firstOrNull()?.let { video ->
                     val path: String? = downloadedVideos[video.orientacao]
-                    Log.i("KataViewModel", "Tentando mudar para o vídeo: ${video.orientacao}, Path: $path")
 
                     if (path != null && File(path).exists()) {
                         withContext(Dispatchers.Main) {
-                            Log.i("KataViewModel", "Path encontrado e arquivo existe. Configurando player.")
                             try {
                                 // Libere quaisquer itens anteriores no player e limpe
                                 exoPlayer.stop()
@@ -75,7 +71,6 @@ class KataViewModel : ViewModel() {
                                 // Atualiza o estado do vídeo carregado
                                 videoCarregado.value = true
                                 currentVideo.value = video
-                                Log.i("KataViewModel", "Vídeo configurado e pronto para ser reproduzido.")
                             } catch (e: Exception) {
                                 Log.e("KataViewModel", "Erro ao configurar o player: ${e.message}")
                             }
@@ -128,7 +123,6 @@ class KataViewModel : ViewModel() {
             if (path != null && File(path).exists()) {
                 withContext(Dispatchers.Main) {
                     try {
-                        Log.i("KataViewModel", "Mudando para o kata: ${novoKata.ordem}, Path: $path")
 
                         // Libera quaisquer itens anteriores no player e limpa
                         exoPlayer.stop()
@@ -146,7 +140,6 @@ class KataViewModel : ViewModel() {
                         videoCarregado.value = true
                         currentVideo.value = novoKata.video.firstOrNull { it.orientacao == orientacaoInicial }
 
-                        Log.i("KataViewModel", "Vídeo configurado e pronto para ser reproduzido.")
                     } catch (e: Exception) {
                         Log.e("KataViewModel", "Erro ao configurar o player: ${e.message}")
                     }
@@ -162,7 +155,6 @@ class KataViewModel : ViewModel() {
         videos: List<Video>,
         kataId: Int
     ): Map<Orientacao, String> {
-        Log.i("KataViewModel", "Iniciando o download dos vídeos para o kata: $kataId")
         val downloadedPaths = mutableMapOf<Orientacao, String>()
 
         videos.forEach { video ->
@@ -185,7 +177,6 @@ class KataViewModel : ViewModel() {
         val file = File(downloadsDir, fileName)
 
         if (!file.exists()) {
-            Log.i("KataViewModel", "Baixando vídeo de URL: $url para $fileName")
             try {
                 val urlObject = URL(url)
                 val connection = urlObject.openConnection() as HttpURLConnection
@@ -209,12 +200,9 @@ class KataViewModel : ViewModel() {
                 output.close()
                 input.close()
 
-                Log.i("KataViewModel", "Download concluído para: $fileName")
             } catch (e: Exception) {
                 Log.e("KataViewModel", "Erro ao baixar o vídeo: ${e.message}")
             }
-        } else {
-            Log.i("KataViewModel", "Arquivo já existe: $fileName")
         }
 
         return file.absolutePath

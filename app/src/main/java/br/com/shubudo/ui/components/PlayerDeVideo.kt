@@ -73,7 +73,6 @@ suspend fun downloadVideos(
 
     videos.forEach { video ->
         try {
-            Log.i("Video", "Baixando vídeo para ${video.orientacao}")
             val file = File(tempDir, "temp_video_${video.orientacao.name}.mp4")
             val connection = URL(video.url).openConnection()
             connection.connect()
@@ -84,7 +83,6 @@ suspend fun downloadVideos(
             }
             downloadedVideos[video.orientacao] = file.absolutePath
         } catch (e: Exception) {
-            Log.i("Video", "Erro ao baixar vídeo para ${video.orientacao}")
             withContext(Dispatchers.Main) {
                 Toast.makeText(
                     context,
