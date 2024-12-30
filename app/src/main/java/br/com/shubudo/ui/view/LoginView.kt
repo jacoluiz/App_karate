@@ -220,7 +220,6 @@ fun LoginView(
                             IconButton(
                                 onClick = {
                                     passwordVisible = !passwordVisible
-                                    Log.i("PasswordVisible", passwordVisible.toString())
                                 }) {
                                 Icon(
                                     imageVector = image,

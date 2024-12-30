@@ -3,8 +3,8 @@ package br.com.shubudo.model
 
 data class Movimento (
     val _id: String,
-    val faixa: String,
-    val tipoMovimento: String,
+    val faixa: String? = null,
+    val tipoMovimento: String? = null,
     val base: String,
     val nome: String,
     val descricao: String,

@@ -313,7 +313,6 @@ fun paginaUmCadastro(
                 IconButton(
                     onClick = {
                         passwordVisible = !passwordVisible
-                        Log.i("PasswordVisible", passwordVisible.toString())
                     }) {
                     Icon(
                         imageVector = image,
@@ -390,7 +389,6 @@ fun paginaUmCadastro(
                 IconButton(
                     onClick = {
                         passwordVisibleConfirmSenha = !passwordVisibleConfirmSenha
-                        Log.i("PasswordVisible", passwordVisibleConfirmSenha.toString())
                     }) {
                     Icon(
                         imageVector = image,

@@ -4,6 +4,5 @@
         <!-- Defina aqui suas cores e configurações -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
-
 <!--    <style name="Theme.App_shubudo" parent="android:Theme.Material.Light.NoActionBar" />-->
 </resources>

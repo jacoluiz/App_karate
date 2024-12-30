@@ -6,9 +6,11 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import br.com.shubudo.database.KarateDatabase
 import br.com.shubudo.database.dao.DefesaPessoalDao
+import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
 import br.com.shubudo.database.dao.FaixaDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
+import br.com.shubudo.database.dao.ProjecaoDao
 import br.com.shubudo.database.dao.SequenciaDeCombateDao
 import br.com.shubudo.database.dao.UsuarioDao
 import dagger.Module
@@ -85,5 +87,15 @@ class DatabaseModule {
     @Provides
     fun provideUsuarioDao(db: KarateDatabase): UsuarioDao {
         return db.usuarioDao()
+    }
+
+    @Provides
+    fun provideProjecaoDao(db: KarateDatabase): ProjecaoDao {
+        return db.projecaoDao()
+    }
+
+    @Provides
+    fun provideDefesaPessoalExtraBannerDao(db: KarateDatabase): DefesaPessoalExtraBannerDao {
+        return db.defesaPessoalExtraBannerDao()
     }
 }

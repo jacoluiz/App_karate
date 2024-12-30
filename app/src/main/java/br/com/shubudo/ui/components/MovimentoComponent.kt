@@ -91,11 +91,13 @@ fun MovimentoComponent(movimento: Movimento, faixa: String) {
             ),
             modifier = Modifier.padding(8.dp)
         ) {
-            itemLista(
-                descricao = "Tipo",
-                valor = movimento.tipoMovimento,
-                icone = Icons.Default.Apps,
-            )
+            movimento.tipoMovimento?.let {
+                itemLista(
+                    descricao = "Tipo",
+                    valor = it,
+                    icone = Icons.Default.Apps,
+                )
+            }
             itemLista(
                 descricao = "Base",
                 valor = movimento.base,

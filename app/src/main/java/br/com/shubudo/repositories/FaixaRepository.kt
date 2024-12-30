@@ -7,7 +7,11 @@ import br.com.shubudo.model.Faixa
 import br.com.shubudo.network.services.FaixasServices
 import br.com.shubudo.network.services.toFaixaEntity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.net.ConnectException
@@ -34,28 +38,20 @@ class FaixaRepository @Inject constructor(
         }
     }
 
-    suspend fun findById(id: String): Flow<Faixa> {
-        try {
-            val response = service.getFaixas()
-            val entities = response.map { it.toFaixaEntity() }
-            dao.saveAll(*entities.toTypedArray())
-        } catch (e: ConnectException) {
-            Log.e("FaixaRepository", "findSections: falha ao conectar na API", e)
+    suspend fun findByNome(cor: String): Flow<Faixa?> {
+        // Sincroniza os dados em segundo plano
+        CoroutineScope(coroutineContext).launch {
+            try {
+                val response = service.getFaixas()
+                val entities = response.map { it.toFaixaEntity() }
+                dao.saveAll(*entities.toTypedArray())
+            } catch (e: ConnectException) {
+                Log.e("FaixaRepository", "findByNome: falha ao conectar na API", e)
+            }
         }
 
-        return dao.getFaixaById(id).map { it.toFaixa() }
-    }
-
-    suspend fun findByNome(cor: String): Flow<Faixa> {
-        try {
-            val response = service.getFaixas()
-            val entities = response.map { it.toFaixaEntity() }
-            dao.saveAll(*entities.toTypedArray())
-        } catch (e: ConnectException) {
-            Log.e("FaixaRepository", "findSections: falha ao conectar na API", e)
-        }
-
-        return dao.getFaixaByCor(cor).map { it.toFaixa() }
+        // Retorna imediatamente os dados do banco local
+        return dao.getFaixaByCor(cor).map { it?.toFaixa() }
     }
 }
 

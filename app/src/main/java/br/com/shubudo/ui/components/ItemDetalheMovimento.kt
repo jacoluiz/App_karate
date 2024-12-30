@@ -28,7 +28,7 @@ fun itemDetalheMovimento(
 ) {
     val icone = when (valor) {
         "Chute" -> Icons.Default.SportsMartialArts
-        "Ataque de Mão" -> Icons.Default.FrontHand
+        "Ataque de mão" -> Icons.Default.FrontHand
         "Defesa" -> Icons.Default.Security
         else -> icone
     }

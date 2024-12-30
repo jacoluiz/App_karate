@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +53,15 @@ sealed class Conteudo(
     object SequenciaDeCombate : Conteudo(
         texto = "Sequência de Combate",
         icon = Icons.Default.Cyclone
+    )
+
+    object DefesaExtraBanner : Conteudo(
+        texto = "Defesas Extra Banner",
+        icon = Icons.Default.Shield
+    )
+
+    object Projecao : Conteudo(
+        texto = "Projeções",
     )
 
 }
@@ -113,6 +123,14 @@ fun preencherLista(p: Programacao): List<Conteudo> {
     if (p.sequenciaDeCombate.isNotEmpty()) {
         Conteudo.SequenciaDeCombate.icon = ImageVector.vectorResource(id = R.drawable.ic_sequencia_de_combate)
         itensTemp.add(Conteudo.SequenciaDeCombate)
+    }
+    if (p.defesaExtraBanner.isNotEmpty()) {
+        Conteudo.DefesaExtraBanner.icon = ImageVector.vectorResource(id = R.drawable.ic_defesa_pessoal)
+        itensTemp.add(Conteudo.DefesaExtraBanner)
+    }
+    if (p.projecoes.isNotEmpty()) {
+        Conteudo.Projecao.icon = ImageVector.vectorResource(id = R.drawable.ic_projecoes)
+        itensTemp.add(Conteudo.Projecao)
     }
 
     return itensTemp

@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,16 +37,13 @@ class DetalheFaixaViewModel @Inject constructor(
         currentUiStateJob?.cancel()
         currentUiStateJob = viewModelScope.launch {
             repository.findProgramacaoByCorFaixa(
-                requireNotNull(
-                    savedStateHandle[detalheFaixaArgument]
-                )
+                requireNotNull(savedStateHandle[detalheFaixaArgument])
             ).onStart {
                 _uiState.update { DetalheFaixaUiState.Loading }
             }.collectLatest { programacao ->
                 _uiState.update {
-                    DetalheFaixaUiState.Success(
-                        programacao = programacao
-                    )
+                    Log.i("DetalheFaixaViewModel", "programacao: $programacao")
+                    DetalheFaixaUiState.Success(programacao = programacao)
                 }
             }
         }

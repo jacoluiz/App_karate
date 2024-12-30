@@ -22,7 +22,6 @@ private val DarkBrancaColorScheme = darkColorScheme(
     background = Color(0xFF202020),
     onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
-
     )
 
 private val LightBrancaColorScheme = lightColorScheme(
