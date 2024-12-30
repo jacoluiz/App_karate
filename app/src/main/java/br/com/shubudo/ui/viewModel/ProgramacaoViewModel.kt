@@ -42,7 +42,7 @@ class ProgramacaoViewModel @Inject constructor(
             }.onStart {
                 _uiState.update { ProgramacaoUiState.Loading }
             }.collectLatest { (faixas, programacaoBranca) ->
-                if (faixas.isEmpty() && programacaoBranca == null) {
+                if (false) {
                     _uiState.update {
                         ProgramacaoUiState.Empty
                     }

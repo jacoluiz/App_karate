@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun botaoVoltar(
+fun BotaoVoltar(
     listState: LazyListState,
     onBackNavigationClick: () -> Unit = {}
 ) {
@@ -40,6 +40,7 @@ fun botaoVoltar(
             // Scroll para baixo
             isButtonVisibleState.targetState = false
         }
+        
         previousScrollOffset = listState.firstVisibleItemScrollOffset
     }
 

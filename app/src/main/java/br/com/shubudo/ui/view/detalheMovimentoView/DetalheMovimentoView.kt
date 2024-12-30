@@ -13,6 +13,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
+import br.com.shubudo.ui.view.detalheMovimentoView.MovimentosPadrao.TelaMovimentoPadraoManager
+import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaDeCombate.TelaSequenciaDeCombateManager
+import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaExtraBanner.TelaExtraBannerManager
+import br.com.shubudo.ui.view.detalheMovimentoView.defesaPessoal.TelaDefesaPessoalManager
+import br.com.shubudo.ui.view.detalheMovimentoView.kata.TelaKataManager
+import br.com.shubudo.ui.view.detalheMovimentoView.projecao.TelaProjecaoManager
 import br.com.shubudo.ui.viewModel.KataViewModel
 
 @Composable
@@ -27,15 +33,18 @@ fun DetalheMovimentoView(
 
         is DetalheMovimentoUiState.Success -> {
             if (uiState.movimento.isNotEmpty()) {
-                telaMovimentoPadrao(uiState, onBackNavigationClick)
+                TelaMovimentoPadraoManager(uiState, onBackNavigationClick)
             } else if (uiState.defesaPessoal.isNotEmpty()) {
-                telaDefesaPessoal(uiState, onBackNavigationClick)
+                TelaDefesaPessoalManager(uiState, onBackNavigationClick)
             } else if (uiState.kata.isNotEmpty()) {
                 val viewModel: KataViewModel = viewModel()
-
-                TelaKata(viewModel ,uiState, onBackNavigationClick)
+                TelaKataManager(viewModel, uiState, onBackNavigationClick)
             } else if (uiState.sequenciaDeCombate.isNotEmpty()) {
-                telaSequenciaDeCombate(uiState, onBackNavigationClick)
+                TelaSequenciaDeCombateManager(uiState, onBackNavigationClick)
+            } else if (uiState.projecao.isNotEmpty()) {
+                TelaProjecaoManager(uiState, onBackNavigationClick)
+            } else if (uiState.sequenciaExtraBanner.isNotEmpty()) {
+                TelaExtraBannerManager(uiState, onBackNavigationClick)
             }
         }
 
