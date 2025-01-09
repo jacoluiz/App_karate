@@ -11,6 +11,13 @@ class DropDownMenuViewModel : ViewModel() {
     private val _selected = mutableStateOf(false)
     val selected: State<Boolean> = _selected
 
+    private val _faixaSelecionada = mutableStateOf("Branca")
+    val faixaSelecionada: State<String> = _faixaSelecionada
+
+    fun changeFaixaSelecionada(faixa: String) {
+        _faixaSelecionada.value = faixa
+    }
+
     fun changeExpanded(expanded: Boolean) {
         _expanded.value = expanded
     }

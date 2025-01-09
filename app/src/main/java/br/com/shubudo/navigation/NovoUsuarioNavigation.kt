@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.NovoUsuarioView
+import br.com.shubudo.ui.view.novoUsuario.NovoUsuarioView
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ProgramacaoViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -19,14 +19,14 @@ internal const val novoUsuarioRoteSemUsername = "novoUsuario" // Sem argumento
 fun NavGraphBuilder.novoUsuarioScreen(
     themeViewModel: ThemeViewModel,
     dropDownMenuViewModel: DropDownMenuViewModel,
-    onNavigateToHome: (String) -> Unit,
+    onNavigateToLogin: (String) -> Unit,
 ) {
     composable(novoUsuarioRote) { backStackEntry ->
         val viewModel = hiltViewModel<ProgramacaoViewModel>()
         val uiState by viewModel.uiState.collectAsState()
         NovoUsuarioView(
             themeViewModel = themeViewModel,
-            onNavigateToHome = onNavigateToHome,
+            onNavigateToLogin = onNavigateToLogin,
             dropDownMenuViewModel = dropDownMenuViewModel,
             username = backStackEntry.arguments?.getString("username") ?: "",
         )
@@ -36,7 +36,7 @@ fun NavGraphBuilder.novoUsuarioScreen(
     composable(novoUsuarioRoteSemUsername) {
         NovoUsuarioView(
             themeViewModel = themeViewModel,
-            onNavigateToHome = onNavigateToHome,
+            onNavigateToLogin = onNavigateToLogin,
             dropDownMenuViewModel = dropDownMenuViewModel,
             username = "" // Passa login vazio
         )

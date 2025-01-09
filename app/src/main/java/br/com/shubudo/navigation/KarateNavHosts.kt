@@ -17,7 +17,10 @@ fun KarateNavHost(
     themeViewModel: ThemeViewModel
 ) {
     NavHost(navController, startDestination = AppDestination.Login.route) {
-        avisosScreen()
+        avisosScreen(
+            themeViewModel = themeViewModel
+        )
+
         perfilScreen()
 
         esqueciMinhaSenhaScreen(
@@ -44,8 +47,8 @@ fun KarateNavHost(
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToHome = {
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
+            onNavigateToLogin = {
+                navController.popBackStack()
             }
         )
 

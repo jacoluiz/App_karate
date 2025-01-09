@@ -16,15 +16,28 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.model.Faixa
+import br.com.shubudo.ui.viewModel.AvisosViewModel
+import br.com.shubudo.ui.viewModel.PerfilViewModel
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
-fun AvisosView() {
+fun AvisosView(
+    avisosViewModel: AvisosViewModel,
+    themeViewModel: ThemeViewModel
+) {
+    val usuario by avisosViewModel.usuario.collectAsState(initial = null)
+
+    usuario?.corFaixa?.let { themeViewModel.changeThemeFaixa(it) }
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -83,10 +96,4 @@ fun AvisosView() {
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun AvisosContentPreview() {
-    AvisosView()
 }

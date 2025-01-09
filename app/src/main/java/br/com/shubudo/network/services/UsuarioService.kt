@@ -62,6 +62,9 @@ interface UsuarioService {
     @GET("/usuarios") // Endpoint para obter o usuário logado
     suspend fun obterUsuarios(): List<UsuarioResponse>
 
+    @POST("/usuarios") // Endpoint para obter o usuário logado
+    suspend fun criarUsuarios(@Body usuario: Usuario): UsuarioResponse
+
     @GET("/usuarios/{id}") // Endpoint para obter o usuário pelo ID
     suspend fun getUsuarioPorId(@Path("id") id: String): UsuarioResponse
 

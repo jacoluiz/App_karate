@@ -63,6 +63,11 @@ fun TelaListaKata(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+                    Text(
+                        text = "Movimentos: ${kata.quantidadeMovimentos}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

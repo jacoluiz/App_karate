@@ -67,7 +67,7 @@ fun TelaListaExtraBanner(
                         extraBanner.movimentos.forEach { movimento ->
                             Text(
                                 text = movimento.nome,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }

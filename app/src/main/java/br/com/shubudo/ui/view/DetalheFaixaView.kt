@@ -74,9 +74,3 @@ fun DetalheFaixaView(
         DetalheFaixaUiState.Empty -> TODO()
     }
 }
-
-@Composable
-@Preview
-fun DetalheFaixaViewPreview() {
-
-}

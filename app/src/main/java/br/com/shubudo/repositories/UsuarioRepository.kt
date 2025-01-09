@@ -4,6 +4,8 @@ import android.util.Log
 import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.database.entities.toUsuario
 import br.com.shubudo.model.Usuario
+import br.com.shubudo.model.toUsuarioEntity
+
 import br.com.shubudo.network.services.UsuarioService
 import br.com.shubudo.network.services.toUsuario
 import br.com.shubudo.network.services.toUsuarioEntity
@@ -28,7 +30,6 @@ class UsuarioRepository @Inject constructor(
             )
             val response = service.login(credentials)
             val entity = response.usuario.toUsuarioEntity()
-            Log.i("UsuarioRepository", "login: $entity")
 
             // Limpa a tabela antes de salvar o novo usuário
             dao.deletarTodos()
@@ -40,4 +41,26 @@ class UsuarioRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun cadastrarUsuario(usuario: Usuario): Usuario? {
+        return try {
+            // Mapeia o modelo para a entidade
+            val usuarioEntity = usuario.toUsuarioEntity()
+
+            // Mapeia de volta para o modelo antes de enviar para o serviço
+            val response = service.criarUsuarios(usuario)
+
+            // Salva o usuário localmente após o sucesso do cadastro
+            if (usuarioEntity != null) {
+                dao.salvarUsuario(usuarioEntity)
+            }
+
+            response.toUsuario() // Retorna o usuário cadastrado
+        } catch (e: Exception) {
+            Log.e("UsuarioRepository", "Erro no cadastro: ${e.message}", e)
+            null
+        }
+    }
+
+
 }
