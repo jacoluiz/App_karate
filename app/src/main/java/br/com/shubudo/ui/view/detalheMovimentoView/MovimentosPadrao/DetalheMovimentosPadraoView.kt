@@ -68,6 +68,7 @@ fun TelaDetalheMovimentoPadrao(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(16.dp, 16.dp, 16.dp, 16.dp),
                         )
                         Text(
                             text = "Detalhes",
@@ -109,7 +110,7 @@ fun TelaDetalheMovimentoPadrao(
                                 .fillMaxWidth()
                                 .padding(16.dp, 0.dp, 16.dp, 8.dp),
                         )
-                        if (movimentoExibido.observacao.isEmpty()) {
+                        if (movimentoExibido.observacao.isNotEmpty()) {
                             Text(
                                 text = "Observações/Dicas",
                                 style = MaterialTheme.typography.titleSmall,

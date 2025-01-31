@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view
 
-import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +44,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -121,7 +121,7 @@ fun LoginView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Shubu-dô",
+                    text = "B.A.S.E.",
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.displayLarge,
                     modifier = Modifier.padding(top = 32.dp)
@@ -295,6 +295,19 @@ fun LoginView(
                 ),
             ) {
                 Text("Esqueci minha senha?")
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            // Link para os termos de uso
+            val uriHandler = LocalUriHandler.current
+            TextButton(
+                onClick = {
+                    uriHandler.openUri("https://jacoluiz.github.io/Politica-de-Seguranca-app-karate/")
+
+                }
+            ) {
+                Text(text = "Termos de Uso")
             }
         }
     }

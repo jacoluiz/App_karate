@@ -1,9 +1,7 @@
 package br.com.shubudo.ui.view.detalheMovimentoView.SequenciaExtraBanner
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,7 +39,7 @@ fun TelaDetalheExtraBanner(
             Text(
                 text = "${extraBanner.numeroOrdem.toOrdinarioFeminino()} defessa pessoal extra banner",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -60,7 +58,6 @@ fun TelaDetalheExtraBanner(
         listState = listState,
         onBackNavigationClick = onBackNavigationClick
     )
-
 }
 
 @Composable

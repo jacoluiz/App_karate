@@ -79,101 +79,88 @@ fun PerfilContent(
 
     onLogout: () -> Unit
 ) {
+
+
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
     ) {
-        Card(
-
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-
-            ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                // Imagem de Perfil
+        // Imagem de Perfil
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Row {
                 Image(
                     painter = painterResource(R.drawable.ic_sequencia_de_combate), // Substitua pelo recurso adequado
                     contentDescription = "Imagem de Perfil",
                     modifier = Modifier
                         .size(120.dp)
-                        .padding(8.dp),
+                        .padding(0.dp),
                     contentScale = ContentScale.Crop
                 )
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                // Nome do Usuário
-                Text(
-                    text = "Nome: $nome",
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // Nome de usuário
-                Text(
-                    text = "Usuário: $username",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // E-mail
-                Text(
-                    text = "Email: $email",
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                Text(
-                    text = "Idade: $idade",
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                Text(
-                    text = "Peso: $peso",
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                
-                Row(
-                    modifier = Modifier.padding(top = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column {
+                    // Nome do Usuário
                     Text(
-                        text = "Faixa: ",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = nome,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Nome de usuário
                     Text(
-                        text = corFaixa,
+                        text = username,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                }
+                    // E-mail
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Spacer(modifier = Modifier.size(32.dp))
+                    Text(
+                        text = "Idade: $idade",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                // Botão de Logout
-                Button(
-                    onClick = {
-
-                }) {
-                    Text(text = "Editar Perfil")
+                    Text(
+                        text = "Peso: $peso",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
             }
         }
+
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+
+        ){
+            // Botão de Logout
+            Button(
+                onClick = {
+
+                }) {
+                Text(text = "Editar Perfil")
+            }
+
+            Button(
+                onClick = {
+                    onLogout()
+                }) {
+                Text(text = "Logout")
+            }
+        }
+
     }
 }

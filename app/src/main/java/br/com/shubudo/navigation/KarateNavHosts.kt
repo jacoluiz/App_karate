@@ -21,7 +21,11 @@ fun KarateNavHost(
             themeViewModel = themeViewModel
         )
 
-        perfilScreen()
+        perfilScreen(
+            onLogout = {
+                navController.loginScreen()
+            }
+        )
 
         esqueciMinhaSenhaScreen(
             onSendResetRequest = {

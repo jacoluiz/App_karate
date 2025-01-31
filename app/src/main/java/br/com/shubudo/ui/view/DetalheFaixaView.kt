@@ -28,17 +28,7 @@ fun DetalheFaixaView(
     when (uiState) {
         is DetalheFaixaUiState.Loading -> {
             // Mostra o overlay de loading
-            LoadingOverlay(isLoading = true) {
-                // O conteúdo da tela pode ser vazio ou algo mínimo enquanto o loading é exibido
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Carregando...")
-                }
-            }
+            LoadingOverlay(isLoading = true) {}
         }
 
         is DetalheFaixaUiState.Success -> {

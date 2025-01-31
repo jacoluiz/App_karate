@@ -2,6 +2,7 @@ package br.com.shubudo.ui.view.detalheMovimentoView
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -57,12 +58,13 @@ fun DetalheMovimentoView(
 @Composable
 fun EsqueletoTela(content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(top = 250.dp),
+
             color = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp)
         ) {

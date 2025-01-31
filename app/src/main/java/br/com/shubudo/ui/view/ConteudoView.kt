@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.R
 import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.components.DropDownMenuCard
+import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
@@ -146,9 +147,7 @@ fun ProgramacaoView(
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)
                 ) {}
-                CircularProgressIndicator(
-                    Modifier.align(Alignment.Center)
-                )
+                LoadingOverlay(true) { }
             }
         }
     }
