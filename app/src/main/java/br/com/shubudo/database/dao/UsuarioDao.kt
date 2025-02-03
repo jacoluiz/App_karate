@@ -4,36 +4,26 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import br.com.shubudo.database.entities.UsuarioEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun salvarUsuario(usuario: UsuarioEntity)
+    @Query("SELECT * FROM usuario LIMIT 1")
+    fun obterUsuarioLogado(): Flow<UsuarioEntity?>
+
+    @Query("DELETE FROM usuario")
+    suspend fun deletarTodos()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveAll(vararg usuarios: UsuarioEntity)
+    suspend fun salvarUsuario(usuario: UsuarioEntity)
 
-    @Query("SELECT * FROM Usuario LIMIT 1")
-    fun getUsuario(): Flow<UsuarioEntity?>
-
-    @Query("DELETE FROM Usuario")
-    suspend fun clear()
-
-    @Query("SELECT * FROM Usuario")
-    fun getUsuarios(): Flow<List<UsuarioEntity>>
-
-    @Query("SELECT * FROM Usuario WHERE _id = :id")
-    fun getUsuarioById(id: String): Flow<UsuarioEntity>
-
-    @Query("SELECT * FROM Usuario WHERE username = :username")
-    fun getUsuarioByUsername(username: String): Flow<UsuarioEntity>
-
-    @Query("SELECT * FROM Usuario WHERE email = :email")
-    fun getUsuarioByEmail(email: String): Flow<UsuarioEntity>
-
-    @Query("SELECT * FROM Usuario WHERE corFaixa = :corFaixa")
-    fun getUsuariosByFaixa(corFaixa: String): Flow<List<UsuarioEntity>>
+    /**
+     * Atualiza o usuário no banco local.
+     * Retorna o número de linhas afetadas (caso queira validar se foi atualizado com sucesso).
+     */
+    @Update
+    suspend fun atualizarUsuario(usuario: UsuarioEntity): Int
 }

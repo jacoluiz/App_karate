@@ -7,8 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -31,7 +30,7 @@ sealed class BottomAppBarItem(
     )
 
     object Avisos : BottomAppBarItem(
-        Icons.Default.Message, "Avisos"
+        Icons.AutoMirrored.Filled.Message, "Avisos"
     )
 
     object Perfil : BottomAppBarItem(
@@ -93,17 +92,4 @@ fun KarateBottomAppBar(
             )
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun KarateBottomAppBarPreview() {
-    KarateBottomAppBar(
-        selectedItem = BottomAppBarItem.Conteudo,
-        items = listOf(
-            BottomAppBarItem.Conteudo,
-            BottomAppBarItem.Avisos,
-            BottomAppBarItem.Perfil
-        )
-    ) {}
 }

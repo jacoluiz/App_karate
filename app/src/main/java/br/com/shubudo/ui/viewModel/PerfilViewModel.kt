@@ -2,6 +2,7 @@ package br.com.shubudo.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.PerfilUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,33 +30,35 @@ class PerfilViewModel @Inject constructor(
     }
 
     private fun loadUiState() {
-//        currentUiStateJob?.cancel()
-//        currentUiStateJob = viewModelScope.launch {
-//            repository.getUsuario().onStart {
-//                _uiState.update { PerfilUiState.Loading }
-//            }.collectLatest { usuario ->
-//                if (usuario == null) {
-//                    _uiState.update {
-//                        PerfilUiState.Empty
-//                    }
-//                } else {
-//                    _uiState.update {
-//                        PerfilUiState.Success(
-//                            nome = usuario.nome,
-//                            username = usuario.username,
-//                            email = usuario.email,
-//                            corFaixa = usuario.corFaixa
-//                        )
-//                    }
-//                }
-//            }
-//        }
+        currentUiStateJob?.cancel()
+        currentUiStateJob = viewModelScope.launch {
+            repository.getUsuario().onStart {
+                _uiState.update { PerfilUiState.Loading }
+            }.collectLatest { usuario ->
+                if (usuario == null) {
+                    _uiState.update {
+                        PerfilUiState.Empty
+                    }
+                } else {
+                    // Chama loadUsuario diretamente para atualizar o estado
+                    loadUsuario(usuario)
+                }
+            }
+        }
     }
 
-    fun logout(onLogout: () -> Unit) {
-        viewModelScope.launch {
-            repository.logout()
-            onLogout()
+    private fun loadUsuario(usuario: Usuario) {
+        _uiState.update {
+            PerfilUiState.Success(
+                nome = usuario.nome,
+                username = usuario.username,
+                email = usuario.email,
+                corFaixa = usuario.corFaixa,
+                idade = usuario.idade,
+                peso = usuario.peso,
+                altura = usuario.altura
+            )
         }
     }
 }
+

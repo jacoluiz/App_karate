@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view
 
-import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,17 +18,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,12 +44,16 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.components.SeletorDeTema
+import br.com.shubudo.ui.uistate.LoginUiState
+import br.com.shubudo.ui.viewModel.LoginViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
@@ -54,6 +63,7 @@ fun LoginView(
     onNavigateToNovoUsuario: (String) -> Unit,
     onNavigateToEsqueciMinhaSenha: (String) -> Unit,
 ) {
+    val viewModel: LoginViewModel = hiltViewModel() // Certifique-se de usar `hiltViewModel()`
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -61,6 +71,30 @@ fun LoginView(
 
     val focusRequesterUsuario = remember { FocusRequester() }
     val focusRequesterSenha = remember { FocusRequester() }
+
+    // Observar o estado do login
+    val uiState by viewModel.uiState.collectAsState()
+
+// Observe o estado do login
+    LaunchedEffect(uiState) {
+        if (uiState is LoginUiState.Success) {
+            onNavigateToHome(username) // Navega para a próxima tela
+        }
+    }
+
+// Exibir alerta apenas em caso de erro
+    if (uiState is LoginUiState.Error) {
+        AlertDialog(
+            onDismissRequest = { /* Fecha o alerta se necessário */ },
+            confirmButton = {
+                TextButton(onClick = { viewModel.resetUiState() }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Erro") },
+            text = { Text((uiState as LoginUiState.Error).message) }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -87,7 +121,7 @@ fun LoginView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Shubu-dô",
+                    text = "B.A.S.E.",
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.displayLarge,
                     modifier = Modifier.padding(top = 32.dp)
@@ -143,9 +177,8 @@ fun LoginView(
                             unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         ),
                         keyboardActions = KeyboardActions(
-                            onNext = { focusRequesterSenha.requestFocus() }  // Move o foco para o próximo campo
+                            onNext = { focusRequesterSenha.requestFocus() }
                         ),
-
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next
@@ -175,9 +208,8 @@ fun LoginView(
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardActions = KeyboardActions(
-                            onNext = { focusRequesterSenha.requestFocus() }  // Move o foco para o próximo campo
+                            onNext = { focusRequesterSenha.requestFocus() }
                         ),
-
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Next
@@ -188,7 +220,6 @@ fun LoginView(
                             IconButton(
                                 onClick = {
                                     passwordVisible = !passwordVisible
-                                    Log.i("PasswordVisible", passwordVisible.toString())
                                 }) {
                                 Icon(
                                     imageVector = image,
@@ -215,8 +246,7 @@ fun LoginView(
                     ) {
                         Button(
                             onClick = {
-                                onNavigateToNovoUsuario(username.ifEmpty { "" }) // Passa o valor do campo "username" para a próxima tela
-
+                                onNavigateToNovoUsuario(username.ifEmpty { "" })
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
@@ -230,8 +260,9 @@ fun LoginView(
                         }
                         Button(
                             onClick = {
-                                onNavigateToHome("Avisos")
+                                viewModel.login(username, password)
                             },
+                            enabled = uiState !is LoginUiState.Loading, // Desabilita o botão durante o carregamento
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -240,7 +271,14 @@ fun LoginView(
                                 .weight(1f)
                                 .padding(start = 4.dp)
                         ) {
-                            Text("Login")
+                            if (uiState is LoginUiState.Loading) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(20.dp) // Ajuste o tamanho do progresso
+                                )
+                            } else {
+                                Text("Login")
+                            }
                         }
                     }
                 }
@@ -249,7 +287,7 @@ fun LoginView(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    onNavigateToEsqueciMinhaSenha(username.ifEmpty { "" }) // Passa o valor do campo "username" para a próxima tela
+                    onNavigateToEsqueciMinhaSenha(username.ifEmpty { "" })
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -258,7 +296,19 @@ fun LoginView(
             ) {
                 Text("Esqueci minha senha?")
             }
+            Spacer(modifier = Modifier.height(10.dp))
 
+
+            // Link para os termos de uso
+            val uriHandler = LocalUriHandler.current
+            TextButton(
+                onClick = {
+                    uriHandler.openUri("https://jacoluiz.github.io/Politica-de-Seguranca-app-karate/")
+
+                }
+            ) {
+                Text(text = "Termos de Uso")
+            }
         }
     }
 }

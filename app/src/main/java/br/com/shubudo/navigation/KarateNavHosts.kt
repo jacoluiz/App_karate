@@ -16,14 +16,24 @@ fun KarateNavHost(
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(navController, startDestination = AppDestination.Avisos.route) {
+    NavHost(navController, startDestination = AppDestination.Login.route) {
         avisosScreen(
-            onClickAviso = {
-                navController.navigateToDetalheAviso()
+            themeViewModel = themeViewModel
+        )
+
+        perfilScreen(
+            onLogout = {
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            },
+            onEditarPerfil = {
+                navController.navigateToEditarPerfil()
             }
         )
-        detalheAvisoScreen()
-        perfilScreen()
 
         esqueciMinhaSenhaScreen(
             onSendResetRequest = {
@@ -49,8 +59,8 @@ fun KarateNavHost(
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToHome = {
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
+            onNavigateToLogin = {
+                navController.popBackStack()
             }
         )
 
@@ -66,6 +76,16 @@ fun KarateNavHost(
 
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
+            }
+        )
+
+        editarPerfilScreen(
+            themeViewModel = themeViewModel,
+            onSaveSuccess = {
+                navController.popBackStack()
+            },
+            onCancelar = {
+                navController.popBackStack()
             }
         )
 

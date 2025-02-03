@@ -31,7 +31,7 @@ fun CustomIconButton(
     texto: String,
     cor : Color = if (isSystemInDarkTheme()) Color.White else Color.Black,
     enabled: Boolean = true,
-    onClick: () -> Unit
+    onClick:  () -> Unit
 ) {
     require(icon != null || iconPainter != null) { "Either 'icon' or 'iconPainter' must be provided." }
 

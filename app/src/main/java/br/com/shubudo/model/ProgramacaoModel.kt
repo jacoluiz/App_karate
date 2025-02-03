@@ -7,6 +7,9 @@ data class Programacao(
     val chutes: List<Movimento>,
     val defesas: List<Movimento>,
     var defesaPessoal: List<DefesaPessoal>,
-    val katas: List<Kata>,
     val sequenciaDeCombate: List<SequenciaDeCombate>,
-)
+    val katas: List<Kata>,
+    val defesaExtraBanner: List<DefesaPessoalExtraBanner>,
+    val projecoes : List<Projecao>,
+) {
+}

@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,26 +28,15 @@ fun DetalheFaixaView(
     when (uiState) {
         is DetalheFaixaUiState.Loading -> {
             // Mostra o overlay de loading
-            LoadingOverlay(isLoading = true) {
-                // O conteúdo da tela pode ser vazio ou algo mínimo enquanto o loading é exibido
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Carregando...")
-                }
-            }
+            LoadingOverlay(isLoading = true) {}
         }
 
         is DetalheFaixaUiState.Success -> {
-            val programacao = uiState.programacao
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
-                Row (
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp, 16.dp, 16.dp),
@@ -54,7 +44,7 @@ fun DetalheFaixaView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text ="Que tipo de conteúdo você gostaria de ver?",
+                        text = "Que tipo de conteúdo você gostaria de ver?",
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
@@ -65,17 +55,12 @@ fun DetalheFaixaView(
                         .fillMaxSize()
                         .padding(28.dp)
                 ) {
-                    CardSelecaoTipoConteudo(programacao, onNavigateToDetalheMovimento)
+                    Log.i("DetalheFaixaView", "programacao: ${uiState.programacao}")
+                    CardSelecaoTipoConteudo(uiState.programacao, onNavigateToDetalheMovimento)
                 }
             }
         }
 
         DetalheFaixaUiState.Empty -> TODO()
     }
-}
-
-@Composable
-@Preview
-fun DetalheFaixaViewPreview() {
-
 }

@@ -1,9 +1,11 @@
 package br.com.shubudo.di.modules
 
+import br.com.shubudo.network.services.DefesaPessoalExtraBannerServices
 import br.com.shubudo.network.services.DefesaPessoalServices
 import br.com.shubudo.network.services.FaixasServices
 import br.com.shubudo.network.services.KataServices
 import br.com.shubudo.network.services.MovimentoService
+import br.com.shubudo.network.services.ProjecaoServices
 import br.com.shubudo.network.services.SequenciaDeCombateService
 import br.com.shubudo.network.services.UsuarioService
 import dagger.Module
@@ -79,5 +81,17 @@ object RestApiModule {
     @Singleton
     fun providerUsuarioService(retrofit : Retrofit) : UsuarioService {
         return retrofit.create(UsuarioService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProjecaoService(retrofit : Retrofit) : ProjecaoServices {
+        return retrofit.create(ProjecaoServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDefesaPessoalExtraBannerService(retrofit : Retrofit) : DefesaPessoalExtraBannerServices {
+        return retrofit.create(DefesaPessoalExtraBannerServices::class.java)
     }
 }

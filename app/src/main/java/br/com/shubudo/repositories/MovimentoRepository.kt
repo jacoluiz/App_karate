@@ -19,54 +19,6 @@ class MovimentoRepository @Inject constructor(
     private val service: MovimentoService
 ) {
 
-    suspend fun findAllAtaquesDeMao(): Flow<List<Movimento>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getAtaquesDeMao()
-                val entities = response.map { it.toMovimentoEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("MovimentoRepository", "findAll: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getMovimentos().map { entities ->
-            entities.map { it.toMovimento() }
-        }
-    }
-
-    suspend fun findAllChutes(): Flow<List<Movimento>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getChutes()
-                val entities = response.map { it.toMovimentoEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("MovimentoRepository", "findAll: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getMovimentos().map { entities ->
-            entities.map { it.toMovimento() }
-        }
-    }
-
-    suspend fun findAllDefesas(): Flow<List<Movimento>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getDefesas()
-                val entities = response.map { it.toMovimentoEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("MovimentoRepository", "findAll: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getMovimentos().map { entities ->
-            entities.map { it.toMovimento() }
-        }
-    }
-
     suspend fun findMovimentoByFaixa(faixa: String, tipoMovimento: String): Flow<List<Movimento>> {
         CoroutineScope(coroutineContext).launch {
             try {

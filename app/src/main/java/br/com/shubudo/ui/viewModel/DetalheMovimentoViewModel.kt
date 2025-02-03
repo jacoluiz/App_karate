@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Kata
-import br.com.shubudo.model.Orientacao
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.repositories.ProgramacaoRepository
@@ -43,6 +42,8 @@ class DetalheMovimentoViewModel @Inject constructor(
                 var kata = emptyList<Kata>()
                 var defesaPessoal = emptyList<br.com.shubudo.model.DefesaPessoal>()
                 var sequenciaDeCombate = emptyList<br.com.shubudo.model.SequenciaDeCombate>()
+                var projecao = emptyList<br.com.shubudo.model.Projecao>()
+                var defesaExtraBanner = emptyList<br.com.shubudo.model.DefesaPessoalExtraBanner>()
                 when (movimento) {
                     "Katas" -> {
                         kata = repository.findKatasByFaixa(
@@ -64,6 +65,19 @@ class DetalheMovimentoViewModel @Inject constructor(
                                 ).first()._id
                             ).first()
                     }
+
+                    "Projeções" -> {
+                        projecao = repository.findProjecoesByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
+                    }
+
+                    "Defesas Extra Banner" -> {
+                        defesaExtraBanner = repository.findDefesaPessoalExtraBannerByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
+                    }
+
                 }
                 val movimento = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
 
@@ -75,7 +89,8 @@ class DetalheMovimentoViewModel @Inject constructor(
                         defesaPessoal = defesaPessoal.sortedBy { it.numeroOrdem },
                         kata = kata.sortedBy { it.ordem },
                         sequenciaDeCombate = sequenciaDeCombate.sortedBy { it.numeroOrdem },
-
+                        projecao = projecao.sortedBy { it.ordem },
+                        sequenciaExtraBanner = defesaExtraBanner.sortedBy { it.numeroOrdem }
                     )
                 }
             }

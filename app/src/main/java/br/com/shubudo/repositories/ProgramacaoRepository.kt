@@ -1,14 +1,17 @@
 package br.com.shubudo.repositories
 
-import android.util.Log
 import br.com.shubudo.model.DefesaPessoal
+import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Faixa
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.Programacao
+import br.com.shubudo.model.Projecao
 import br.com.shubudo.model.SequenciaDeCombate
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -17,24 +20,29 @@ class ProgramacaoRepository @Inject constructor(
     private val defesaPessoalRepository: DefesaPessoalRepository,
     private val kataRepository: KataRepository,
     private val movimentoRepository: MovimentoRepository,
-    private val sequenciaDeCombateRepository: SequenciaDeCombateRepository
+    private val sequenciaDeCombateRepository: SequenciaDeCombateRepository,
+    private val projecaoRepository: ProjecoesRepository,
+    private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository
 ) {
 
     suspend fun findMovimentoByFaixaETipo(faixa: String, tipo: String): Flow<List<Movimento>> {
-        when (tipo) {
-            "Ataques de Mão" -> return findAtaquesDeMaoByFaixa(
-                faixaRepository.findByNome(faixa).first()
-            )
-
-            "Chutes" -> return findChutesByFaixa(faixaRepository.findByNome(faixa).first())
-            "Defesas" -> return findDefesasByFaixa(faixaRepository.findByNome(faixa).first())
+        val faixaResult = faixaRepository.findByNome(faixa).firstOrNull()
+        if (faixaResult == null) {
+            return flow { emit(emptyList()) } // Retorna uma lista vazia se não encontrar a faixa
         }
-        return flow { emit(emptyList()) }
+
+        return when (tipo) {
+            "Ataques de Mão" -> findAtaquesDeMaoByFaixa(faixaResult)
+            "Chutes" -> findChutesByFaixa(faixaResult)
+            "Defesas" -> findDefesasByFaixa(faixaResult)
+            else -> flow { emit(emptyList()) }
+        }
     }
 
     suspend fun findFaixaByCor(cor: String): Flow<Faixa> {
-        return faixaRepository.findByNome(cor)
+        return faixaRepository.findByNome(cor).filterNotNull()
     }
+
 
     suspend fun findProgramacaoByCorFaixa(corFaixa: String): Flow<Programacao> {
         val faixa = findFaixaByCor(corFaixa).first()
@@ -48,6 +56,8 @@ class ProgramacaoRepository @Inject constructor(
         val chutes = findChutesByFaixa(faixa).first()
         val defesas = findDefesasByFaixa(faixa).first()
         val sequenciasDeCombate = findSequenciasDeCombateByFaixa(faixa).first()
+        val defesaPessoalExtraBanner = findDefesaPessoalExtraBannerByFaixa(faixa).first()
+        val projecao = findProjecoesByFaixa(faixa).first()
 
         val programacao = Programacao(
             faixa = faixa,
@@ -57,6 +67,8 @@ class ProgramacaoRepository @Inject constructor(
             chutes = chutes,
             defesas = defesas,
             sequenciaDeCombate = sequenciasDeCombate,
+            projecoes = projecao,
+            defesaExtraBanner = defesaPessoalExtraBanner
         )
         return flow { emit(programacao) }
     }
@@ -84,7 +96,8 @@ class ProgramacaoRepository @Inject constructor(
 
     // Função para buscar Katas por Faixa ou ID de Faixa
     suspend fun findKatasByFaixa(faixa: Faixa? = null, idFaixa: String? = null): Flow<List<Kata>> {
-        val faixaId = faixa?._id ?: idFaixa?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
         return kataRepository.findByFaixa(faixaId)
     }
 
@@ -96,6 +109,24 @@ class ProgramacaoRepository @Inject constructor(
         val faixaId = faixa?._id ?: idFaixa
         ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
         return sequenciaDeCombateRepository.findByFaixa(faixaId)
+    }
+
+    suspend fun findProjecoesByFaixa(
+        faixa: Faixa? = null,
+        idFaixa: String? = null
+    ): Flow<List<Projecao>> {
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        return projecaoRepository.findByFaixa(faixaId)
+    }
+
+    suspend fun findDefesaPessoalExtraBannerByFaixa(
+        faixa: Faixa? = null,
+        idFaixa: String? = null
+    ): Flow<List<DefesaPessoalExtraBanner>> {
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        return defesaPessoalExtraBannerRepository.findByFaixa(faixaId)
     }
 
 }
