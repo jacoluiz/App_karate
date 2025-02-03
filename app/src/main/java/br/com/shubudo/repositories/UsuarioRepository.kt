@@ -9,6 +9,7 @@ import br.com.shubudo.network.services.UsuarioService
 import br.com.shubudo.network.services.toUsuario
 import br.com.shubudo.network.services.toUsuarioEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -26,22 +27,14 @@ class UsuarioRepository @Inject constructor(
     }
 
     /**
-     * Faz login enviando tanto "username" quanto "email" para o back-end,
-     * dependendo do que o usuário digitou (se contém "@", consideramos email).
+     * Faz login enviando tanto "username" quanto "email" para o back-end.
      */
     suspend fun login(userInput: String, password: String): Usuario? {
         return try {
-            // Se o usuário digitou um '@', assumimos que seja email
             val credentials = if (userInput.contains("@")) {
-                mapOf(
-                    "email" to userInput,
-                    "senha" to password
-                )
+                mapOf("email" to userInput, "senha" to password)
             } else {
-                mapOf(
-                    "username" to userInput,
-                    "senha" to password
-                )
+                mapOf("username" to userInput, "senha" to password)
             }
 
             // Chama o serviço de login
@@ -67,13 +60,11 @@ class UsuarioRepository @Inject constructor(
      */
     suspend fun cadastrarUsuario(usuario: Usuario): Usuario? {
         return try {
-            // Mapeia o modelo para a entidade
-            val usuarioEntity = usuario.toUsuarioEntity()
-
             // Envia o usuário para o serviço (criar usuário no backend)
             val response = service.criarUsuarios(usuario)
 
-            // Salva o usuário localmente após o sucesso do cadastro
+            // Converte para entidade para salvar localmente
+            val usuarioEntity = usuario.toUsuarioEntity()
             if (usuarioEntity != null) {
                 dao.salvarUsuario(usuarioEntity)
             }
@@ -85,4 +76,51 @@ class UsuarioRepository @Inject constructor(
             null
         }
     }
+
+    /**
+     * Atualiza um usuário no backend (rota PUT /usuarios/:id) e reflete as mudanças no banco local.
+     */
+    suspend fun atualizarUsuario(usuario: Usuario): Usuario? {
+        return try {
+            // 1. Pega o usuário logado localmente (o Flow retorna o primeiro valor ou null se não existir)
+            val localUserEntity = dao.obterUsuarioLogado().firstOrNull()
+            if (localUserEntity == null) {
+                // Se não há usuário salvo, não podemos atualizar
+                Log.e("UsuarioRepository", "Nenhum usuário logado localmente para atualizar.")
+                return null
+            }
+
+            // 2. Usa o _id do usuário local para fazer a chamada ao serviço
+            val userId = localUserEntity._id  // ajuste o nome do campo, se necessário
+            if (userId.isBlank()) {
+                // Se, por algum motivo, o ID estiver nulo ou vazio, não prosseguir
+                Log.e("UsuarioRepository", "O usuário local não possui um ID válido.")
+                return null
+            }
+
+            val userToUpdate = usuario.copy(
+                _id = userId,
+                senha = localUserEntity.senha
+            )
+            // 4. Chama o serviço remotor
+            val responseDto = service.atualizarUsuario(userId, userToUpdate)
+
+            responseDto?.copy(
+                senha = localUserEntity.senha
+            )
+
+            // 5. Atualiza o usuário local (caso queira refletir as mudanças offline)
+            responseDto?.let { updatedDto ->
+                val updatedEntity = updatedDto.toUsuarioEntity()
+                dao.atualizarUsuario(updatedEntity)
+            }
+
+            // 6. Converte a resposta para o modelo de domínio e retorna
+            responseDto?.toUsuario()
+        } catch (e: Exception) {
+            Log.e("UsuarioRepository", "Erro ao atualizar usuário: ${e.message}", e)
+            null
+        }
+    }
+
 }

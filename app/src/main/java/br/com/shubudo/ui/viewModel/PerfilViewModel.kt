@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Usuario
@@ -54,7 +53,10 @@ class PerfilViewModel @Inject constructor(
                 nome = usuario.nome,
                 username = usuario.username,
                 email = usuario.email,
-                corFaixa = usuario.corFaixa
+                corFaixa = usuario.corFaixa,
+                idade = usuario.idade,
+                peso = usuario.peso,
+                altura = usuario.altura
             )
         }
     }

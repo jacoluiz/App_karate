@@ -23,7 +23,15 @@ fun KarateNavHost(
 
         perfilScreen(
             onLogout = {
-                navController.loginScreen()
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            },
+            onEditarPerfil = {
+                navController.navigateToEditarPerfil()
             }
         )
 
@@ -68,6 +76,16 @@ fun KarateNavHost(
 
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
+            }
+        )
+
+        editarPerfilScreen(
+            themeViewModel = themeViewModel,
+            onSaveSuccess = {
+                navController.popBackStack()
+            },
+            onCancelar = {
+                navController.popBackStack()
             }
         )
 

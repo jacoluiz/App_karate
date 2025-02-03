@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,7 +28,8 @@ import br.com.shubudo.ui.uistate.PerfilUiState
 @Composable
 fun PerfilView(
     uiState: PerfilUiState,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onEditarPerfil: () -> Unit
 ) {
     when (uiState) {
         is PerfilUiState.Loading -> {
@@ -62,7 +62,8 @@ fun PerfilView(
                 corFaixa = uiState.corFaixa,
                 idade = uiState.idade,
                 peso = uiState.peso,
-                onLogout = onLogout
+                onLogout = onLogout,
+                onEditarPerfil = onEditarPerfil
             )
         }
     }
@@ -76,8 +77,8 @@ fun PerfilContent(
     idade: String,
     peso: String,
     corFaixa: String,
-
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onEditarPerfil: () -> Unit
 ) {
 
 
@@ -89,7 +90,9 @@ fun PerfilContent(
     ) {
         // Imagem de Perfil
         Card(modifier = Modifier.fillMaxWidth()) {
-            Row {
+            Row(
+                modifier = Modifier.padding(16.dp),
+            ) {
                 Image(
                     painter = painterResource(R.drawable.ic_sequencia_de_combate), // Substitua pelo recurso adequado
                     contentDescription = "Imagem de Perfil",
@@ -139,21 +142,22 @@ fun PerfilContent(
             }
         }
 
-        Column (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
 
-        ){
+        ) {
             // Botão de Logout
             Button(
                 onClick = {
-
+                    onEditarPerfil()
                 }) {
                 Text(text = "Editar Perfil")
             }
 
+            Spacer(modifier = Modifier.size(160.dp))
             Button(
                 onClick = {
                     onLogout()

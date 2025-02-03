@@ -118,11 +118,8 @@ fun ProgramacaoView(
                             DropDownMenuCard(
                                 titulo = "Conteudo adicional",
                                 icone = Icons.Outlined.PlusOne
-                            ) {
-
-                            }
+                            ) {}
                         }
-
                     }
                 }
             }

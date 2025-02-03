@@ -59,29 +59,36 @@ fun EsqueciMinhaSenhaView(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TextField(
-                        value = email.value,
-                        onValueChange = { email.value = it },
-                        label = { Text("Digite seu e-mail", color = MaterialTheme.colorScheme.onPrimary )},
-                        placeholder = { Text("email@exemplo.com", color = MaterialTheme.colorScheme.onPrimary ) },
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
-                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = "Por hora n temos um reset de senha automatico\n\nFale com o Jacó para resolver esse problema!",
+
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { onSendResetRequest(email.value) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Enviar Solicitação")
-                    }
+//                    TextField(
+//                        value = email.value,
+//                        onValueChange = { email.value = it },
+//                        label = { Text("Digite seu e-mail", color = MaterialTheme.colorScheme.onPrimary )},
+//                        placeholder = { Text("email@exemplo.com", color = MaterialTheme.colorScheme.onPrimary ) },
+//                        singleLine = true,
+//                        colors = TextFieldDefaults.colors(
+//                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
+//                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
+//                            focusedIndicatorColor = Color.Transparent,
+//                            unfocusedIndicatorColor = Color.Transparent,
+//                            focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
+//                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+//                        ),
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                    Button(
+//                        onClick = { onSendResetRequest(email.value) },
+//                        modifier = Modifier.fillMaxWidth()
+//                    ) {
+//                        Text("Enviar Solicitação")
+//                    }
                 }
             }
         }

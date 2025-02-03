@@ -95,6 +95,7 @@ fun PaginaUmCadastro(
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
+
                 faixas.forEach { faixa ->
                     val iconPainter =
                         if (faixa == "Branca" && !isSystemInDarkTheme()) {
