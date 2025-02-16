@@ -2,12 +2,18 @@ package br.com.shubudo.network.services
 
 import br.com.shubudo.database.entities.AvisoEntity
 import br.com.shubudo.model.Aviso
+import br.com.shubudo.model.AvisoResumido
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+
+data class AvisoCriadoResponse(
+    val message: String,
+    val aviso: Aviso
+)
 
 data class AvisoResponse(
     val _id: String,
@@ -19,6 +25,10 @@ data class AvisoResponse(
     val dataCriacao: String,
     val exclusivoParaFaixas: List<String>
 )
+
+fun AvisoCriadoResponse.toAviso(): Aviso {
+    return aviso
+}
 
 fun AvisoResponse.toAviso(): Aviso {
     return Aviso(
@@ -49,7 +59,7 @@ fun AvisoResponse.toAvisoEntity(): AvisoEntity {
 interface AvisoService {
 
     @POST("/aviso")
-    suspend fun criarAviso(@Body aviso: Aviso): AvisoResponse
+    suspend fun criarAviso(@Body aviso: AvisoResumido): AvisoCriadoResponse
 
     @PUT("/aviso/{id}")
     suspend fun atualizarAviso(

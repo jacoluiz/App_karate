@@ -60,6 +60,9 @@ fun UsuarioResponse.toUsuarioEntity(): UsuarioEntity {
 
 interface UsuarioService {
 
+    @GET("/usuarios")
+    suspend fun getUsuarios(): List<UsuarioResponse>
+
     @POST("/usuarios") // Endpoint para obter o usuário logado
     suspend fun criarUsuarios(@Body usuario: Usuario): UsuarioResponse
 

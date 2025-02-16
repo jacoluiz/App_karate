@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import br.com.shubudo.model.Aviso
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -18,10 +19,27 @@ fun KarateNavHost(
 ) {
     NavHost(navController, startDestination = AppDestination.Login.route) {
         avisosScreen(
-            themeViewModel = themeViewModel
+            onReload = {
+                navController.navigateToAvisos()
+            },
+
+            onAvisoClick = { aviso: Aviso ->
+                navController.navigateToDetalheAviso(aviso._id)
+            },
+
+            onAddAvisoClick = {
+                navController.navigateToNovoAviso()
+            }
+        )
+
+        detalheAvisoScreen(
+            onDelete = {
+                navController.popBackStack()
+            }
         )
 
         perfilScreen(
+            themeViewModel = themeViewModel,
             onLogout = {
                 navController.navigate("login") {
                     popUpTo(navController.graph.startDestinationId) {
@@ -82,11 +100,20 @@ fun KarateNavHost(
         editarPerfilScreen(
             themeViewModel = themeViewModel,
             onSaveSuccess = {
+
                 navController.popBackStack()
+
             },
             onCancelar = {
                 navController.popBackStack()
             }
+        )
+
+        novoAvisoScreen(
+            onSaveSuccess = {
+                navController.navigateToAvisos()
+            },
+            onCancelar = { navController.popBackStack() }
         )
 
     }
@@ -117,6 +144,5 @@ fun NavController.navigateToBottomAppBarItem(
             })
         }
 
-        else -> {}
     }
 }

@@ -45,4 +45,8 @@ interface AvisoDao {
     // Método para deletar um aviso pelo ID
     @Query("DELETE FROM Aviso WHERE _id = :id")
     suspend fun deletarAviso(id: String)
+
+    @Query("DELETE FROM Aviso")
+    suspend fun deletarTodos()
+
 }

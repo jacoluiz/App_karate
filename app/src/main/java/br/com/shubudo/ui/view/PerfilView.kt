@@ -24,10 +24,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.PerfilUiState
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun PerfilView(
     uiState: PerfilUiState,
+    themeViewModel: ThemeViewModel,
     onLogout: () -> Unit,
     onEditarPerfil: () -> Unit
 ) {
@@ -55,6 +57,7 @@ fun PerfilView(
         }
 
         is PerfilUiState.Success -> {
+            themeViewModel.changeThemeFaixa(uiState.corFaixa)
             PerfilContent(
                 nome = uiState.nome,
                 username = uiState.username,

@@ -55,7 +55,6 @@ fun DetalheFaixaView(
                         .fillMaxSize()
                         .padding(28.dp)
                 ) {
-                    Log.i("DetalheFaixaView", "programacao: ${uiState.programacao}")
                     CardSelecaoTipoConteudo(uiState.programacao, onNavigateToDetalheMovimento)
                 }
             }

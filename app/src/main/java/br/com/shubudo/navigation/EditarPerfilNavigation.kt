@@ -16,7 +16,7 @@ internal const val editarPerfilRoute = "editarPerfil"
 
 fun NavGraphBuilder.editarPerfilScreen(
     themeViewModel: ThemeViewModel,
-    onSaveSuccess: () -> Boolean,  // Exemplo: callback ao salvar
+    onSaveSuccess: () -> Unit,  // Exemplo: callback ao salvar
     onCancelar: () -> Unit
 ) {
     composable(editarPerfilRoute) {

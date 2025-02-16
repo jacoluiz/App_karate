@@ -1,5 +1,6 @@
 package br.com.shubudo.di.modules
 
+import br.com.shubudo.network.services.AvisoService
 import br.com.shubudo.network.services.DefesaPessoalExtraBannerServices
 import br.com.shubudo.network.services.DefesaPessoalServices
 import br.com.shubudo.network.services.FaixasServices
@@ -93,5 +94,11 @@ object RestApiModule {
     @Singleton
     fun provideDefesaPessoalExtraBannerService(retrofit : Retrofit) : DefesaPessoalExtraBannerServices {
         return retrofit.create(DefesaPessoalExtraBannerServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAvisoService(retrofit : Retrofit) : AvisoService {
+        return retrofit.create(AvisoService::class.java)
     }
 }

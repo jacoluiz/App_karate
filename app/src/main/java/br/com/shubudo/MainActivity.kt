@@ -6,7 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,7 +33,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import br.com.shubudo.navigation.*
+import br.com.shubudo.navigation.AppDestination
+import br.com.shubudo.navigation.KarateNavHost
+import br.com.shubudo.navigation.avisosRoute
+import br.com.shubudo.navigation.detalheAvisoRoute
+import br.com.shubudo.navigation.detalheFaixaArgument
+import br.com.shubudo.navigation.detalheFaixaRuteFullpath
+import br.com.shubudo.navigation.detalheMovimentoArgument
+import br.com.shubudo.navigation.detalheMovimentoRuteFullpath
+import br.com.shubudo.navigation.editarPerfilRoute
+import br.com.shubudo.navigation.esqueciMinhaSenhaRote
+import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
+import br.com.shubudo.navigation.navigateToBottomAppBarItem
+import br.com.shubudo.navigation.novoUsuarioRote
+import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
+import br.com.shubudo.navigation.perfilRoute
+import br.com.shubudo.navigation.programacaoRoute
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
@@ -76,15 +96,22 @@ class MainActivity : ComponentActivity() {
                         AppDestination.Avisos.route -> "Seja Bem-Vindo"
                         AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
-                        detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(detalheFaixaArgument))
-                        detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(detalheMovimentoArgument)
+                        detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
+                            detalheFaixaArgument
+                        ))
+
+                        detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
+                            detalheMovimentoArgument
+                        )
+
                         novoUsuarioRote -> "Precisamos de alguns dados"
                         novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
+                        detalheAvisoRoute -> "Aviso"
                         else -> "Shubu-dô App"
                     }
 
                     val showBottomBack = when (currentDestination?.route) {
-                        detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, esqueciMinhaSenhaRoteSemUsername -> true
+                        detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, esqueciMinhaSenhaRoteSemUsername, detalheAvisoRoute -> true
                         else -> false
                     }
 
@@ -143,11 +170,19 @@ class MainActivity : ComponentActivity() {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
         if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSION_CODE)
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                REQUEST_PERMISSION_CODE
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {

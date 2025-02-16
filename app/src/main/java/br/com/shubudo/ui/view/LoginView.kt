@@ -260,7 +260,7 @@ fun LoginView(
                         }
                         Button(
                             onClick = {
-                                viewModel.login(username, password)
+                                viewModel.login(username, password, themeViewModel)
                             },
                             enabled = uiState !is LoginUiState.Loading, // Desabilita o botão durante o carregamento
                             colors = ButtonDefaults.buttonColors(

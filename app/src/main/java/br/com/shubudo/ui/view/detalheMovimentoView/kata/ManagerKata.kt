@@ -51,7 +51,6 @@ fun TelaKataManager(
                 uiState = uiState,
                 onBackNavigationClick = onBackNavigationClick,
                 onCardClick = {
-                    Log.i("TelaDefesaPessoalManager", "onCardClick: $it")
                     selectedKata = it }
             )
         }

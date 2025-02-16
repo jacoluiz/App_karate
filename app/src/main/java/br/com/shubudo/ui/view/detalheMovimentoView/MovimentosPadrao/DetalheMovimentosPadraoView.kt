@@ -103,7 +103,7 @@ fun TelaDetalheMovimentoPadrao(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = movimentoExibido?.descricao ?: "",
+                            text = movimentoExibido.descricao,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.inverseSurface,
                             modifier = Modifier

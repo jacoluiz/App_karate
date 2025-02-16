@@ -9,6 +9,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.PerfilView
 import br.com.shubudo.ui.viewModel.PerfilViewModel
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 
 internal const val perfilRoute = "perfil"
@@ -16,6 +17,7 @@ internal const val perfilRoute = "perfil"
 fun NavGraphBuilder.perfilScreen(
     onLogout: () -> Unit,
     onEditarPerfil: () -> Unit,
+    themeViewModel: ThemeViewModel
 ) {
     composable(perfilRoute) {
         val viewModel = hiltViewModel<PerfilViewModel>()
@@ -24,6 +26,7 @@ fun NavGraphBuilder.perfilScreen(
             uiState = uiState,
             onEditarPerfil = { onEditarPerfil() },
             onLogout = { onLogout() },
+            themeViewModel = themeViewModel
         )
     }
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "4e75f3234f7e748d7a61699ded2e3185",
+    "identityHash": "dca7991d48a09cdfb74ca8c0683bc46f",
     "entities": [
       {
         "tableName": "DefesasPessoais",
@@ -403,12 +403,74 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Aviso",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `conteudo` TEXT NOT NULL, `imagem` TEXT, `arquivos` TEXT NOT NULL, `ativo` INTEGER NOT NULL, `dataCriacao` TEXT NOT NULL, `exclusivoParaFaixas` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conteudo",
+            "columnName": "conteudo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imagem",
+            "columnName": "imagem",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "arquivos",
+            "columnName": "arquivos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ativo",
+            "columnName": "ativo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCriacao",
+            "columnName": "dataCriacao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exclusivoParaFaixas",
+            "columnName": "exclusivoParaFaixas",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4e75f3234f7e748d7a61699ded2e3185')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dca7991d48a09cdfb74ca8c0683bc46f')"
     ]
   }
 }

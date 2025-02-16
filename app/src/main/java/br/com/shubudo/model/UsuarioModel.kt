@@ -25,9 +25,9 @@ fun Usuario.toUsuarioEntity(): UsuarioEntity? {
         corFaixa = this.corFaixa,
         peso = this.peso,
         altura = this.altura,
-        username = this.nome,
-        idade = "",
-        perfil = "básico"
+        username = this.username,
+        idade = this.idade,
+        perfil = this.perfil
     )
     }
 }

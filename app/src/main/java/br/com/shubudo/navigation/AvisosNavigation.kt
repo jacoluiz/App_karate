@@ -1,29 +1,37 @@
 package br.com.shubudo.navigation
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import br.com.shubudo.model.Aviso
 import br.com.shubudo.ui.view.AvisosView
 import br.com.shubudo.ui.viewModel.AvisosViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
-
 internal const val avisosRoute = "avisos"
 
 fun NavGraphBuilder.avisosScreen(
-    themeViewModel: ThemeViewModel
+    onAvisoClick: (Aviso) -> Unit,
+    onAddAvisoClick: () -> Unit,
+    onReload: () -> Unit
 ) {
-
     composable(avisosRoute) {
-        // Obtendo o AvisosViewModel
+        // Obtém o AvisosViewModel injetado pelo Hilt
         val avisosViewModel: AvisosViewModel = hiltViewModel()
 
-        // Renderizando a tela de avisos
+        // Coleta o uiState exposto pelo ViewModel
+        val uiState by avisosViewModel.avisoUiState.collectAsState()
+
+        // Renderiza a tela de avisos passando o uiState e as callbacks necessárias
         AvisosView(
-            avisosViewModel = avisosViewModel, // Passa o ViewModel para a tela
-            themeViewModel = themeViewModel, // Passa o ViewModel de tema para a tela
+            uiState = uiState,
+            onAvisoClick = onAvisoClick,
+            onAddAvisoClick = onAddAvisoClick,
+            onReload = onReload,
         )
     }
 }

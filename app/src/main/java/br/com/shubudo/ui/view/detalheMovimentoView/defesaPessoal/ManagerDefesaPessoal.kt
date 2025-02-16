@@ -48,7 +48,6 @@ fun TelaDefesaPessoalManager(
                 uiState = uiState,
                 onBackNavigationClick = onBackNavigationClick,
                 onCardClick = {
-                    Log.i("TelaDefesaPessoalManager", "onCardClick: $it")
                     selectedDefesaPessoal = it }
             )
         }

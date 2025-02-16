@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,23 +21,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.model.Aviso
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
 fun CardAviso(
-    imageUrl: String? = null,
-    title: String,
-    description: String,
+    aviso: Aviso,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: (Aviso) -> Unit
 ) {
-   val imagemDefault = "https://karateshubudo.com.br/wp-content/uploads/elementor/thumbs/LOGO_KARATE-JPG-2010-01-01-pgd3sk0v62xv53x0bhlsbq53k0unw3zph03j682rww.png"
+    // URL padrão caso o aviso não possua imagem
+    val imagemDefault = "https://karateshubudo.com.br/wp-content/uploads/elementor/thumbs/LOGO_KARATE-JPG-2010-01-01-pgd3sk0v62xv53x0bhlsbq53k0unw3zph03j682rww.png"
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(top = 8.dp),
         shape = MaterialTheme.shapes.medium,
-        onClick = onClick
+        // Envolve a chamada onClick em uma lambda que passa o objeto 'aviso'
+        onClick = { onClick(aviso) },
+        colors = CardDefaults.cardColors()
     ) {
         Row(
             modifier = Modifier
@@ -44,10 +48,11 @@ fun CardAviso(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Foto redonda
+            // Exibe a imagem (usa a imagem padrão se necessário)
             Image(
-
-                painter = rememberAsyncImagePainter(model = if (imageUrl.isNullOrBlank()) imagemDefault else imageUrl),
+                painter = rememberAsyncImagePainter(
+                    model = if (aviso.imagem.isNullOrBlank()) imagemDefault else aviso.imagem
+                ),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -57,10 +62,10 @@ fun CardAviso(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Título e descrição
+            // Exibe o título e o conteúdo do aviso
             Column {
                 Text(
-                    text = title,
+                    text = aviso.titulo,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
@@ -68,7 +73,7 @@ fun CardAviso(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = description,
+                    text = aviso.conteudo,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
