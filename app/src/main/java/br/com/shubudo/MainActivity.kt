@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
                     val topAppBarTitle = when (currentDestination?.route) {
                         editarPerfilRoute -> "Editar Perfil"
                         perfilRoute -> "Perfil"
-                        AppDestination.Avisos.route -> "Seja Bem-Vindo"
+                        AppDestination.Avisos.route -> "Avisos"
                         AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
                         detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
@@ -283,15 +283,7 @@ fun KarateApp(
                         })
                     }
             ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
-                ) {
 
-                }
                 content()
             }
         }

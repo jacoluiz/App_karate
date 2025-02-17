@@ -1,6 +1,9 @@
 package br.com.shubudo.ui.view
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +15,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,7 +23,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,18 +42,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import br.com.shubudo.ui.components.SeletorDeTema
+import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.LoginUiState
 import br.com.shubudo.ui.viewModel.LoginViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -63,29 +65,25 @@ fun LoginView(
     onNavigateToNovoUsuario: (String) -> Unit,
     onNavigateToEsqueciMinhaSenha: (String) -> Unit,
 ) {
-    val viewModel: LoginViewModel = hiltViewModel() // Certifique-se de usar `hiltViewModel()`
+    val viewModel: LoginViewModel = hiltViewModel()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
-
-    val focusRequesterUsuario = remember { FocusRequester() }
-    val focusRequesterSenha = remember { FocusRequester() }
-
-    // Observar o estado do login
     val uiState by viewModel.uiState.collectAsState()
 
-// Observe o estado do login
+    // Se o login for bem-sucedido, navega para a tela Home
     LaunchedEffect(uiState) {
         if (uiState is LoginUiState.Success) {
-            onNavigateToHome(username) // Navega para a próxima tela
+            onNavigateToHome(username)
         }
     }
 
-// Exibir alerta apenas em caso de erro
+    // Exibir alerta de erro, se necessário
     if (uiState is LoginUiState.Error) {
         AlertDialog(
-            onDismissRequest = { /* Fecha o alerta se necessário */ },
+            onDismissRequest = { viewModel.resetUiState() },
             confirmButton = {
                 TextButton(onClick = { viewModel.resetUiState() }) {
                     Text("OK")
@@ -96,218 +94,158 @@ fun LoginView(
         )
     }
 
+    // Layout principal
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    focusManager.clearFocus()
-                })
-            }
-            .imePadding(),
-        contentAlignment = Alignment.Center
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
+        contentAlignment = Alignment.TopCenter
     ) {
+        // Fundo colorido no topo (você pode ajustar as cores conforme seu tema)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .background(MaterialTheme.colorScheme.primary),
+        ) {
+            // Imagem de perfil circular e texto B.A.S.E Karate no centro superior
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp)
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_round),
+                    contentDescription = "Ícone do app",
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Karate Shubu-dô",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+
+        // Conteúdo scrollável
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(top = 230.dp) // para ficar abaixo do cabeçalho
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Parte superior da tela com o título
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "B.A.S.E.",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier.padding(top = 32.dp)
-                )
-                Text(
-                    text = "Faça seu login para prosseguir",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Spacer(modifier = Modifier.padding(top = 16.dp))
-
-                SeletorDeTema(themeViewModel = themeViewModel)
-            }
-
-            Spacer(modifier = Modifier.height(100.dp))
-
-            // Card central com campos de login e botões
+            // Card com campos de login
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(vertical = 16.dp),
-                elevation = CardDefaults.cardElevation(8.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp),
+                elevation = CardDefaults.cardElevation(6.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(16.dp)
                 ) {
+                    // Campo de usuário
                     TextField(
                         singleLine = true,
                         value = username,
                         onValueChange = { username = it },
-                        label = {
-                            Text(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                text = "Usuário"
-                            )
-                        },
-                        placeholder = {
-                            Text(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                text = "Digite seu usuário"
-                            )
-                        },
+                        label = { Text("Email ou nome de usuário") },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary
                         ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusRequesterSenha.requestFocus() }
-                        ),
-                        keyboardOptions = KeyboardOptions(
+                        keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next
                         ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequesterUsuario),
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Campo de senha
                     TextField(
                         singleLine = true,
                         value = password,
                         onValueChange = { password = it },
-                        label = {
-                            Text(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                text = "Senha"
-                            )
-                        },
-                        placeholder = {
-                            Text(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                text = "Digite sua senha"
-                            )
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusRequesterSenha.requestFocus() }
+                        label = { Text("Senha") },
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary
                         ),
-                        keyboardOptions = KeyboardOptions(
+                        keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Next
+                            imeAction = ImeAction.Done
                         ),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            val image =
+                            val icon =
                                 if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            IconButton(
-                                onClick = {
-                                    passwordVisible = !passwordVisible
-                                }) {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = image,
-                                    contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    imageVector = icon,
+                                    contentDescription = null
                                 )
                             }
                         },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequesterSenha),
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
+                    // Botão "Entrar"
+                    Button(
+                        onClick = {
+                            viewModel.login(username, password, themeViewModel)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = uiState !is LoginUiState.Loading
                     ) {
-                        Button(
-                            onClick = {
-                                onNavigateToNovoUsuario(username.ifEmpty { "" })
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 4.dp)
-                        ) {
-                            Text("Novo por aqui?")
-                        }
-                        Button(
-                            onClick = {
-                                viewModel.login(username, password, themeViewModel)
-                            },
-                            enabled = uiState !is LoginUiState.Loading, // Desabilita o botão durante o carregamento
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 4.dp)
-                        ) {
-                            if (uiState is LoginUiState.Loading) {
-                                CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(20.dp) // Ajuste o tamanho do progresso
-                                )
-                            } else {
-                                Text("Login")
-                            }
+                        if (uiState is LoginUiState.Loading) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        } else {
+                            Text("Entrar")
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    onNavigateToEsqueciMinhaSenha(username.ifEmpty { "" })
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
+            // "Criar conta" e "Esqueci minha senha" abaixo do card
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 32.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("Esqueci minha senha?")
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-
-
-            // Link para os termos de uso
-            val uriHandler = LocalUriHandler.current
-            TextButton(
-                onClick = {
-                    uriHandler.openUri("https://jacoluiz.github.io/Politica-de-Seguranca-app-karate/")
-
+                TextButton(onClick = { onNavigateToNovoUsuario(username) }) {
+                    Text("Criar conta")
                 }
-            ) {
-                Text(text = "Termos de Uso")
+                TextButton(onClick = { onNavigateToEsqueciMinhaSenha(username) }) {
+                    Text("Esqueci minha senha")
+                }
             }
         }
     }

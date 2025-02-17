@@ -46,6 +46,9 @@ fun TelaListaMovimentoPadrao(
         // Lista de projeções
         items(uiState.movimento) { movimento ->
             Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)

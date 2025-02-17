@@ -46,6 +46,9 @@ fun TelaListaSequenciaDeCombate(
                     .padding(bottom = 8.dp)
                     .then(Modifier.padding(4.dp)), // Clique no Card
                 elevation = CardDefaults.cardElevation(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
                 onClick = { onCardClick(sequenciaDeCombate) } // Ao clicar no Card
             ) {
                 Column(

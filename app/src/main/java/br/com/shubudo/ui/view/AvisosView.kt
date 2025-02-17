@@ -1,23 +1,25 @@
 package br.com.shubudo.ui.view
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,10 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Aviso
-import br.com.shubudo.ui.components.CardAviso
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.uistate.AvisoUiState
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @Composable
 fun AvisosView(
@@ -45,97 +48,20 @@ fun AvisosView(
     onReload: () -> Unit
 ) {
     when (uiState) {
-        is AvisoUiState.Success -> {
-            Column(
+        is AvisoUiState.Loading -> {
+            Box(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
+                contentAlignment = Alignment.Center
             ) {
-                // Top Row: Título + Botão de Reload
-                Row(
+                // Cabeçalho colorido de fundo
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Confira os avisos recentes e mantenha-se informado!",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                }
-                // Conteúdo principal com os avisos
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 28.dp)
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                        modifier = Modifier
-                            .border(
-                                width = 0.dp,
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(26.dp)
-                            )
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ){
-                                IconButton(onClick = onReload) {
-                                    Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Recarregar avisos"
-                                    )
-                                }
-                                // Exibe o botão de adicionar aviso somente se o perfil for "adm"
-                                if (SessionManager.usuarioLogado?.perfil?.equals("adm", ignoreCase = true) == true) {
-                                    IconButton(onClick = onAddAvisoClick) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = "Adicionar Aviso"
-                                        )
-                                    }
-                                }
-                            }
-
-
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(top = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(uiState.avisos) { aviso ->
-                                    if (aviso.exclusivoParaFaixas.contains(SessionManager.usuarioLogado?.corFaixa)
-                                        || aviso.exclusivoParaFaixas.isEmpty()
-                                    ) {
-                                        CardAviso(
-                                            aviso = aviso,
-                                            onClick = { onAvisoClick(aviso) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                        .height(250.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)
+                ) { }
+                LoadingOverlay(true) { }
             }
         }
         is AvisoUiState.Empty -> {
@@ -151,20 +77,142 @@ fun AvisosView(
                 )
             }
         }
-        is AvisoUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(
+        is AvisoUiState.Success -> {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Cabeçalho simples com fundo colorido
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp),
+                        .height(120.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Mantenha-se informado",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+
+                // Barra de ações (Recarregar e Adicionar)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onReload) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Recarregar avisos"
+                        )
+                    }
+                    if (SessionManager.usuarioLogado?.perfil?.equals("adm", ignoreCase = true) == true) {
+                        IconButton(onClick = onAddAvisoClick) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Adicionar Aviso"
+                            )
+                        }
+                    }
+                }
+
+                HorizontalDivider(
                     color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)
-                ) { }
-                LoadingOverlay(true) { }
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                // Lista de avisos
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(top = 8.dp, start = 16.dp, end = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(uiState.avisos) { aviso ->
+                        // Exibe o item se o aviso for liberado para a faixa do usuário ou não possuir restrição
+                        if (aviso.exclusivoParaFaixas.contains(SessionManager.usuarioLogado?.corFaixa)
+                            || aviso.exclusivoParaFaixas.isEmpty()
+                        ) {
+                            AvisoItem(
+                                aviso = aviso,
+                                onClick = { onAvisoClick(aviso) }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
+fun String.formatDate(): String {
+    return try {
+        val zdt = ZonedDateTime.parse(this)
+        // Formata para "dd/MM/yyyy"
+        zdt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    } catch (e: DateTimeParseException) {
+        // Caso a data não possa ser parseada, retorna a própria string ou um valor padrão
+        this
+    }
+}
+
+/**
+ * Item de aviso com uma barra vertical colorida à esquerda.
+ * A linha inteira é clicável.
+ */
+@Composable
+fun AvisoItem(
+    aviso: Aviso,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Barra vertical usando a cor primária
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(color = MaterialTheme.colorScheme.primary)
+        )
+        // Conteúdo do aviso
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 8.dp)
+        ) {
+            // Data formatada
+            Text(
+                text = if (aviso.dataCriacao.isNotBlank()) aviso.dataCriacao.formatDate() else "15/03/2024",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            // Título
+            Text(
+                text = aviso.titulo,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+            // Conteúdo ou subtítulo
+            Text(
+                text = aviso.conteudo,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+        }
+    }
+}
+

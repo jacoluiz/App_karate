@@ -1,7 +1,6 @@
 package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,10 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,11 +36,11 @@ import coil.compose.rememberAsyncImagePainter
 @Composable
 fun DetalheAvisoView(
     uiState: DetalheAvisoUiState,
-    onNavigationPop: () -> Unit // Callback para pop na navegação após a exclusão
+    onNavigationPop: () -> Unit // Callback para voltar à tela após exclusão
 ) {
     val viewModel: DetalheAvisoViewModel = hiltViewModel()
-    val imagemDefault = "https://karateshubudo.com.br/wp-content/uploads/elementor/thumbs/LOGO_KARATE-JPG-2010-01-01-pgd3sk0v62xv53x0bhlsbq53k0unw3zph03j682rww.png"
-    // Estado para controlar a exibição do diálogo de confirmação de exclusão
+    val imagemDefault =
+        "https://karateshubudo.com.br/wp-content/uploads/elementor/thumbs/LOGO_KARATE-JPG-2010-01-01-pgd3sk0v62xv53x0bhlsbq53k0unw3zph03j682rww.png"
     val showDeleteConfirm = remember { mutableStateOf(false) }
 
     when (uiState) {
@@ -52,9 +52,10 @@ fun DetalheAvisoView(
                 CircularProgressIndicator()
             }
         }
+
         is DetalheAvisoUiState.Success -> {
-            Column {
-                // Exibe a imagem do aviso (ou a imagem default)
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Imagem do aviso
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = if (uiState.aviso.imagem.isNullOrBlank()) imagemDefault
@@ -66,8 +67,12 @@ fun DetalheAvisoView(
                         .fillMaxWidth(),
                     contentScale = ContentScale.Fit
                 )
-                // Botão de delete, visível somente para administradores
-                if (SessionManager.usuarioLogado?.perfil?.equals("adm", ignoreCase = true) == true) {
+                // Botão de delete para administradores
+                if (SessionManager.usuarioLogado?.perfil?.equals(
+                        "adm",
+                        ignoreCase = true
+                    ) == true
+                ) {
                     IconButton(
                         onClick = { showDeleteConfirm.value = true },
                         modifier = Modifier
@@ -81,7 +86,7 @@ fun DetalheAvisoView(
                         )
                     }
                 }
-                // Diálogo de confirmação para exclusão
+                // Diálogo de confirmação
                 if (showDeleteConfirm.value) {
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirm.value = false },
@@ -93,7 +98,7 @@ fun DetalheAvisoView(
                                 viewModel.deleteAviso(
                                     onSuccess = { onNavigationPop() },
                                     onError = { errorMsg ->
-
+                                        // Aqui você pode exibir um alerta de erro
                                         println("Erro ao deletar aviso: $errorMsg")
                                     }
                                 )
@@ -108,17 +113,16 @@ fun DetalheAvisoView(
                         }
                     )
                 }
-                Card(
+                // Área de conteúdo com scroll, para caso o aviso seja muito grande
+                Surface(
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxSize()
                 ) {
                     Column(
                         modifier = Modifier
+                            .verticalScroll(rememberScrollState())
                             .padding(16.dp)
-                            .fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
                             text = uiState.aviso.titulo,
@@ -133,6 +137,7 @@ fun DetalheAvisoView(
                 }
             }
         }
+
         is DetalheAvisoUiState.Error -> {
             Box(
                 modifier = Modifier.fillMaxSize(),

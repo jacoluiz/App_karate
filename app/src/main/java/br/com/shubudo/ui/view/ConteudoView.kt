@@ -1,22 +1,26 @@
 package br.com.shubudo.ui.view
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlusOne
 import androidx.compose.material.icons.outlined.SportsMartialArts
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,8 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager
 import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.components.DropDownMenuCard
 import br.com.shubudo.ui.components.LoadingOverlay
@@ -41,64 +45,81 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 fun ProgramacaoView(
     uiState: ProgramacaoUiState,
     onClickFaixa: (String) -> Unit,
-    themeViewModel: ThemeViewModel = viewModel()
+    themeViewModel: ThemeViewModel
 ) {
     when (uiState) {
-        is ProgramacaoUiState.Success -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
+        is ProgramacaoUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
+                // Cabeçalho colorido (apenas para exibir o Loading)
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 8.dp)
+                        .height(250.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                LoadingOverlay(true) {}
+            }
+        }
+        is ProgramacaoUiState.Empty -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Calma jovem, ainda não temos nada por aqui!",
+                    modifier = Modifier.align(Alignment.Center),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        is ProgramacaoUiState.Success -> {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Cabeçalho com fundo colorido apenas atrás do texto
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(vertical = 16.dp)
                 ) {
-                    Text(
-                        text = "Explore todo o conteúdo de cada faixa e aproveite dicas e materiais extras que preparamos para você!",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Explore todo o conteúdo de cada faixa e aproveite dicas e materiais extras que preparamos para você!",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
 
+                // Conteúdo principal
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(28.dp, 0.dp, 28.dp, 0.dp),
+                        .padding(horizontal = 28.dp)
                 ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                        modifier = Modifier
+                    // Surface para conter os menus (com fundo branco ou definido pelo tema)
 
-                            .border(
-                                width = 0.dp,
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(26.dp)
-                            )
-                            .padding(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                        ) {
-
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Primeiro drop-down para Programação
                             DropDownMenuCard(
                                 titulo = "Programação",
                                 icone = Icons.Outlined.SportsMartialArts
                             ) {
                                 Column {
                                     uiState.faixas.forEach { faixa ->
-                                        if (listaBloqueiFaixas().contains(faixa.faixa).not()) {
-                                            val iconPainter =
-                                                if (faixa.faixa == "Branca" && !isSystemInDarkTheme()) {
-                                                    painterResource(id = R.drawable.ic_faixa_outline)
-                                                } else {
-                                                    painterResource(id = R.drawable.ic_faixa)
-                                                }
+                                        if (!listaBloqueiFaixas().contains(faixa.faixa)) {
+                                            val iconPainter = if (faixa.faixa == "Branca" && !isSystemInDarkTheme()) {
+                                                painterResource(id = R.drawable.ic_faixa_outline)
+                                            } else {
+                                                painterResource(id = R.drawable.ic_faixa)
+                                            }
                                             CustomIconButton(
                                                 texto = faixa.faixa,
                                                 iconPainter = iconPainter,
@@ -115,36 +136,14 @@ fun ProgramacaoView(
                                     }
                                 }
                             }
+                            // Segundo drop-down para Conteúdo Adicional (vazio neste exemplo)
                             DropDownMenuCard(
                                 titulo = "Conteudo adicional",
                                 icone = Icons.Outlined.PlusOne
                             ) {}
                         }
-                    }
+
                 }
-            }
-        }
-
-        is ProgramacaoUiState.Empty -> {
-            Box(Modifier.fillMaxSize()) {
-                Text(
-                    text = "Calma jovem, ainda não temos nada por aqui!",
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        is ProgramacaoUiState.Loading -> {
-            Box(Modifier.fillMaxSize()) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)
-                ) {}
-                LoadingOverlay(true) { }
             }
         }
     }

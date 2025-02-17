@@ -79,6 +79,8 @@ fun CardSelecaoTipoConteudo(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp, bottom = 16.dp),
+        elevation = CardDefaults.cardElevation(16.dp),
+
     ) {
         Column {
             itens.forEach() { item ->
