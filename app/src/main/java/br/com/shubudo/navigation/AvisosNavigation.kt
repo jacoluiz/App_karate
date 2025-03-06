@@ -10,7 +10,6 @@ import androidx.navigation.compose.composable
 import br.com.shubudo.model.Aviso
 import br.com.shubudo.ui.view.AvisosView
 import br.com.shubudo.ui.viewModel.AvisosViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 internal const val avisosRoute = "avisos"
 

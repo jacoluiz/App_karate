@@ -10,18 +10,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.model.Faixa
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.view.detalheMovimentoView.EsqueletoTela
 
 @Composable
 fun TelaDetalheProjecao(
+    faixa: String,
     projecao: Projecao,
     onBackNavigationClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
-    EsqueletoTela {
+    EsqueletoTela(
+        faixa = faixa
+    ){
         Column(
             modifier = Modifier
                 .fillMaxWidth()

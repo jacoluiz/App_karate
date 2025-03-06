@@ -40,6 +40,7 @@ fun TelaMovimentoPadraoManager(
     ) { movimento ->
         if (movimento != null) {
             TelaDetalheMovimentoPadrao(
+                faixa = uiState.faixa,
                 movimento = movimento,
                 onBackNavigationClick = { selectedMovimento = null }
             )

@@ -8,6 +8,7 @@ import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.Programacao
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.model.SequenciaDeCombate
+import br.com.shubudo.model.Armamento
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -22,15 +23,14 @@ class ProgramacaoRepository @Inject constructor(
     private val movimentoRepository: MovimentoRepository,
     private val sequenciaDeCombateRepository: SequenciaDeCombateRepository,
     private val projecaoRepository: ProjecoesRepository,
-    private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository
+    private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository,
+    private val armamentoRepository: ArmamentoRepository
 ) {
-
     suspend fun findMovimentoByFaixaETipo(faixa: String, tipo: String): Flow<List<Movimento>> {
         val faixaResult = faixaRepository.findByNome(faixa).firstOrNull()
         if (faixaResult == null) {
             return flow { emit(emptyList()) } // Retorna uma lista vazia se não encontrar a faixa
         }
-
         return when (tipo) {
             "Ataques de Mão" -> findAtaquesDeMaoByFaixa(faixaResult)
             "Chutes" -> findChutesByFaixa(faixaResult)
@@ -42,7 +42,6 @@ class ProgramacaoRepository @Inject constructor(
     suspend fun findFaixaByCor(cor: String): Flow<Faixa> {
         return faixaRepository.findByNome(cor).filterNotNull()
     }
-
 
     suspend fun findProgramacaoByCorFaixa(corFaixa: String): Flow<Programacao> {
         val faixa = findFaixaByCor(corFaixa).first()
@@ -58,6 +57,7 @@ class ProgramacaoRepository @Inject constructor(
         val sequenciasDeCombate = findSequenciasDeCombateByFaixa(faixa).first()
         val defesaPessoalExtraBanner = findDefesaPessoalExtraBannerByFaixa(faixa).first()
         val projecao = findProjecoesByFaixa(faixa).first()
+        val armamentos = findArmamentosByFaixa(faixa).first()
 
         val programacao = Programacao(
             faixa = faixa,
@@ -68,7 +68,8 @@ class ProgramacaoRepository @Inject constructor(
             defesas = defesas,
             sequenciaDeCombate = sequenciasDeCombate,
             projecoes = projecao,
-            defesaExtraBanner = defesaPessoalExtraBanner
+            defesaExtraBanner = defesaPessoalExtraBanner,
+            armamento = armamentos
         )
         return flow { emit(programacao) }
     }
@@ -129,4 +130,13 @@ class ProgramacaoRepository @Inject constructor(
         return defesaPessoalExtraBannerRepository.findByFaixa(faixaId)
     }
 
+    // Função para buscar Armamentos por Faixa ou ID de Faixa
+    suspend fun findArmamentosByFaixa(
+        faixa: Faixa? = null,
+        idFaixa: String? = null
+    ): Flow<List<Armamento>> {
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        return armamentoRepository.findByFaixa(faixaId)
+    }
 }

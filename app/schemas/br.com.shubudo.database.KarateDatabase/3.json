@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "dca7991d48a09cdfb74ca8c0683bc46f",
+    "identityHash": "d43272d22a486e8b8cf3994b6070f557",
     "entities": [
       {
         "tableName": "DefesasPessoais",
@@ -465,12 +465,62 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Armamento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `arma` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arma",
+            "columnName": "arma",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numeroOrdem",
+            "columnName": "numeroOrdem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movimentos",
+            "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dca7991d48a09cdfb74ca8c0683bc46f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd43272d22a486e8b8cf3994b6070f557')"
     ]
   }
 }

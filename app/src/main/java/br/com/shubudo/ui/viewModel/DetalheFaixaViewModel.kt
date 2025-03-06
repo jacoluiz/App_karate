@@ -42,7 +42,6 @@ class DetalheFaixaViewModel @Inject constructor(
                 _uiState.update { DetalheFaixaUiState.Loading }
             }.collectLatest { programacao ->
                 _uiState.update {
-                    Log.i("DetalheFaixaViewModel", "programacao: $programacao")
                     DetalheFaixaUiState.Success(programacao = programacao)
                 }
             }

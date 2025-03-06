@@ -22,7 +22,7 @@ private val DarkBrancaColorScheme = darkColorScheme(
     background = Color(0xFF202020),
     onBackground = Color(0xFFD5D5D5),
     surface = Color(0xFF383838),
-    )
+)
 
 private val LightBrancaColorScheme = lightColorScheme(
     primary = LightPrimaryColorBranca,
@@ -84,7 +84,7 @@ private val LightLaranjaColorScheme = lightColorScheme(
     background = Color(0xFFFFFFFF),
     onBackground = Color(0xFF202020),
     surface = Color(0xFFE2E2E2),
-    )
+)
 
 private val DarkVerdeColorScheme = darkColorScheme(
     primary = PrimaryColorVerde,
@@ -109,7 +109,7 @@ private val LightVerdeColorScheme = lightColorScheme(
     background = Color(0xFFFFFFFF),
     onBackground = Color(0xFF202020),
     surface = Color(0xFFE2E2E2),
-    )
+)
 
 private val DarkRoxaColorScheme = darkColorScheme(
     primary = PrimaryColorRoxa,
@@ -134,7 +134,7 @@ private val LightRoxaColorScheme = lightColorScheme(
     background = Color(0xFFFFFFFF),
     onBackground = Color(0xFF202020),
     surface = Color(0xFFE2E2E2),
-    )
+)
 
 private val DarkMarromColorScheme = darkColorScheme(
     primary = PrimaryColorMarron,
@@ -161,12 +161,85 @@ private val LightMarromColorScheme = lightColorScheme(
 
     )
 
+private val DarkPretaColorScheme = darkColorScheme(
+    primary = PrimaryColorPreta,
+    primaryContainer = PrimaryContainerColorPreta,
+    secondary = SecondaryColorPreta,
+    tertiary = TertiaryColorPreta,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFFD5D5D5),
+    surface = Color(0xFF383838),
+)
+
+private val LightPretaColorScheme = lightColorScheme(
+    primary = LightPrimaryColorPreta,
+    primaryContainer = LightPrimaryContainerColorPreta,
+    secondary = SecondaryColorPreta,
+    tertiary = LightTertiaryColorPreta,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
+
+    )
+
+private val DarkMestreColorScheme = darkColorScheme(
+    primary = PrimaryColorMestre,
+    primaryContainer = PrimaryContainerColorMestre,
+    secondary = SecondaryColorMestre,
+    tertiary = TertiaryColorMestre,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFFD5D5D5),
+    surface = Color(0xFF383838),
+)
+
+private val LightMestreColorScheme = lightColorScheme(
+    primary = LightPrimaryColorMestre,
+    primaryContainer = LightPrimaryContainerColorMestre,
+    secondary = SecondaryColorMestre,
+    tertiary = LightTertiaryColorMestre,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
+
+    )
+
+private val DarkGraoMestreColorScheme = darkColorScheme(
+    primary = PrimaryColorGraoMestre,
+    primaryContainer = PrimaryContainerColorGraoMestre,
+    secondary = SecondaryColorGraoMestre,
+    tertiary = TertiaryColorGraoMestre,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFF202020),
+    onBackground = Color(0xFFD5D5D5),
+    surface = Color(0xFF383838),
+)
+
+private val LightGraoMestreColorScheme = lightColorScheme(
+    primary = LightPrimaryColorGraoMestre,
+    primaryContainer = LightPrimaryContainerColorGraoMestre,
+    secondary = SecondaryColorGraoMestre,
+    tertiary = LightTertiaryColorGraoMestre,
+    onPrimary = Color.White,
+    outline = Color.White,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF202020),
+    surface = Color(0xFFE2E2E2),
+
+    )
+
 
 @Composable
 fun AppShubudoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    faixa: String,
-    content: @Composable () -> Unit
+    darkTheme: Boolean = isSystemInDarkTheme(), faixa: String, content: @Composable () -> Unit
 ) {
     val colorScheme = when (faixa) {
         "Branca" -> if (darkTheme) DarkBrancaColorScheme else LightBrancaColorScheme
@@ -175,6 +248,15 @@ fun AppShubudoTheme(
         "Verde" -> if (darkTheme) DarkVerdeColorScheme else LightVerdeColorScheme
         "Roxa" -> if (darkTheme) DarkRoxaColorScheme else LightRoxaColorScheme
         "Marrom" -> if (darkTheme) DarkMarromColorScheme else LightMarromColorScheme
+        "Preta" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Preta 1 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Preta 2 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Preta 3 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Preta 4 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Mestre" -> if (darkTheme) DarkMestreColorScheme else LightMestreColorScheme
+        "Grão Mestre" -> if (darkTheme) DarkGraoMestreColorScheme else LightGraoMestreColorScheme
+
+
         else -> if (darkTheme) DarkBrancaColorScheme else LightBrancaColorScheme
     }
     val view = LocalView.current
@@ -187,8 +269,6 @@ fun AppShubudoTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = CustomTypography,
-        content = content
+        colorScheme = colorScheme, typography = CustomTypography, content = content
     )
 }

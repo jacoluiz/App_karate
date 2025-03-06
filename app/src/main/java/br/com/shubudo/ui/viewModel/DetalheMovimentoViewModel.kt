@@ -3,7 +3,12 @@ package br.com.shubudo.ui.viewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.model.Armamento
+import br.com.shubudo.model.DefesaPessoal
+import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Kata
+import br.com.shubudo.model.Projecao
+import br.com.shubudo.model.SequenciaDeCombate
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.repositories.ProgramacaoRepository
@@ -40,10 +45,11 @@ class DetalheMovimentoViewModel @Inject constructor(
             currentUiStateJob?.cancel()
             currentUiStateJob = viewModelScope.launch {
                 var kata = emptyList<Kata>()
-                var defesaPessoal = emptyList<br.com.shubudo.model.DefesaPessoal>()
-                var sequenciaDeCombate = emptyList<br.com.shubudo.model.SequenciaDeCombate>()
-                var projecao = emptyList<br.com.shubudo.model.Projecao>()
-                var defesaExtraBanner = emptyList<br.com.shubudo.model.DefesaPessoalExtraBanner>()
+                var defesaPessoal = emptyList<DefesaPessoal>()
+                var sequenciaDeCombate = emptyList<SequenciaDeCombate>()
+                var projecao = emptyList<Projecao>()
+                var defesaExtraBanner = emptyList<DefesaPessoalExtraBanner>()
+                var armamento = emptyList<Armamento>()
                 when (movimento) {
                     "Katas" -> {
                         kata = repository.findKatasByFaixa(
@@ -58,12 +64,9 @@ class DetalheMovimentoViewModel @Inject constructor(
                     }
 
                     "Sequência de Combate" -> {
-                        sequenciaDeCombate =
-                            repository.findSequenciasDeCombateByFaixa(
-                                idFaixa = repository.findFaixaByCor(
-                                    faixa
-                                ).first()._id
-                            ).first()
+                        sequenciaDeCombate = repository.findSequenciasDeCombateByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
                     }
 
                     "Projeções" -> {
@@ -78,11 +81,15 @@ class DetalheMovimentoViewModel @Inject constructor(
                         ).first()
                     }
 
+                    "Armamento" -> {
+                        armamento = repository.findArmamentosByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
+                    }
                 }
                 val movimento = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
 
                 _uiState.update {
-
                     DetalheMovimentoUiState.Success(
                         movimento = movimento.sortedBy { it.ordem },
                         faixa = faixa,
@@ -90,7 +97,8 @@ class DetalheMovimentoViewModel @Inject constructor(
                         kata = kata.sortedBy { it.ordem },
                         sequenciaDeCombate = sequenciaDeCombate.sortedBy { it.numeroOrdem },
                         projecao = projecao.sortedBy { it.ordem },
-                        sequenciaExtraBanner = defesaExtraBanner.sortedBy { it.numeroOrdem }
+                        sequenciaExtraBanner = defesaExtraBanner.sortedBy { it.numeroOrdem },
+                        armamento = armamento.sortedBy { it.numeroOrdem }
                     )
                 }
             }

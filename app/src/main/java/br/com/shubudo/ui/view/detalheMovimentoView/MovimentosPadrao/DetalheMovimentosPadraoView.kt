@@ -36,13 +36,16 @@ import br.com.shubudo.ui.view.detalheMovimentoView.EsqueletoTela
 
 @Composable
 fun TelaDetalheMovimentoPadrao(
+    faixa: String,
     movimento: Movimento,
     onBackNavigationClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        EsqueletoTela {
+        EsqueletoTela(
+            faixa = faixa
+        ) {
             AnimatedContent(
                 targetState = movimento,
                 transitionSpec = {

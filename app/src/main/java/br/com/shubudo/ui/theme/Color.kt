@@ -12,7 +12,7 @@ val PrimaryContainerColorBranca = Color(0xFFD9D9D9)
 val SecondaryColorBranca = Color(0xFFFFFFFF)
 
 val LightTertiaryColorBranca = Color(0xFF919191)
-val TertiaryColorBranca = Color(0xFFAFAFAF)
+val TertiaryColorBranca = Color(0xFF808080)
 
 // Amarela
 val LightPrimaryColorAmarela = Color(0xFFD6B601)
@@ -65,3 +65,39 @@ val SecondaryColorMarron = Color(0xFF452900)
 
 val TertiaryColorMarron = Color(0xFF473F33)
 val LightTertiaryColorMarron = Color(0xFFA29075)
+
+//Preta
+val LightPrimaryColorPreta = Color(0xFF111111)
+val LightPrimaryContainerColorPreta = Color(0xFF111111)
+
+val PrimaryColorPreta = Color(0xFF111111)
+val PrimaryContainerColorPreta = Color(0xFF111111)
+
+val SecondaryColorPreta = Color(0xFF343434)
+
+val TertiaryColorPreta = Color(0xFF5F5F5F)
+val LightTertiaryColorPreta = Color(0xFF5F5F5F)
+
+//Mestre
+val LightPrimaryColorMestre = Color(0xFFA22424)
+val LightPrimaryContainerColorMestre = Color(0xFFA22424)
+
+val PrimaryColorMestre = Color(0xFFA22424)
+val PrimaryContainerColorMestre = Color(0xFFA22424)
+
+val SecondaryColorMestre = Color(0xFFA83232)
+
+val TertiaryColorMestre = Color(0xFFB14747)
+val LightTertiaryColorMestre = Color(0xFFB14747)
+
+//Grão Mestre
+val LightPrimaryColorGraoMestre = Color(0xFF511212)
+val LightPrimaryContainerColorGraoMestre = Color(0xFF511212)
+
+val PrimaryColorGraoMestre = Color(0xFF511212)
+val PrimaryContainerColorGraoMestre = Color(0xFF511212)
+
+val SecondaryColorGraoMestre = Color(0xFF7A1B1B)
+
+val TertiaryColorGraoMestre = Color(0xFFA22424)
+val LightTertiaryColorGraoMestre = Color(0xFFA22424)

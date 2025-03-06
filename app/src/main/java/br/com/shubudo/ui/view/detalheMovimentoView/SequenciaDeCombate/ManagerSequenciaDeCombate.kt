@@ -40,7 +40,8 @@ fun TelaSequenciaDeCombateManager(
         }, label = ""
     ) { sequenciaDeCombate ->
         if (sequenciaDeCombate != null) {
-            TelaDetalheSequenciaDeCombate (
+            TelaDetalheSequenciaDeCombate ( faixa = uiState.faixa,
+
                 sequenciaDeCombate = sequenciaDeCombate,
                 onBackNavigationClick = { selectedMoviento = null }
             )

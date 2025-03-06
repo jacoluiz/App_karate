@@ -26,13 +26,16 @@ import br.com.shubudo.utils.toOrdinario
 
 @Composable
 fun TelaDetalheSequenciaDeCombate(
+    faixa: String,
     sequenciaDeCombate: SequenciaDeCombate,
     onBackNavigationClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        EsqueletoTela {
+        EsqueletoTela (
+            faixa = faixa
+        ){
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),

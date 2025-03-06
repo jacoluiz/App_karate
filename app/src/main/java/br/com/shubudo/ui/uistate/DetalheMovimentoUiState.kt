@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.uistate
 
+import br.com.shubudo.model.Armamento
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Kata
@@ -19,6 +20,7 @@ sealed class DetalheMovimentoUiState {
         val sequenciaExtraBanner: List<DefesaPessoalExtraBanner>,
         val projecao: List<Projecao>,
         val faixa: String,
+        val armamento: List<Armamento>,
 
         ) : DetalheMovimentoUiState()
 

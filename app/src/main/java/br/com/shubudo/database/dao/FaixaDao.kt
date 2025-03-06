@@ -23,4 +23,8 @@ interface FaixaDao {
 
     @Query("SELECT * FROM Faixa WHERE faixa = :cor")
     fun getFaixaByCor(cor: String): Flow<FaixaEntity>
+
+    // Método para deletar todas as faixas do banco de dados
+    @Query("DELETE FROM Faixa")
+    suspend fun deletarTodos()
 }

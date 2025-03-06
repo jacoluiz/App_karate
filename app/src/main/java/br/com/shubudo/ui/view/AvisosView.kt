@@ -40,6 +40,15 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
+fun String.formatDate(): String {
+    return try {
+        val zdt = ZonedDateTime.parse(this)
+        zdt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    } catch (e: DateTimeParseException) {
+        this
+    }
+}
+
 @Composable
 fun AvisosView(
     uiState: AvisoUiState,
@@ -53,7 +62,7 @@ fun AvisosView(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                // Cabeçalho colorido de fundo
+                // Cabeçalho de fundo
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -61,25 +70,18 @@ fun AvisosView(
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)
                 ) { }
-                LoadingOverlay(true) { }
+                LoadingOverlay(true) {}
             }
         }
-        is AvisoUiState.Empty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Nenhum aviso disponível no momento!",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+        is AvisoUiState.Success, is AvisoUiState.Empty -> {
+            // Se Success, usamos a lista de avisos; se Empty, lista vazia.
+            val avisosList = when (uiState) {
+                is AvisoUiState.Success -> uiState.avisos
+                is AvisoUiState.Empty -> emptyList()
+                else -> emptyList()
             }
-        }
-        is AvisoUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho simples com fundo colorido
+                // Cabeçalho com fundo colorido atrás do texto
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,13 +91,16 @@ fun AvisosView(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 32.dp),
+                            .padding(vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Mantenha-se informado",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
@@ -129,21 +134,36 @@ fun AvisosView(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
-                // Lista de avisos
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 8.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.avisos) { aviso ->
-                        // Exibe o item se o aviso for liberado para a faixa do usuário ou não possuir restrição
-                        if (aviso.exclusivoParaFaixas.contains(SessionManager.usuarioLogado?.corFaixa)
-                            || aviso.exclusivoParaFaixas.isEmpty()
-                        ) {
-                            AvisoItem(
-                                aviso = aviso,
-                                onClick = { onAvisoClick(aviso) }
-                            )
+                // Se a lista estiver vazia, exibe mensagem; caso contrário, exibe os itens.
+                if (avisosList.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Nenhum aviso disponível no momento!",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 8.dp, start = 16.dp, end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(avisosList) { aviso ->
+                            if (aviso.exclusivoParaFaixas.contains(SessionManager.usuarioLogado?.corFaixa)
+                                || aviso.exclusivoParaFaixas.isEmpty()
+                            ) {
+                                AvisoItem(
+                                    aviso = aviso,
+                                    onClick = { onAvisoClick(aviso) }
+                                )
+                            }
                         }
                     }
                 }
@@ -152,21 +172,6 @@ fun AvisosView(
     }
 }
 
-fun String.formatDate(): String {
-    return try {
-        val zdt = ZonedDateTime.parse(this)
-        // Formata para "dd/MM/yyyy"
-        zdt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    } catch (e: DateTimeParseException) {
-        // Caso a data não possa ser parseada, retorna a própria string ou um valor padrão
-        this
-    }
-}
-
-/**
- * Item de aviso com uma barra vertical colorida à esquerda.
- * A linha inteira é clicável.
- */
 @Composable
 fun AvisoItem(
     aviso: Aviso,
@@ -179,40 +184,33 @@ fun AvisoItem(
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Barra vertical usando a cor primária
+        // Barra vertical com a cor primária
         Box(
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
                 .background(color = MaterialTheme.colorScheme.primary)
         )
-        // Conteúdo do aviso
+        Spacer(modifier = Modifier.width(8.dp))
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 8.dp)
+                .padding(vertical = 4.dp)
         ) {
-            // Data formatada
             Text(
                 text = if (aviso.dataCriacao.isNotBlank()) aviso.dataCriacao.formatDate() else "15/03/2024",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 4.dp)
+                color = Color.Gray
             )
-            // Título
             Text(
                 text = aviso.titulo,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 2.dp)
+                style = MaterialTheme.typography.bodyMedium
             )
-            // Conteúdo ou subtítulo
             Text(
                 text = aviso.conteudo,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 4.dp)
+                color = Color.Gray
             )
         }
     }
 }
-

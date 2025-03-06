@@ -1,17 +1,12 @@
 package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -36,7 +31,8 @@ import coil.compose.rememberAsyncImagePainter
 @Composable
 fun DetalheAvisoView(
     uiState: DetalheAvisoUiState,
-    onNavigationPop: () -> Unit // Callback para voltar à tela após exclusão
+    onNavigationPop: () -> Unit, // Callback para voltar à tela após exclusão
+    onEdit: (Any?) -> Unit          // Callback para iniciar a edição do aviso
 ) {
     val viewModel: DetalheAvisoViewModel = hiltViewModel()
     val imagemDefault =
@@ -52,7 +48,6 @@ fun DetalheAvisoView(
                 CircularProgressIndicator()
             }
         }
-
         is DetalheAvisoUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Imagem do aviso
@@ -67,26 +62,35 @@ fun DetalheAvisoView(
                         .fillMaxWidth(),
                     contentScale = ContentScale.Fit
                 )
-                // Botão de delete para administradores
-                if (SessionManager.usuarioLogado?.perfil?.equals(
-                        "adm",
-                        ignoreCase = true
-                    ) == true
-                ) {
-                    IconButton(
-                        onClick = { showDeleteConfirm.value = true },
+                // Botões de ação (Editar e Deletar) para administradores
+                if (SessionManager.usuarioLogado?.perfil?.equals("adm", ignoreCase = true) == true) {
+                    Row(
                         modifier = Modifier
                             .align(Alignment.End)
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Deletar Aviso",
-                            tint = MaterialTheme.colorScheme.error
-                        )
+                        IconButton(
+                            onClick = { onEdit(uiState.aviso._id) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar Aviso",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(
+                            onClick = { showDeleteConfirm.value = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Deletar Aviso",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
-                // Diálogo de confirmação
+                // Diálogo de confirmação para exclusão
                 if (showDeleteConfirm.value) {
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirm.value = false },
@@ -98,7 +102,7 @@ fun DetalheAvisoView(
                                 viewModel.deleteAviso(
                                     onSuccess = { onNavigationPop() },
                                     onError = { errorMsg ->
-                                        // Aqui você pode exibir um alerta de erro
+                                        // Trate o erro conforme necessário, por exemplo, exiba uma mensagem de alerta.
                                         println("Erro ao deletar aviso: $errorMsg")
                                     }
                                 )
@@ -113,7 +117,7 @@ fun DetalheAvisoView(
                         }
                     )
                 }
-                // Área de conteúdo com scroll, para caso o aviso seja muito grande
+                // Área de conteúdo com scroll para textos longos
                 Surface(
                     modifier = Modifier
                         .padding(16.dp)
@@ -137,7 +141,6 @@ fun DetalheAvisoView(
                 }
             }
         }
-
         is DetalheAvisoUiState.Error -> {
             Box(
                 modifier = Modifier.fillMaxSize(),

@@ -38,6 +38,7 @@ fun TelaProjecaoManager(
     ) { projecao ->
         if (projecao != null) {
             TelaDetalheProjecao(
+                faixa = uiState.faixa,
                 projecao = projecao,
                 onBackNavigationClick = { selectedProjecao = null }
             )

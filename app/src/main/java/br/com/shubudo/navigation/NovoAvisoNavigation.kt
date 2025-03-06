@@ -3,33 +3,55 @@ package br.com.shubudo.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.NovoAvisoView
+import androidx.navigation.navArgument
+import br.com.shubudo.ui.view.NovoOuEditarAvisoView
 
-// Define a rota para a tela de NovoAviso
+// 🔹 Rotas separadas para criar e editar
 internal const val novoAvisoRoute = "novoAviso"
+internal const val editarAvisoRoute = "editarAviso/{avisoId}"
 
-// Registra a tela de NovoAviso no NavGraph
+/**
+ * Adiciona as telas de criação e edição de avisos no NavGraph
+ */
 fun NavGraphBuilder.novoAvisoScreen(
-    onSaveSuccess: () -> Unit,  // Callback disparado após salvar com sucesso
-    onCancelar: () -> Unit       // Callback para cancelar a operação
+    onSaveSuccess: () -> Unit,
+    onCancel: () -> Unit
 ) {
+    // 🔹 Tela para criação de um novo aviso (sem avisoId)
     composable(novoAvisoRoute) {
-        // Obtém o ViewModel com Hilt
-//        val viewModel = hiltViewModel<NovoAvisoViewModel>()
-        // Coleta o estado da UI exposto pelo ViewModel
-//        val uiState by viewModel.uiState.collectAsState()
-        // Renderiza a tela de NovoAviso
-        NovoAvisoView(
+        NovoOuEditarAvisoView(
+            avisoId = null,
             onSave = { onSaveSuccess() },
-            onCancel = { onCancelar() }
+            onCancel = { onCancel() }
+        )
+    }
+
+    // 🔹 Tela para edição de um aviso existente (passando avisoId)
+    composable(
+        route = editarAvisoRoute,
+        arguments = listOf(navArgument("avisoId") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val avisoId = backStackEntry.arguments?.getString("avisoId")!!
+        NovoOuEditarAvisoView(
+            avisoId = avisoId,
+            onSave = { onSaveSuccess() },
+            onCancel = { onCancel() }
         )
     }
 }
 
-// Função de extensão para facilitar a navegação para a tela de NovoAviso
-fun NavController.navigateToNovoAviso(
-    navOptions: NavOptions? = null
-) {
+/**
+ * 🔹 Função para navegar até a tela de criação de um novo aviso
+ */
+fun NavController.navigateToNovoAviso(navOptions: NavOptions? = null) {
     navigate(novoAvisoRoute, navOptions)
+}
+
+/**
+ * 🔹 Função para navegar até a tela de edição de um aviso existente
+ */
+fun NavController.navigateToEditarAviso(avisoId: String, navOptions: NavOptions? = null) {
+    navigate("editarAviso/$avisoId", navOptions)
 }

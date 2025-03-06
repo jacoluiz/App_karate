@@ -27,16 +27,19 @@ class FaixaRepository @Inject constructor(
             try {
                 val response = service.getFaixas()
                 val entities = response.map { it.toFaixaEntity() }
+                // Apaga todas as faixas existentes no banco
+                dao.deletarTodos()
+                // Salva as novas faixas
                 dao.saveAll(*entities.toTypedArray())
             } catch (e: ConnectException) {
                 Log.e("FaixaRepository", "findSections: falha ao conectar na API", e)
             }
         }
-
         return dao.getFaixas().map { entityList ->
             entityList.map { it.toFaixa() }
         }
     }
+
 
     suspend fun findByNome(cor: String): Flow<Faixa?> {
         // Sincroniza os dados em segundo plano

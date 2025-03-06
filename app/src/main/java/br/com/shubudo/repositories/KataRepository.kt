@@ -21,22 +21,6 @@ class KataRepository @Inject constructor(
     private val service: KataServices,
     private val dao: KataDao
 ) {
-    suspend fun findAll(): Flow<List<Kata>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getKatas()
-                val entities = response.map { it.toKataEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("KataRepository", "findSections: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getKatas().map { entities ->
-            entities.map { it.toKata() }
-        }
-    }
-
     suspend fun findByFaixa(faixa: String): Flow<List<Kata>> {
         CoroutineScope(coroutineContext).launch {
             try {

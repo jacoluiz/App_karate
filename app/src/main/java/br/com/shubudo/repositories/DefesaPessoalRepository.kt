@@ -18,23 +18,6 @@ class DefesaPessoalRepository @Inject constructor(
     private val service: DefesaPessoalServices,
     private val dao: DefesaPessoalDao
 ) {
-
-    suspend fun findAll(): Flow<List<DefesaPessoal>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getDefesasPessoais()
-                val entities = response.map { it.toDefesaPessoalEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("DefesaPessoalRepository", "findSections: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getDefesasPessoais().map { entities ->
-            entities.map { it.toDefesaPessoal() }
-        }
-    }
-
     suspend fun findByFaixa(faixa: String): Flow<List<DefesaPessoal>> {
         CoroutineScope(coroutineContext).launch {
             try {

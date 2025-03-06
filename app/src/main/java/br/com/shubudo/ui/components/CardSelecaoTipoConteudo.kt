@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -64,6 +63,12 @@ sealed class Conteudo(
         texto = "Projeções",
     )
 
+    object Armamento : Conteudo(
+        texto = "Armamento",
+    )
+
+
+
 }
 
 @Composable
@@ -81,7 +86,7 @@ fun CardSelecaoTipoConteudo(
             .padding(top = 16.dp, bottom = 16.dp),
         elevation = CardDefaults.cardElevation(16.dp),
 
-    ) {
+        ) {
         Column {
             itens.forEach() { item ->
                 Row(
@@ -123,16 +128,23 @@ fun preencherLista(p: Programacao): List<Conteudo> {
         itensTemp.add(Conteudo.Katas)
     }
     if (p.sequenciaDeCombate.isNotEmpty()) {
-        Conteudo.SequenciaDeCombate.icon = ImageVector.vectorResource(id = R.drawable.ic_sequencia_de_combate)
+        Conteudo.SequenciaDeCombate.icon =
+            ImageVector.vectorResource(id = R.drawable.ic_sequencia_de_combate)
         itensTemp.add(Conteudo.SequenciaDeCombate)
     }
     if (p.defesaExtraBanner.isNotEmpty()) {
-        Conteudo.DefesaExtraBanner.icon = ImageVector.vectorResource(id = R.drawable.ic_defesa_pessoal)
+        Conteudo.DefesaExtraBanner.icon =
+            ImageVector.vectorResource(id = R.drawable.ic_defesa_pessoal)
         itensTemp.add(Conteudo.DefesaExtraBanner)
     }
     if (p.projecoes.isNotEmpty()) {
         Conteudo.Projecao.icon = ImageVector.vectorResource(id = R.drawable.ic_projecoes)
         itensTemp.add(Conteudo.Projecao)
+    }
+
+    if (p.armamento.isNotEmpty()){
+        Conteudo.Armamento.icon = ImageVector.vectorResource(id = R.drawable.ic_aramamento)
+        itensTemp.add(Conteudo.Armamento)
     }
 
     return itensTemp

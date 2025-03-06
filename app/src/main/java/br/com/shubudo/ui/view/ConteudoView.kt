@@ -2,16 +2,9 @@ package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,8 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlusOne
 import androidx.compose.material.icons.outlined.SportsMartialArts
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,9 +28,17 @@ import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.components.DropDownMenuCard
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
+import br.com.shubudo.ui.theme.PrimaryColorMarron
+import br.com.shubudo.ui.theme.PrimaryColorPreta
+import br.com.shubudo.ui.theme.PrimaryColorMestre
+import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+
+// Lista de faixas bloqueadas para usuários que não são avançados (por exemplo, abaixo da preta).
+// Se o usuário estiver em uma faixa avançada (cujo valor esteja nesta lista), ele verá todas as opções.
+val FAIXAS_BLOQUEADAS = listOf("preta", "mestre", "grão mestre", "preta 1 dan", "preta 2 dan", "preta 3 dan", "preta 4 dan")
 
 @Composable
 fun ProgramacaoView(
@@ -53,13 +52,6 @@ fun ProgramacaoView(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                // Cabeçalho colorido (apenas para exibir o Loading)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
                 LoadingOverlay(true) {}
             }
         }
@@ -77,10 +69,11 @@ fun ProgramacaoView(
         }
         is ProgramacaoUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho com fundo colorido apenas atrás do texto
+                // Cabeçalho com fundo colorido atrás do texto
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(120.dp)
                         .background(MaterialTheme.colorScheme.primary)
                         .padding(vertical = 16.dp)
                 ) {
@@ -97,52 +90,54 @@ fun ProgramacaoView(
                         )
                     }
                 }
-
-                // Conteúdo principal
+                // Conteúdo principal com os drop-downs
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 28.dp)
                 ) {
-                    // Surface para conter os menus (com fundo branco ou definido pelo tema)
-
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            // Primeiro drop-down para Programação
-                            DropDownMenuCard(
-                                titulo = "Programação",
-                                icone = Icons.Outlined.SportsMartialArts
-                            ) {
-                                Column {
-                                    uiState.faixas.forEach { faixa ->
-                                        if (!listaBloqueiFaixas().contains(faixa.faixa)) {
-                                            val iconPainter = if (faixa.faixa == "Branca" && !isSystemInDarkTheme()) {
-                                                painterResource(id = R.drawable.ic_faixa_outline)
-                                            } else {
-                                                painterResource(id = R.drawable.ic_faixa)
-                                            }
-                                            CustomIconButton(
-                                                texto = faixa.faixa,
-                                                iconPainter = iconPainter,
-                                                onClick = {
-                                                    themeViewModel.changeThemeFaixa(faixa.faixa)
-                                                    onClickFaixa(faixa.faixa)
-                                                },
-                                                cor = selecionaCorIcone(
-                                                    faixa.faixa,
-                                                    isSystemInDarkTheme()
-                                                )
-                                            )
-                                        }
+                    // Drop-down para Programação
+                    DropDownMenuCard(
+                        titulo = "Programação",
+                        icone = Icons.Outlined.SportsMartialArts
+                    ) {
+                        // Para possibilitar scroll caso a lista seja longa
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Obtém a faixa do usuário (normalizada)
+                            val userFaixa = SessionManager.usuarioLogado?.corFaixa?.trim()?.lowercase() ?: ""
+                            uiState.faixas.forEach { faixa ->
+                                val faixaNome = faixa.faixa.trim().lowercase()
+                                // Se o usuário for avançado (faixa dentro de FAIXAS_BLOQUEADAS), mostra todas as opções.
+                                // Caso contrário, mostra somente se a faixa atual não estiver na lista de bloqueadas.
+                                if (userFaixa in FAIXAS_BLOQUEADAS || (userFaixa !in FAIXAS_BLOQUEADAS && faixaNome !in FAIXAS_BLOQUEADAS)) {
+                                    val iconPainter = if (faixa.faixa == "Branca" && !isSystemInDarkTheme()) {
+                                        painterResource(id = R.drawable.ic_faixa_outline)
+                                    } else {
+                                        painterResource(id = R.drawable.ic_faixa)
                                     }
+                                    CustomIconButton(
+                                        texto = faixa.faixa,
+                                        iconPainter = iconPainter,
+                                        onClick = {
+                                            themeViewModel.changeThemeFaixa(faixa.faixa)
+                                            onClickFaixa(faixa.faixa)
+                                        },
+                                        cor = selecionaCorIcone(faixa.faixa, isSystemInDarkTheme())
+                                    )
                                 }
                             }
-                            // Segundo drop-down para Conteúdo Adicional (vazio neste exemplo)
-                            DropDownMenuCard(
-                                titulo = "Conteudo adicional",
-                                icone = Icons.Outlined.PlusOne
-                            ) {}
                         }
-
+                    }
+                    // Drop-down para Conteúdo Adicional (vazio neste exemplo)
+                    DropDownMenuCard(
+                        titulo = "Conteúdo adicional",
+                        icone = Icons.Outlined.PlusOne
+                    ) {}
                 }
             }
         }
@@ -156,14 +151,14 @@ fun selecionaCorIcone(faixa: String, isDarkTheme: Boolean): Color {
         "Laranja" -> Color(0xFFF46000)
         "Verde" -> Color(0xFF00800D)
         "Roxa" -> PrimaryColorRoxa
-        "Marrom" -> Color(0xFF6E3812)
-        "Preta" -> Color.Black
-        "Mestre" -> Color(0xFF8A2BE2)
-        "Grão Mestre" -> Color(0xFF8A2BE2)
+        "Marrom" -> PrimaryColorMarron
+        "Preta" -> PrimaryColorPreta
+        "Preta 1 dan" -> PrimaryColorPreta
+        "Preta 2 dan" -> PrimaryColorPreta
+        "Preta 3 dan" -> PrimaryColorPreta
+        "Preta 4 dan" -> PrimaryColorPreta
+        "Mestre" -> PrimaryColorMestre
+        "Grão Mestre" -> PrimaryColorGraoMestre
         else -> Color(0xFF8A2BE2)
     }
-}
-
-fun listaBloqueiFaixas(): List<String> {
-    return listOf("Preta", "Mestre", "Grão Mestre")
 }

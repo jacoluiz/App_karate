@@ -2,7 +2,6 @@ package br.com.shubudo.ui.view.detalheMovimentoView.kata
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TelaDetalheKata(
+    faixa: String,
     viewModel: KataViewModel,
     kata: Kata,
     onBackNavigationClick: () -> Unit
@@ -70,13 +71,10 @@ fun TelaDetalheKata(
                     when (playbackState) {
                         ExoPlayer.STATE_BUFFERING ->
                             Log.i("KataViewModel", "ExoPlayer está carregando o vídeo.")
-
                         ExoPlayer.STATE_READY ->
                             Log.i("KataViewModel", "ExoPlayer está pronto para reproduzir o vídeo.")
-
                         ExoPlayer.STATE_ENDED ->
                             Log.i("KataViewModel", "A reprodução do vídeo terminou.")
-
                         ExoPlayer.STATE_IDLE ->
                             Log.i("KataViewModel", "ExoPlayer está no estado idle.")
                     }
@@ -91,9 +89,7 @@ fun TelaDetalheKata(
 
     // Liberando o ExoPlayer quando o Composable sair de cena (boa prática)
     DisposableEffect(exoPlayer) {
-        onDispose {
-            exoPlayer.release()
-        }
+        onDispose { exoPlayer.release() }
     }
 
     // Carrega os vídeos sempre que o ViewModel ou o Kata mudarem (ou somente no início)
@@ -101,32 +97,33 @@ fun TelaDetalheKata(
         viewModel.loadVideos(kata, context, exoPlayer)
     }
 
-    // Localiza a lista de tempos de vídeo correspondente à orientação atual
-    val currentTemposVideos =
-        kata.temposVideos.find { it.descricao == viewModel.currentVideo.value?.orientacao }
+    // Extrai o caminho do vídeo atual a partir do viewModel
+    val videoPath = viewModel.localFilePaths.value[viewModel.currentVideo.value?.orientacao]
 
-        if (!viewModel.videoCarregado.value) {
-            // Exibe um overlay de carregamento enquanto o vídeo não estiver pronto
-            LoadingOverlay(true) { }
-        } else {
-            // Player de vídeo
-
-                LocalVideoPlayer(viewModel = viewModel, exoPlayer = exoPlayer)
-
-            EsqueletoTela {
+    if (!viewModel.videoCarregado.value) {
+        // Exibe um overlay de carregamento enquanto o vídeo não estiver pronto
+        LoadingOverlay(true) { }
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Player de vídeo na parte superior da tela
+            LocalVideoPlayer(
+                videoPath = videoPath,
+                exoPlayer = exoPlayer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp),
+                useController = false
+            )
+            EsqueletoTela(faixa = faixa) {
                 LazyColumn(
                     state = listState,
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxHeight()
+                    modifier = Modifier.fillMaxHeight()
                 ) {
                     item {
                         // Seção superior com botões de controle e seleção de tempos
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             Row(
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 modifier = Modifier.fillMaxWidth()
@@ -149,7 +146,6 @@ fun TelaDetalheKata(
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
-
                                 // Botão para alternar a orientação do vídeo
                                 IconButton(onClick = {
                                     if (kata.video.isNotEmpty()) {
@@ -183,7 +179,6 @@ fun TelaDetalheKata(
                                     )
                                 }
                             }
-
                             // Título centralizado para a lista de tempos
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -193,11 +188,12 @@ fun TelaDetalheKata(
                                     text = "Pular para o movimento:",
                                     color = MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                             }
-
                             // Botões que pulam para os tempos específicos no vídeo
+                            val currentTemposVideos =
+                                kata.temposVideos.find { it.descricao == viewModel.currentVideo.value?.orientacao }
                             FlowRow(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -205,30 +201,25 @@ fun TelaDetalheKata(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 currentTemposVideos?.tempo?.forEachIndexed { index, time ->
-                                    TextButton(
-                                        onClick = {
-                                            viewModel.seekTo(exoPlayer, time * 1000L)
-                                            coroutineScope.launch {
-                                                pagerState.animateScrollToPage(index)
-                                            }
+                                    TextButton(onClick = {
+                                        viewModel.seekTo(exoPlayer, time * 1000L)
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
                                         }
-                                    ) {
+                                    }) {
                                         Text(text = "${index + 1}º")
                                     }
                                 }
                             }
                         }
                     }
-
                     // HorizontalPager exibindo cada movimento
                     item {
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize()
                         ) { pageIndex ->
-                            Column(
-                                modifier = Modifier.fillMaxSize()
-                            ) {
+                            Column(modifier = Modifier.fillMaxSize()) {
                                 Text(
                                     modifier = Modifier
                                         .padding(top = 22.dp, start = 16.dp)
@@ -237,8 +228,6 @@ fun TelaDetalheKata(
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-
-
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -259,24 +248,14 @@ fun TelaDetalheKata(
                                         icone = Icons.Default.Accessibility
                                     )
                                 }
-
                                 Text(
-                                    modifier = Modifier.padding(
-                                        top = 16.dp,
-                                        start = 16.dp,
-                                        end = 16.dp
-                                    ),
+                                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                                     text = kata.movimentos[pageIndex].nome,
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-
                                 Text(
-                                    modifier = Modifier.padding(
-                                        top = 16.dp,
-                                        start = 16.dp,
-                                        end = 16.dp
-                                    ),
+                                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                                     text = kata.movimentos[pageIndex].descricao,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     style = MaterialTheme.typography.bodyMedium
@@ -287,7 +266,7 @@ fun TelaDetalheKata(
                 }
             }
         }
-
+    }
 
     // Botão de voltar
     BotaoVoltar(

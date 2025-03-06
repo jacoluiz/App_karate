@@ -7,9 +7,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Feed
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.SportsMartialArts
+import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +33,7 @@ sealed class BottomAppBarItem(
     )
 
     object Avisos : BottomAppBarItem(
-        Icons.AutoMirrored.Filled.Message, "Avisos"
+        Icons.Outlined.Campaign, "Avisos"
     )
 
     object Perfil : BottomAppBarItem(
@@ -53,17 +56,17 @@ fun KarateBottomAppBar(
             val isSelected = it == selectedItem
             val iconSize by animateDpAsState(
                 targetValue = if (isSelected) 42.dp else 28.dp,
-                animationSpec = tween(durationMillis = 300)
+                animationSpec = tween(durationMillis = 300), label = ""
             )
 
             val offset by animateDpAsState(
                 targetValue = if (isSelected) (-6).dp else 0.dp,
-                animationSpec = tween(durationMillis = 300)
+                animationSpec = tween(durationMillis = 300), label = ""
             )
 
             val textColor by animateColorAsState(
                 targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-                animationSpec = tween(durationMillis = 300)
+                animationSpec = tween(durationMillis = 300), label = ""
             )
 
             NavigationBarItem(

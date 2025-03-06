@@ -2,7 +2,6 @@ package br.com.shubudo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
@@ -13,31 +12,43 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun KarateNavHost(
-    navController: NavHostController = rememberNavController(),
+    navController: androidx.navigation.NavHostController = rememberNavController(),
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
     NavHost(navController, startDestination = AppDestination.Login.route) {
-        avisosScreen(
-            onReload = {
-                navController.navigateToAvisos()
+        // Tela de Login
+        loginScreen(
+            themeViewModel = themeViewModel,
+            onNavigateToNovoUsuario = { username ->
+                navController.navigateToNovoUsuario(username.toString())
             },
+            onNavigateToHome = {
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
+            },
+            onNavigateToEsqueciMinhaSenha = {
+                navController.navigateToEsqueciMinhaSenha()
+            }
+        )
 
+        // Tela de Avisos
+        avisosScreen(
+            onReload = { navController.navigateToAvisos() },
             onAvisoClick = { aviso: Aviso ->
                 navController.navigateToDetalheAviso(aviso._id)
             },
-
-            onAddAvisoClick = {
-                navController.navigateToNovoAviso()
-            }
+            onAddAvisoClick = { navController.navigateToNovoAviso() }
         )
 
+        // Tela de Detalhe do Aviso (com opções para deletar e editar)
         detalheAvisoScreen(
-            onDelete = {
-                navController.popBackStack()
+            onDelete = { navController.popBackStack() },
+            onEdit = { avisoId ->
+                navController.navigateToEditarAviso(avisoId.toString())
             }
         )
 
+        // Tela de Perfil
         perfilScreen(
             themeViewModel = themeViewModel,
             onLogout = {
@@ -48,80 +59,56 @@ fun KarateNavHost(
                     launchSingleTop = true
                 }
             },
-            onEditarPerfil = {
-                navController.navigateToEditarPerfil()
-            }
+            onEditarPerfil = { navController.navigateToEditarPerfil() }
         )
 
+        // Tela de Esqueci Minha Senha
         esqueciMinhaSenhaScreen(
-            onSendResetRequest = {
-                navController.popBackStack()
-            }
+            onSendResetRequest = { navController.popBackStack() }
         )
 
+        // Tela de Programação
         programacaoScreen(
             onNavigateToDetalheFaixa = { navController.navigateToDetalheFaixa(it) },
             themeViewModel = themeViewModel
         )
 
-        detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->
-            navController.navigateToDetalheMovimento(faixa, movimento)
-        })
-
-        detalheMovimentoScreen(
-            onBackNavigationClick = {
-                navController.popBackStack()
+        // Tela de Detalhe da Faixa
+        detalheFaixaScreen(
+            onNavigateToDetalheMovimento = { faixa, movimento ->
+                navController.navigateToDetalheMovimento(faixa, movimento)
             }
         )
 
+        // Tela de Detalhe do Movimento
+        detalheMovimentoScreen(
+            onBackNavigationClick = { navController.popBackStack() }
+        )
+
+        // Tela de Novo Usuário
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToLogin = {
-                navController.popBackStack()
-            }
+            onNavigateToLogin = { navController.popBackStack() }
         )
 
-        loginScreen(
-            themeViewModel = themeViewModel,
-            onNavigateToNovoUsuario = { username ->
-                navController.navigateToNovoUsuario(username.toString()) // Passa o valor de "username"
-            },
-
-            onNavigateToHome = {
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
-            },
-
-            onNavigateToEsqueciMinhaSenha = {
-                navController.navigateToEsqueciMinhaSenha()
-            }
-        )
-
+        // Tela de Editar Perfil
         editarPerfilScreen(
             themeViewModel = themeViewModel,
-            onSaveSuccess = {
-
-                navController.popBackStack()
-
-            },
-            onCancelar = {
-                navController.popBackStack()
-            }
-        )
-
-        novoAvisoScreen(
-            onSaveSuccess = {
-                navController.navigateToAvisos()
-            },
+            onSaveSuccess = { navController.popBackStack() },
             onCancelar = { navController.popBackStack() }
         )
 
+        // Tela de Criar ou Editar Aviso
+        novoAvisoScreen(
+            onSaveSuccess = { navController.navigateToAvisos() },
+            onCancel = { navController.popBackStack() }
+        )
     }
 }
 
-fun NavController.navigateToBottomAppBarItem(
-    item: BottomAppBarItem,
-) {
+// Navegação para a tela correta dependendo do item da BottomBar
+fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
     when (item) {
         BottomAppBarItem.Conteudo -> {
             navigateToProgramacao(navOptions {
@@ -129,20 +116,17 @@ fun NavController.navigateToBottomAppBarItem(
                 popUpTo(programacaoRoute)
             })
         }
-
         BottomAppBarItem.Avisos -> {
             navigateToAvisos(navOptions {
                 launchSingleTop = true
                 popUpTo(avisosRoute)
             })
         }
-
         BottomAppBarItem.Perfil -> {
             navigateToPerfil(navOptions {
                 launchSingleTop = true
                 popUpTo(perfilRoute)
             })
         }
-
     }
 }

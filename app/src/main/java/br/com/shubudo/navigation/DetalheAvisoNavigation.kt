@@ -16,7 +16,8 @@ internal const val detalheAvisoRoute = "detalheAviso/{$detalheAvisoArgument}"
 
 // Na navegação, declare o argumento para que o framework o trate corretamente.
 fun NavGraphBuilder.detalheAvisoScreen(
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: (Any?) -> Unit
 ) {
     composable(
         route = detalheAvisoRoute,
@@ -34,7 +35,8 @@ fun NavGraphBuilder.detalheAvisoScreen(
         // Renderiza a view, passando o estado da UI.
         DetalheAvisoView(
             uiState = uiState,
-            onNavigationPop = onDelete
+            onNavigationPop = onDelete,
+            onEdit = onEdit
         )
     }
 }

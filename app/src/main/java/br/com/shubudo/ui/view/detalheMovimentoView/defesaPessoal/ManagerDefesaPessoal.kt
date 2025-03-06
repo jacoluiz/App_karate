@@ -40,6 +40,7 @@ fun TelaDefesaPessoalManager(
 
         if (defesaPessoal != null) {
             TelaDetalheDefesaPessoal(
+                faixa = uiState.faixa,
                 defesaPessoal = defesaPessoal,
                 onBackNavigationClick = { selectedDefesaPessoal = null }
             )

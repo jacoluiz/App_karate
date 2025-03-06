@@ -23,12 +23,15 @@ import br.com.shubudo.utils.toOrdinarioFeminino
 
 @Composable
 fun TelaDetalheExtraBanner(
+    faixa: String,
     onBackNavigationClick: () -> Unit,
     extraBanner: DefesaPessoalExtraBanner
 ) {
     val listState = rememberLazyListState()
 
-    EsqueletoTela {
+    EsqueletoTela(
+        faixa = faixa
+    ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)

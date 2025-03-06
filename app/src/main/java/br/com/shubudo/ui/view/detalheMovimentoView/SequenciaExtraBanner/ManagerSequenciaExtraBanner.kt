@@ -38,7 +38,7 @@ fun TelaExtraBannerManager(
         }, label = ""
     ) { extraBanner ->
         if (extraBanner != null) {
-            TelaDetalheExtraBanner(
+            TelaDetalheExtraBanner(faixa = uiState.faixa,
                 extraBanner = extraBanner,
                 onBackNavigationClick = { selectedExtraBanner = null }
             )
