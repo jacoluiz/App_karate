@@ -320,7 +320,7 @@ fun TelaDetalheKata(
                         ) { page ->
                             val movimento = kata.movimentos[page]
                             Column(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth()
                                     .padding(16.dp)
                             ) {
                                 Text(
