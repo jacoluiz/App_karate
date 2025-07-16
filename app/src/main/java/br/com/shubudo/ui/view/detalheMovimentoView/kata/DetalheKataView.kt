@@ -12,14 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -32,9 +29,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -53,11 +49,10 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Orientacao
-import kotlinx.coroutines.launch
-import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.components.LocalVideoPlayer
 import br.com.shubudo.ui.viewModel.KataViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TelaDetalheKata(
@@ -67,7 +62,7 @@ fun TelaDetalheKata(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-    
+
     // Instância do ExoPlayer
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -76,10 +71,13 @@ fun TelaDetalheKata(
                     when (playbackState) {
                         ExoPlayer.STATE_BUFFERING ->
                             Log.i("KataViewModel", "ExoPlayer está carregando o vídeo.")
+
                         ExoPlayer.STATE_READY ->
                             Log.i("KataViewModel", "ExoPlayer está pronto para reproduzir o vídeo.")
+
                         ExoPlayer.STATE_ENDED ->
                             Log.i("KataViewModel", "A reprodução do vídeo terminou.")
+
                         ExoPlayer.STATE_IDLE ->
                             Log.i("KataViewModel", "ExoPlayer está no estado idle.")
                     }
@@ -107,15 +105,15 @@ fun TelaDetalheKata(
 
     // Estado para controlar o movimento atual
     var currentMovementIndex by remember { mutableIntStateOf(0) }
-    
+
     val coroutineScope = rememberCoroutineScope()
-    
+
     // Configuração do pager para navegar entre movimentos
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { kata.movimentos.size }
     )
-    
+
     // Sincroniza o índice do movimento com o pager
     LaunchedEffect(currentMovementIndex) {
         coroutineScope.launch {
@@ -124,7 +122,7 @@ fun TelaDetalheKata(
             }
         }
     }
-    
+
     LaunchedEffect(pagerState.currentPage) {
         if (currentMovementIndex != pagerState.currentPage) {
             currentMovementIndex = pagerState.currentPage
@@ -153,7 +151,7 @@ fun TelaDetalheKata(
                         modifier = Modifier.fillMaxSize(),
                         useController = false
                     )
-                    
+
                     // Botão de voltar
                     IconButton(
                         onClick = onBackNavigationClick,
@@ -171,7 +169,7 @@ fun TelaDetalheKata(
                         )
                     }
                 }
-                
+
                 // Controles de vídeo
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -206,7 +204,7 @@ fun TelaDetalheKata(
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                            
+
                             IconButton(
                                 onClick = {
                                     viewModel.seekTo(exoPlayer, 0)
@@ -220,13 +218,13 @@ fun TelaDetalheKata(
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                            
+
                             IconButton(
                                 onClick = {
                                     if (kata.video.isNotEmpty()) {
                                         val currentVideo = viewModel.currentVideo.value
                                         val currentOrientation = currentVideo?.orientacao
-                                        
+
                                         val nextOrientation = when (currentOrientation) {
                                             Orientacao.FRENTE -> Orientacao.ESQUERDA
                                             Orientacao.ESQUERDA -> Orientacao.DIREITA
@@ -234,11 +232,11 @@ fun TelaDetalheKata(
                                             Orientacao.COSTAS -> Orientacao.FRENTE
                                             else -> Orientacao.FRENTE
                                         }
-                                        
+
                                         val nextVideo = kata.video.find {
                                             it.orientacao == nextOrientation
                                         }
-                                        
+
                                         if (nextVideo != null) {
                                             viewModel.changeVideo(nextVideo, exoPlayer)
                                             viewModel.pause(exoPlayer)
@@ -254,7 +252,7 @@ fun TelaDetalheKata(
                                 )
                             }
                         }
-                        
+
                         // Texto para pular para movimento
                         Text(
                             text = "Pular para o movimento:",
@@ -265,17 +263,17 @@ fun TelaDetalheKata(
                                 .padding(top = 16.dp, bottom = 8.dp),
                             textAlign = TextAlign.Center
                         )
-                        
+
                         // Botões numerados para pular para movimentos específicos
-                        val currentTemposVideos = kata.temposVideos.find { 
-                            it.descricao == viewModel.currentVideo.value?.orientacao 
+                        val currentTemposVideos = kata.temposVideos.find {
+                            it.descricao == viewModel.currentVideo.value?.orientacao
                         }
-                        
+
                         // Criando uma grade para os botões de movimento
                         val tempos = currentTemposVideos?.tempo ?: emptyList()
                         val rows = (tempos.size + 4) / 5 // Dividir em linhas de 5 botões
                         val totalMovements = kotlin.math.min(tempos.size, kata.movimentos.size)
-                        
+
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -292,7 +290,10 @@ fun TelaDetalheKata(
                                         if (index < totalMovements) {
                                             TextButton(
                                                 onClick = {
-                                                    viewModel.seekTo(exoPlayer, tempos[index] * 1000L)
+                                                    viewModel.seekTo(
+                                                        exoPlayer,
+                                                        tempos[index] * 1000L
+                                                    )
                                                     currentMovementIndex = index
                                                     coroutineScope.launch {
                                                         pagerState.scrollToPage(index)
@@ -312,7 +313,7 @@ fun TelaDetalheKata(
                         }
                     }
                 }
-                
+
                 // Detalhes do movimento atual
                 if (kata.movimentos.isNotEmpty() && currentMovementIndex < kata.movimentos.size) {
                     Card(
@@ -331,7 +332,8 @@ fun TelaDetalheKata(
                         ) { page ->
                             val movimento = kata.movimentos[page]
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
                                 Text(
@@ -340,9 +342,9 @@ fun TelaDetalheKata(
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(8.dp))
-                                
+
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -363,7 +365,7 @@ fun TelaDetalheKata(
                                             )
                                         }
                                     }
-                                    
+
                                     Column {
                                         Text(
                                             text = "Base:",
@@ -377,18 +379,18 @@ fun TelaDetalheKata(
                                         )
                                     }
                                 }
-                                
+
                                 Spacer(modifier = Modifier.height(16.dp))
-                                
+
                                 Text(
                                     text = movimento.nome,
                                     color = Color.White,
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Medium
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(8.dp))
-                                
+
                                 Text(
                                     text = movimento.descricao,
                                     color = Color.LightGray,

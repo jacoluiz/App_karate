@@ -36,7 +36,7 @@ fun TelaListaKata(
     onCardClick: (kata: Kata) -> Unit
 ) {
     val listState = rememberLazyListState()
-    
+
     LazyColumn(
         state = listState,
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -52,7 +52,7 @@ fun TelaListaKata(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
-        
+
         items(uiState.kata.sortedBy { it.ordem }) { kata ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -81,7 +81,7 @@ fun TelaListaKata(
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(28.dp)
                             )
-                            
+
                             Text(
                                 text = kata.ordem.toOrdinarioFeminino(),
                                 style = MaterialTheme.typography.titleMedium,
@@ -90,7 +90,7 @@ fun TelaListaKata(
                                 modifier = Modifier.padding(start = 12.dp)
                             )
                         }
-                        
+
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -105,11 +105,13 @@ fun TelaListaKata(
                             )
                         }
                     }
-                    
+
                     if (kata.movimentos.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Inclui: ${kata.movimentos.take(3).joinToString(", ") { it.nome }}${if (kata.movimentos.size > 3) "..." else ""}",
+                            text = "Inclui: ${
+                                kata.movimentos.take(3).joinToString(", ") { it.nome }
+                            }${if (kata.movimentos.size > 3) "..." else ""}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -117,7 +119,7 @@ fun TelaListaKata(
                 }
             }
         }
-        
+
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }

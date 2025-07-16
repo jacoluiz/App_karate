@@ -260,7 +260,10 @@ fun EventosView(
                             )
                         }
                         items(filteredFuturos) { evento ->
-                            EventoItem(evento = evento, isPast = false, onClick = { onEventClick(evento._id) })
+                            EventoItem(
+                                evento = evento,
+                                isPast = false,
+                                onClick = { onEventClick(evento._id) })
                         }
                     }
 
@@ -274,7 +277,10 @@ fun EventosView(
                             )
                         }
                         items(filteredPassados) { evento ->
-                            EventoItem(evento = evento, isPast = true, onClick = { onEventClick(evento._id) })
+                            EventoItem(
+                                evento = evento,
+                                isPast = true,
+                                onClick = { onEventClick(evento._id) })
                         }
                     }
                 }

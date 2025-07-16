@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -39,7 +37,7 @@ fun TelaListaExtraBanner(
     onCardClick: (extraBanner: DefesaPessoalExtraBanner) -> Unit
 ) {
     val listState = rememberLazyListState()
-    
+
     LazyColumn(
         state = listState,
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -55,7 +53,7 @@ fun TelaListaExtraBanner(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
-        
+
         items(uiState.sequenciaExtraBanner.sortedBy { it.numeroOrdem }) { extraBanner ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,7 +82,7 @@ fun TelaListaExtraBanner(
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(28.dp)
                             )
-                            
+
                             Text(
                                 text = extraBanner.numeroOrdem.toOrdinarioFeminino(),
                                 style = MaterialTheme.typography.titleMedium,
@@ -93,7 +91,7 @@ fun TelaListaExtraBanner(
                                 modifier = Modifier.padding(start = 12.dp)
                             )
                         }
-                        
+
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -108,9 +106,9 @@ fun TelaListaExtraBanner(
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(4.dp))
-                    
+
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -122,7 +120,7 @@ fun TelaListaExtraBanner(
                                 fontWeight = FontWeight.Medium
                             )
                         }
-                        
+
                         if (extraBanner.movimentos.size > 3) {
                             Text(
                                 text = "... e mais ${extraBanner.movimentos.size - 3} movimentos",
@@ -136,7 +134,7 @@ fun TelaListaExtraBanner(
                 }
             }
         }
-        
+
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }

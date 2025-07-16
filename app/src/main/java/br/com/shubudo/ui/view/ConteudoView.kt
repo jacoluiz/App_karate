@@ -2,7 +2,16 @@ package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -25,13 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
-import br.com.shubudo.SessionManager
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
-import br.com.shubudo.ui.theme.PrimaryColorMarron
-import br.com.shubudo.ui.theme.PrimaryColorPreta
-import br.com.shubudo.ui.theme.PrimaryColorMestre
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
+import br.com.shubudo.ui.theme.PrimaryColorMarron
+import br.com.shubudo.ui.theme.PrimaryColorMestre
+import br.com.shubudo.ui.theme.PrimaryColorPreta
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -51,6 +59,7 @@ fun ProgramacaoView(
                 LoadingOverlay(true) {}
             }
         }
+
         is ProgramacaoUiState.Empty -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -65,6 +74,7 @@ fun ProgramacaoView(
                 )
             }
         }
+
         is ProgramacaoUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Cabeçalho com fundo gradiente
@@ -111,7 +121,7 @@ fun ProgramacaoView(
                         )
                     }
                 }
-                
+
                 // Conteúdo principal com grid de faixas
                 Card(
                     modifier = Modifier
@@ -133,10 +143,10 @@ fun ProgramacaoView(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        
+
                         // Grid de faixas
                         val availableFaixas = uiState.faixas.sortedBy { it.ordem }
-                        
+
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -168,7 +178,7 @@ fun FaixaCard(
     isDarkTheme: Boolean
 ) {
     val faixaColor = selecionaCorIcone(faixa, isDarkTheme)
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,7 +203,7 @@ fun FaixaCard(
             } else {
                 painterResource(id = R.drawable.ic_faixa)
             }
-            
+
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -209,9 +219,9 @@ fun FaixaCard(
                     modifier = Modifier.size(32.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = faixa,
                 style = MaterialTheme.typography.titleMedium,

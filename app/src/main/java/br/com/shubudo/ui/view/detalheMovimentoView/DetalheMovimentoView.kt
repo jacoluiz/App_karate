@@ -13,9 +13,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.ui.components.LoadingOverlay
@@ -77,13 +76,14 @@ fun EsqueletoTela(
 ) {
     // Verifica se o tema é escuro
     val isDark = isSystemInDarkTheme()
-    
+
     // Determina as cores do gradiente baseado na faixa
     val gradientColors = when {
         faixa.trim().lowercase().startsWith("preta") -> listOf(
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
         )
+
         else -> listOf(
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
@@ -103,16 +103,16 @@ fun EsqueletoTela(
             Column {
                 // Cabeçalho com gradiente
                 Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = gradientColors
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = gradientColors
+                            )
                         )
-                    )
                 )
-                
+
                 // Conteúdo principal
                 Box(
                     modifier = Modifier
