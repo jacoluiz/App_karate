@@ -36,10 +36,6 @@ import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
-// Lista de faixas bloqueadas para usuários que não são avançados (por exemplo, abaixo da preta).
-// Se o usuário estiver em uma faixa avançada (cujo valor esteja nesta lista), ele verá todas as opções.
-val FAIXAS_BLOQUEADAS = listOf("preta", "mestre", "grão mestre", "preta 1 dan", "preta 2 dan", "preta 3 dan", "preta 4 dan")
-
 @Composable
 fun ProgramacaoView(
     uiState: ProgramacaoUiState,
@@ -139,11 +135,7 @@ fun ProgramacaoView(
                         )
                         
                         // Grid de faixas
-                        val userFaixa = SessionManager.usuarioLogado?.corFaixa?.trim()?.lowercase() ?: ""
-                        val availableFaixas = uiState.faixas.filter { faixa ->
-                            val faixaNome = faixa.faixa.trim().lowercase()
-                            userFaixa in FAIXAS_BLOQUEADAS || (userFaixa !in FAIXAS_BLOQUEADAS && faixaNome !in FAIXAS_BLOQUEADAS)
-                        }.sortedBy { it.ordem }
+                        val availableFaixas = uiState.faixas.sortedBy { it.ordem }
                         
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
