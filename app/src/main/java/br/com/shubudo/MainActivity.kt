@@ -253,14 +253,14 @@ fun KarateApp(
             bottomBar = {
                 if (isShowBottomBar) {
                     KarateBottomAppBar(selectedItem = when (currentRoute) {
-                        perfilRoute -> BottomAppBarItem.Perfil
+//                        perfilRoute -> BottomAppBarItem.Perfil
                         eventosRoute -> BottomAppBarItem.Eventos
                         programacaoRoute -> BottomAppBarItem.Conteudo
                         else -> BottomAppBarItem.Eventos
                     }, items = remember {
                         listOf(
                             BottomAppBarItem.Eventos,
-                            BottomAppBarItem.Perfil,
+//                            BottomAppBarItem.Perfil,
                             BottomAppBarItem.Conteudo,
                         )
                     }, onItemClick = { item ->

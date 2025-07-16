@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EventoDao {
 
+    @Query("DELETE FROM Evento") // ou o nome real da tabela
+    suspend fun limparTodos()
+
     @Query("SELECT * FROM Evento ORDER BY dataInicio")
     fun getEventos(): Flow<List<EventoEntity>>
 

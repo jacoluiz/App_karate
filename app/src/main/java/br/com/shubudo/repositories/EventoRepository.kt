@@ -17,6 +17,7 @@ class EventoRepository @Inject constructor(
     // Atualiza os dados do servidor no banco local
     suspend fun refreshEventos() {
         val eventosFromApi = eventoService.listarEventos()
+        eventoDao.limparTodos()
         eventoDao.salvarTodos(*eventosFromApi.map { it.toEventoEntity() }.toTypedArray())
     }
 
