@@ -33,7 +33,9 @@ fun KarateNavHost(
         // Tela de Avisos
         eventosScreen(
             onReload = { eventosViewModel.recarregarEventos() },
-            onEventClick = { eventoId -> navController.navigateToEventoDetalhe(eventoId) }
+            onEventClick = { eventoId -> 
+                navController.navigateToEventoDetalhe(eventoId) 
+            }
         )
 
         // Tela de Perfil
@@ -89,9 +91,9 @@ fun KarateNavHost(
     }
     
     // Tela de Detalhe do Evento
-    eventoDetalheScreen(
-        onBackClick = { navController.popBackStack() }
-    )
+    eventoDetalheScreen {
+        navController.popBackStack()
+    }
 }
 
 // Navegação para a tela correta dependendo do item da BottomBar

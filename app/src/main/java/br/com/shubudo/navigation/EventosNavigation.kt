@@ -17,17 +17,13 @@ fun NavGraphBuilder.eventosScreen(
     onEventClick: (String) -> Unit
 ) {
     composable(eventosRoute) {
-        val eventosViewModel: EventosViewModel = hiltViewModel()
-        val uiState by eventosViewModel.eventoUiState.collectAsState()
+        val viewModel = hiltViewModel<EventosViewModel>()
+        val uiState by viewModel.eventoUiState.collectAsState()
 
         EventosView(
             uiState = uiState,
-            onReload = {
-                eventosViewModel.recarregarEventos()
-                onReload()
-            },
+            onReload = onReload,
             onAddEventoClick = {},
-            onEventClick = onEventClick
             onEventClick = onEventClick
         )
     }
