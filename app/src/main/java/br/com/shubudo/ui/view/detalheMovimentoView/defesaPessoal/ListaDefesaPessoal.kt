@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Apps
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.itemDetalheMovimento
@@ -48,9 +50,9 @@ fun TelaListaDefesaPessoal(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .then(Modifier.padding(4.dp)), // Clique no Card
-                elevation = CardDefaults.cardElevation(16.dp),
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
@@ -67,15 +69,19 @@ fun TelaListaDefesaPessoal(
                     ) {
                         Text(
                             text = defesaPessoal.numeroOrdem.toOrdinarioFeminino(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                     defesaPessoal.movimentos.forEach { movimento ->
                         Text(
                             text = movimento.nome,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(vertical = 2.dp)
                         )
 
                     }
@@ -84,7 +90,7 @@ fun TelaListaDefesaPessoal(
         }
     }
 
-// Botão de voltar flutuante
+    // Botão de voltar flutuante
     BotaoVoltar(
         listState = listState,
         onBackNavigationClick = onBackNavigationClick

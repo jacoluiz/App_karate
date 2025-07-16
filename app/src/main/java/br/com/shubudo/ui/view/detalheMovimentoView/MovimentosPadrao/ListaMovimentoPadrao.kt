@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Apps
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.itemDetalheMovimento
@@ -37,11 +39,11 @@ fun TelaListaMovimentoPadrao(
     LazyColumn(
         state = listState,
         modifier = Modifier
-            .padding( start = 16.dp, end = 16.dp),
+            .padding(start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.padding(top =46.dp))
+            Spacer(modifier = Modifier.padding(top = 46.dp))
         }
         // Lista de projeções
         items(uiState.movimento) { movimento ->
@@ -51,9 +53,9 @@ fun TelaListaMovimentoPadrao(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .then(Modifier.padding(4.dp)), // Clique no Card
-                elevation = CardDefaults.cardElevation(16.dp),
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(4.dp),
                 onClick = { onCardClick(movimento) } // Ao clicar no Card
             ) {
                 Column(
@@ -67,14 +69,16 @@ fun TelaListaMovimentoPadrao(
                     ) {
                         Text(
                             text = movimento.ordem.toOrdinarioFeminino(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = movimento.nome,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
                     )
 
                     Row(
@@ -82,7 +86,7 @@ fun TelaListaMovimentoPadrao(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp, 0.dp, 16.dp, 0.dp),
+                            .padding(0.dp, 8.dp, 0.dp, 0.dp),
                     ) {
                         movimento.tipoMovimento?.let {
                             itemDetalheMovimento(

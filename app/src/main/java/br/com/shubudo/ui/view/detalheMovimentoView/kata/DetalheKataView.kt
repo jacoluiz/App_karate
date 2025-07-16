@@ -12,16 +12,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -119,40 +124,235 @@ fun TelaDetalheKata(
                 ) {
                     // Player de vídeo na parte superior da tela
                     item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxWidth()
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
-                            LocalVideoPlayer(
-                                videoPath = videoPath,
-                                exoPlayer = exoPlayer,
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .height(250.dp),
-                                useController = false
-                            )
+                                    .padding(8.dp)
+                            ) {
+                                LocalVideoPlayer(
+                                    videoPath = videoPath,
+                                    exoPlayer = exoPlayer,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(220.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    useController = false
+                                )
+                            }
                         }
                     }
 
                     item {
                         // Seção superior com botões de controle e seleção de tempos
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                modifier = Modifier.fillMaxWidth()
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
                             ) {
-                                // Botão Play/Pause
-                                IconButton(onClick = {
-                                    if (viewModel.isPlaying.value) {
-                                        viewModel.pause(exoPlayer)
-                                    } else {
-                                        viewModel.play(exoPlayer)
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    // Botão Play/Pause
+                                    IconButton(
+                                        onClick = {
+                                            if (viewModel.isPlaying.value) {
+                                                viewModel.pause(exoPlayer)
+                                            } else {
+                                                viewModel.play(exoPlayer)
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (viewModel.isPlaying.value) {
+                                                Icons.Default.Pause
+                                            } else {
+                                                Icons.Default.PlayArrow
+                                            },
+                                            contentDescription = "Play/Pause",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(32.dp)
+                                        )
                                     }
-                                }) {
-                                    Icon(
-                                        imageVector = if (viewModel.isPlaying.value) {
-                                            Icons.Default.Pause
+                                    // Botão para alternar a orientação do vídeo
+                                    IconButton(
+                                        onClick = {
+                                            if (kata.video.isNotEmpty()) {
+                                                val currentVideo = viewModel.currentVideo.value
+                                                val currentOrientation = currentVideo?.orientacao
+
+                                                // Define a próxima orientação de forma cíclica
+                                                val nextOrientation = when (currentOrientation) {
+                                                    Orientacao.FRENTE -> Orientacao.ESQUERDA
+                                                    Orientacao.ESQUERDA -> Orientacao.DIREITA
+                                                    Orientacao.DIREITA -> Orientacao.COSTAS
+                                                    Orientacao.COSTAS -> Orientacao.FRENTE
+                                                    else -> Orientacao.FRENTE
+                                                }
+
+                                                // Encontra o vídeo correspondente à próxima orientação
+                                                val nextVideo = kata.video.find {
+                                                    it.orientacao == nextOrientation
+                                                }
+                                                if (nextVideo != null) {
+                                                    viewModel.changeVideo(nextVideo, exoPlayer)
+                                                    // Opcionalmente, pausa o vídeo após a mudança
+                                                    viewModel.pause(exoPlayer)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.FlipCameraAndroid,
+                                            contentDescription = "Alternar vídeo",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+                                
+                                // Título centralizado para a lista de tempos
+                                Text(
+                                    text = "Pular para o movimento:",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                
+                                // Botões que pulam para os tempos específicos no vídeo
+                                val currentTemposVideos =
+                                    kata.temposVideos.find { it.descricao == viewModel.currentVideo.value?.orientacao }
+                                FlowRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    currentTemposVideos?.tempo?.forEachIndexed { index, time ->
+                                        TextButton(
+                                            onClick = {
+                                                viewModel.seekTo(exoPlayer, time * 1000L)
+                                                coroutineScope.launch {
+                                                    pagerState.animateScrollToPage(index)
+                                                }
+                                            },
+                                            modifier = Modifier.padding(horizontal = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = "${index + 1}º",
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // HorizontalPager exibindo cada movimento
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { pageIndex ->
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "${kata.movimentos[pageIndex].ordem.toOrdinario()} movimento",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 12.dp)
+                                    ) {
+                                        kata.movimentos[pageIndex].tipoMovimento?.let {
+                                            itemDetalheMovimento(
+                                                descricao = "Tipo",
+                                                valor = it,
+                                                icone = Icons.Default.Accessibility
+                                            )
+                                        }
+                                        itemDetalheMovimento(
+                                            descricao = "Base",
+                                            valor = kata.movimentos[pageIndex].base,
+                                            icone = Icons.Default.Accessibility
+                                        )
+                                    }
+                                    Text(
+                                        text = kata.movimentos[pageIndex].nome,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    Text(
+                                        text = kata.movimentos[pageIndex].descricao,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Botão de voltar
+    BotaoVoltar(
+        listState = listState,
+        onBackNavigationClick = onBackNavigationClick
+    )
+}
                                         } else {
                                             Icons.Default.PlayArrow
                                         },

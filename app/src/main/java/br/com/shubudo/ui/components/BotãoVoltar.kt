@@ -5,6 +5,7 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 
 
@@ -50,6 +52,7 @@ fun BotaoVoltar(
     ) {
         Box(
             modifier = Modifier
+                .shadow(elevation = 6.dp, shape = CircleShape)
                 .background(
                     color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape
@@ -58,9 +61,11 @@ fun BotaoVoltar(
             IconButton(
                 onClick = {
                     onBackNavigationClick()
-                }) {
+                },
+                modifier = Modifier.size(48.dp)
+            ) {
                 Icon(
-                    modifier = Modifier.padding(0.dp),
+                    modifier = Modifier.size(24.dp),
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Seta para voltar",
                     tint = MaterialTheme.colorScheme.onPrimary,

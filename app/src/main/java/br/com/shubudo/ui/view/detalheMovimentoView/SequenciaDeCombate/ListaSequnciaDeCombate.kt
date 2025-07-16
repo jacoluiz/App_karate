@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.model.SequenciaDeCombate
 import br.com.shubudo.ui.components.BotaoVoltar
@@ -32,7 +34,8 @@ fun TelaListaSequenciaDeCombate(
     LazyColumn(
         state = listState,
         modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp),
+            .padding(start = 16.dp, end = 16.dp)
+            .padding(top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         item {
@@ -43,9 +46,9 @@ fun TelaListaSequenciaDeCombate(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .then(Modifier.padding(4.dp)), // Clique no Card
-                elevation = CardDefaults.cardElevation(16.dp),
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
@@ -62,15 +65,19 @@ fun TelaListaSequenciaDeCombate(
                     ) {
                         Text(
                             text = sequenciaDeCombate.numeroOrdem.toOrdinarioFeminino(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                     sequenciaDeCombate.movimentos.forEach { movimento ->
                         Text(
                             text = movimento.nome,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(vertical = 2.dp)
                         )
                     }
                 }
