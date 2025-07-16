@@ -5,9 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import kotlin.random.Random
 
 class ThemeViewModel : ViewModel() {
-    private val _currentFaixa = mutableStateOf("Branca")
+    private val availableFaixas = listOf(
+        "Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", 
+        "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan", "Mestre", "Grão Mestre"
+    )
+    
+    private val _currentFaixa = mutableStateOf(availableFaixas[Random.nextInt(availableFaixas.size)])
     val currentFaixa: State<String> = _currentFaixa
 
     fun changeThemeFaixa(faixa: String) {
