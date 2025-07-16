@@ -94,8 +94,8 @@ fun KarateNavHost(
     eventoDetalheScreen {
         navController.popBackStack()
     }
-}
-
+    
+    // Tela de Detalhe do Evento
 // Navegação para a tela correta dependendo do item da BottomBar
 fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
     when (item) {
