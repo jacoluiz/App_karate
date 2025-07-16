@@ -108,19 +108,27 @@ fun TelaDetalheKata(
     // Estado para controlar o movimento atual
     var currentMovementIndex by remember { mutableIntStateOf(0) }
     
-    // Configuração do pager para navegar entre movimentos
-    val pagerState = rememberPagerState(initialPage = 0) { kata.movimentos.size }
     val coroutineScope = rememberCoroutineScope()
+    
+    // Configuração do pager para navegar entre movimentos
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { kata.movimentos.size }
+    )
     
     // Sincroniza o índice do movimento com o pager
     LaunchedEffect(currentMovementIndex) {
-        if (currentMovementIndex != pagerState.currentPage) {
-            pagerState.animateScrollToPage(currentMovementIndex)
+        coroutineScope.launch {
+            if (currentMovementIndex != pagerState.currentPage) {
+                pagerState.animateScrollToPage(currentMovementIndex)
+            }
         }
     }
     
     LaunchedEffect(pagerState.currentPage) {
-        currentMovementIndex = pagerState.currentPage
+        if (currentMovementIndex != pagerState.currentPage) {
+            currentMovementIndex = pagerState.currentPage
+        }
     }
 
     if (!viewModel.videoCarregado.value) {
@@ -286,6 +294,9 @@ fun TelaDetalheKata(
                                                 onClick = {
                                                     viewModel.seekTo(exoPlayer, tempos[index] * 1000L)
                                                     currentMovementIndex = index
+                                                    coroutineScope.launch {
+                                                        pagerState.scrollToPage(index)
+                                                    }
                                                 },
                                                 modifier = Modifier.padding(horizontal = 2.dp)
                                             ) {
