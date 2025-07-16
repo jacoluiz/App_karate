@@ -9,11 +9,12 @@ import kotlin.random.Random
 
 class ThemeViewModel : ViewModel() {
     private val availableFaixas = listOf(
-        "Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", 
-        "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan", "Mestre", "Grão Mestre"
+        "Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta",
+        "Mestre", "Grão Mestre"
     )
-    
-    private val _currentFaixa = mutableStateOf(availableFaixas[Random.nextInt(availableFaixas.size)])
+
+    private val _currentFaixa =
+        mutableStateOf(availableFaixas[Random.nextInt(availableFaixas.size)])
     val currentFaixa: State<String> = _currentFaixa
 
     fun changeThemeFaixa(faixa: String) {
