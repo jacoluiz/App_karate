@@ -3,29 +3,29 @@ package br.com.shubudo.ui.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PlusOne
-import androidx.compose.material.icons.outlined.SportsMartialArts
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager
-import br.com.shubudo.ui.components.CustomIconButton
-import br.com.shubudo.ui.components.DropDownMenuCard
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorMarron
@@ -62,84 +62,171 @@ fun ProgramacaoView(
             ) {
                 Text(
                     text = "Calma jovem, ainda não temos nada por aqui!",
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
         is ProgramacaoUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho com fundo colorido atrás do texto
+                // Cabeçalho com fundo gradiente
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(120.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(vertical = 16.dp)
+                        .height(180.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                        )
+                        .padding(vertical = 24.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.School,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Explore todo o conteúdo de cada faixa e aproveite dicas e materiais extras que preparamos para você!",
+                            text = "Conteúdo do Karate",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Explore o conteúdo de cada faixa e aprimore suas técnicas",
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.fillMaxWidth()
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
                 }
-                // Conteúdo principal com os drop-downs
-                Column(
+                
+                // Conteúdo principal com grid de faixas
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 28.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .offset(y = (-20).dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    // Drop-down para Programação
-                    DropDownMenuCard(
-                        titulo = "Programação",
-                        icone = Icons.Outlined.SportsMartialArts
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        // Para possibilitar scroll caso a lista seja longa
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        Text(
+                            text = "Selecione uma faixa",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        // Grid de faixas
+                        val userFaixa = SessionManager.usuarioLogado?.corFaixa?.trim()?.lowercase() ?: ""
+                        val availableFaixas = uiState.faixas.filter { faixa ->
+                            val faixaNome = faixa.faixa.trim().lowercase()
+                            userFaixa in FAIXAS_BLOQUEADAS || (userFaixa !in FAIXAS_BLOQUEADAS && faixaNome !in FAIXAS_BLOQUEADAS)
+                        }.sortedBy { it.ordem }
+                        
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Obtém a faixa do usuário (normalizada)
-                            val userFaixa = SessionManager.usuarioLogado?.corFaixa?.trim()?.lowercase() ?: ""
-                            uiState.faixas.forEach { faixa ->
-                                val faixaNome = faixa.faixa.trim().lowercase()
-                                // Se o usuário for avançado (faixa dentro de FAIXAS_BLOQUEADAS), mostra todas as opções.
-                                // Caso contrário, mostra somente se a faixa atual não estiver na lista de bloqueadas.
-                                if (userFaixa in FAIXAS_BLOQUEADAS || (userFaixa !in FAIXAS_BLOQUEADAS && faixaNome !in FAIXAS_BLOQUEADAS)) {
-                                    val iconPainter = if (faixa.faixa == "Branca" && !isSystemInDarkTheme()) {
-                                        painterResource(id = R.drawable.ic_faixa_outline)
-                                    } else {
-                                        painterResource(id = R.drawable.ic_faixa)
-                                    }
-                                    CustomIconButton(
-                                        texto = faixa.faixa,
-                                        iconPainter = iconPainter,
-                                        onClick = {
-                                            themeViewModel.changeThemeFaixa(faixa.faixa)
-                                            onClickFaixa(faixa.faixa)
-                                        },
-                                        cor = selecionaCorIcone(faixa.faixa, isSystemInDarkTheme())
-                                    )
-                                }
+                            items(availableFaixas) { faixa ->
+                                FaixaCard(
+                                    faixa = faixa.faixa,
+                                    onClick = {
+                                        themeViewModel.changeThemeFaixa(faixa.faixa)
+                                        onClickFaixa(faixa.faixa)
+                                    },
+                                    isDarkTheme = isSystemInDarkTheme()
+                                )
                             }
                         }
                     }
-                    // Drop-down para Conteúdo Adicional (vazio neste exemplo)
-                    DropDownMenuCard(
-                        titulo = "Conteúdo adicional",
-                        icone = Icons.Outlined.PlusOne
-                    ) {}
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun FaixaCard(
+    faixa: String,
+    onClick: () -> Unit,
+    isDarkTheme: Boolean
+) {
+    val faixaColor = selecionaCorIcone(faixa, isDarkTheme)
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        onClick = onClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Faixa icon
+            val iconPainter = if (faixa == "Branca" && !isDarkTheme) {
+                painterResource(id = R.drawable.ic_faixa_outline)
+            } else {
+                painterResource(id = R.drawable.ic_faixa)
+            }
+            
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(faixaColor.copy(alpha = 0.2f))
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = iconPainter,
+                    contentDescription = "Faixa $faixa",
+                    tint = faixaColor,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = faixa,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
