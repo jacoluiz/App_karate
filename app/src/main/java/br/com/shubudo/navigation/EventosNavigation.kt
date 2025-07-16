@@ -13,7 +13,8 @@ import br.com.shubudo.ui.viewModel.EventosViewModel
 internal const val eventosRoute = "eventos"
 
 fun NavGraphBuilder.eventosScreen(
-    onReload: () -> Unit
+    onReload: () -> Unit,
+    onEventClick: (String) -> Unit
 ) {
     composable(eventosRoute) {
         val eventosViewModel: EventosViewModel = hiltViewModel()
@@ -24,7 +25,8 @@ fun NavGraphBuilder.eventosScreen(
             onReload = {
                 eventosViewModel.recarregarEventos()
                 onReload()
-            }
+            },
+            onEventClick = onEventClick
         )
     }
 }
