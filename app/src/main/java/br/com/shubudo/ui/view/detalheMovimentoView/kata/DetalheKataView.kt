@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -57,7 +59,6 @@ fun TelaDetalheKata(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val listState = rememberLazyListState()
     
     // Instância do ExoPlayer
     val exoPlayer = remember {
@@ -129,7 +130,7 @@ fun TelaDetalheKata(
                             .background(Color(0x80000000), RoundedCornerShape(18.dp))
                     ) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
