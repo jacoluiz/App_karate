@@ -95,7 +95,8 @@ fun String.formatDayMonth(): String {
 @Composable
 fun EventosView(
     uiState: EventoUiState,
-    onReload: () -> Unit,
+    onReload: () -> Unit = {},
+    onEventClick: (String) -> Unit = {},
     onAddEventoClick: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
@@ -259,7 +260,7 @@ fun EventosView(
                             )
                         }
                         items(filteredFuturos) { evento ->
-                            EventoItem(evento = evento, isPast = false)
+                            EventoItem(evento = evento, isPast = false, onClick = { onEventClick(evento._id) })
                         }
                     }
 
@@ -273,7 +274,7 @@ fun EventosView(
                             )
                         }
                         items(filteredPassados) { evento ->
-                            EventoItem(evento = evento, isPast = true)
+                            EventoItem(evento = evento, isPast = true, onClick = { onEventClick(evento._id) })
                         }
                     }
                 }
@@ -303,7 +304,7 @@ fun EventosView(
 }
 
 @Composable
-fun EventoItem(evento: Evento, isPast: Boolean = false) {
+fun EventoItem(evento: Evento, isPast: Boolean = false, onClick: () -> Unit = {}) {
     val cardColor = if (isPast) {
         MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
     } else {
@@ -319,7 +320,7 @@ fun EventoItem(evento: Evento, isPast: Boolean = false) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { },
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor),
         shape = RoundedCornerShape(16.dp)
