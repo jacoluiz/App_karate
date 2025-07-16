@@ -23,7 +23,6 @@ fun NavGraphBuilder.eventosScreen(
         EventosView(
             uiState = uiState,
             onReload = onReload,
-            onAddEventoClick = {},
             onEventClick = onEventClick
         )
     }
