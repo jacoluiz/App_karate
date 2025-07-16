@@ -26,6 +26,8 @@ fun NavGraphBuilder.eventosScreen(
                 eventosViewModel.recarregarEventos()
                 onReload()
             },
+            onAddEventoClick = {},
+            onEventClick = onEventClick
             onEventClick = onEventClick
         )
     }
