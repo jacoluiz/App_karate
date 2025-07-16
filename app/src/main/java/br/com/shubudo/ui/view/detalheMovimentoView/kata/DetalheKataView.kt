@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,10 +32,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +53,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Orientacao
+import kotlinx.coroutines.launch
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.components.LocalVideoPlayer
@@ -96,6 +104,24 @@ fun TelaDetalheKata(
 
     // Extrai o caminho do vídeo atual a partir do viewModel
     val videoPath = viewModel.localFilePaths.value[viewModel.currentVideo.value?.orientacao]
+
+    // Estado para controlar o movimento atual
+    var currentMovementIndex by remember { mutableIntStateOf(0) }
+    
+    // Configuração do pager para navegar entre movimentos
+    val pagerState = rememberPagerState(initialPage = 0) { kata.movimentos.size }
+    val coroutineScope = rememberCoroutineScope()
+    
+    // Sincroniza o índice do movimento com o pager
+    LaunchedEffect(currentMovementIndex) {
+        if (currentMovementIndex != pagerState.currentPage) {
+            pagerState.animateScrollToPage(currentMovementIndex)
+        }
+    }
+    
+    LaunchedEffect(pagerState.currentPage) {
+        currentMovementIndex = pagerState.currentPage
+    }
 
     if (!viewModel.videoCarregado.value) {
         // Exibe um overlay de carregamento enquanto o vídeo não estiver pronto
@@ -240,6 +266,7 @@ fun TelaDetalheKata(
                         // Criando uma grade para os botões de movimento
                         val tempos = currentTemposVideos?.tempo ?: emptyList()
                         val rows = (tempos.size + 4) / 5 // Dividir em linhas de 5 botões
+                        val totalMovements = kotlin.math.min(tempos.size, kata.movimentos.size)
                         
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -254,10 +281,11 @@ fun TelaDetalheKata(
                                 ) {
                                     for (col in 0 until 5) {
                                         val index = row * 5 + col
-                                        if (index < tempos.size) {
+                                        if (index < totalMovements) {
                                             TextButton(
                                                 onClick = {
                                                     viewModel.seekTo(exoPlayer, tempos[index] * 1000L)
+                                                    currentMovementIndex = index
                                                 },
                                                 modifier = Modifier.padding(horizontal = 2.dp)
                                             ) {
@@ -275,11 +303,7 @@ fun TelaDetalheKata(
                 }
                 
                 // Detalhes do movimento atual
-                val currentMovimentoIndex = 0 // Você pode adicionar lógica para rastrear o movimento atual
-                
-                if (kata.movimentos.isNotEmpty() && currentMovimentoIndex < kata.movimentos.size) {
-                    val movimento = kata.movimentos[currentMovimentoIndex]
-                    
+                if (kata.movimentos.isNotEmpty() && currentMovementIndex < kata.movimentos.size) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -289,69 +313,77 @@ fun TelaDetalheKata(
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Primeiro movimento",
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            Row(
+                        // Pager para navegar entre os movimentos
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxWidth()
+                        ) { page ->
+                            val movimento = kata.movimentos[page]
+                            Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(16.dp)
                             ) {
-                                movimento.tipoMovimento?.let {
+                                Text(
+                                    text = "${(page + 1)}º movimento",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    movimento.tipoMovimento?.let {
+                                        Column {
+                                            Text(
+                                                text = "Tipo:",
+                                                color = Color.Gray,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                            Text(
+                                                text = it,
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
+                                    
                                     Column {
                                         Text(
-                                            text = "Tipo:",
+                                            text = "Base:",
                                             color = Color.Gray,
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                         Text(
-                                            text = it,
+                                            text = movimento.base,
                                             color = Color.White,
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
                                 
-                                Column {
-                                    Text(
-                                        text = "Base:",
-                                        color = Color.Gray,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                    Text(
-                                        text = movimento.base,
-                                        color = Color.White,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                
+                                Text(
+                                    text = movimento.nome,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Text(
+                                    text = movimento.descricao,
+                                    color = Color.LightGray,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
-                            
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            Text(
-                                text = movimento.nome,
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Medium
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            Text(
-                                text = movimento.descricao,
-                                color = Color.LightGray,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                     }
                 }
