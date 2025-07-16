@@ -31,7 +31,6 @@ class DetalheMovimentoViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<DetalheMovimentoUiState>(
         DetalheMovimentoUiState.Loading
     )
-
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -50,55 +49,57 @@ class DetalheMovimentoViewModel @Inject constructor(
                 var projecao = emptyList<Projecao>()
                 var defesaExtraBanner = emptyList<DefesaPessoalExtraBanner>()
                 var armamento = emptyList<Armamento>()
+                var defesasDeArma = emptyList<Armamento>()
                 when (movimento) {
                     "Katas" -> {
                         kata = repository.findKatasByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
-
                     "Defesa Pessoal" -> {
                         defesaPessoal = repository.findDefesasPessoaisByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
-
                     "Sequência de Combate" -> {
                         sequenciaDeCombate = repository.findSequenciasDeCombateByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
-
                     "Projeções" -> {
                         projecao = repository.findProjecoesByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
-
                     "Defesas Extra Banner" -> {
                         defesaExtraBanner = repository.findDefesaPessoalExtraBannerByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
-
                     "Armamento" -> {
                         armamento = repository.findArmamentosByFaixa(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
+                    "Defesas de armas" -> {
+                        defesasDeArma = repository.findDefesasDeArmasByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
+                    }
                 }
-                val movimento = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
+                val movimentoList = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
 
                 _uiState.update {
                     DetalheMovimentoUiState.Success(
-                        movimento = movimento.sortedBy { it.ordem },
+                        movimento = movimentoList.sortedBy { it.ordem },
                         faixa = faixa,
                         defesaPessoal = defesaPessoal.sortedBy { it.numeroOrdem },
                         kata = kata.sortedBy { it.ordem },
                         sequenciaDeCombate = sequenciaDeCombate.sortedBy { it.numeroOrdem },
                         projecao = projecao.sortedBy { it.ordem },
                         sequenciaExtraBanner = defesaExtraBanner.sortedBy { it.numeroOrdem },
-                        armamento = armamento.sortedBy { it.numeroOrdem }
+                        armamento = armamento.sortedBy { it.numeroOrdem },
+                        defesasDeArma = defesasDeArma.sortedBy { it.numeroOrdem }
                     )
                 }
             }

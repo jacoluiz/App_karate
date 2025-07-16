@@ -2,6 +2,7 @@ package br.com.shubudo.ui.view.detalheMovimentoView.kata
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -71,10 +73,13 @@ fun TelaDetalheKata(
                     when (playbackState) {
                         ExoPlayer.STATE_BUFFERING ->
                             Log.i("KataViewModel", "ExoPlayer está carregando o vídeo.")
+
                         ExoPlayer.STATE_READY ->
                             Log.i("KataViewModel", "ExoPlayer está pronto para reproduzir o vídeo.")
+
                         ExoPlayer.STATE_ENDED ->
                             Log.i("KataViewModel", "A reprodução do vídeo terminou.")
+
                         ExoPlayer.STATE_IDLE ->
                             Log.i("KataViewModel", "ExoPlayer está no estado idle.")
                     }
@@ -105,15 +110,6 @@ fun TelaDetalheKata(
         LoadingOverlay(true) { }
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Player de vídeo na parte superior da tela
-            LocalVideoPlayer(
-                videoPath = videoPath,
-                exoPlayer = exoPlayer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp),
-                useController = false
-            )
             EsqueletoTela(faixa = faixa) {
                 LazyColumn(
                     state = listState,
@@ -121,6 +117,24 @@ fun TelaDetalheKata(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxHeight()
                 ) {
+                    // Player de vídeo na parte superior da tela
+                    item {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            LocalVideoPlayer(
+                                videoPath = videoPath,
+                                exoPlayer = exoPlayer,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .height(250.dp),
+                                useController = false
+                            )
+                        }
+                    }
+
                     item {
                         // Seção superior com botões de controle e seleção de tempos
                         Column(modifier = Modifier.fillMaxWidth()) {
@@ -249,13 +263,21 @@ fun TelaDetalheKata(
                                     )
                                 }
                                 Text(
-                                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                                    modifier = Modifier.padding(
+                                        top = 16.dp,
+                                        start = 16.dp,
+                                        end = 16.dp
+                                    ),
                                     text = kata.movimentos[pageIndex].nome,
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                                    modifier = Modifier.padding(
+                                        top = 16.dp,
+                                        start = 16.dp,
+                                        end = 16.dp
+                                    ),
                                     text = kata.movimentos[pageIndex].descricao,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     style = MaterialTheme.typography.bodyMedium

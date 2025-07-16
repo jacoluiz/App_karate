@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import br.com.shubudo.database.KarateDatabase
 import br.com.shubudo.database.dao.ArmamentoDao
-import br.com.shubudo.database.dao.AvisoDao
+import br.com.shubudo.database.dao.DefesaArmaDao
 import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
+import br.com.shubudo.database.dao.EventoDao
 import br.com.shubudo.database.dao.FaixaDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
@@ -77,12 +78,17 @@ class DatabaseModule {
     }
 
     @Provides
-    fun provideAvisoDao(db: KarateDatabase): AvisoDao {
-        return db.avisoDao()
+    fun provideArmamentoDao(db: KarateDatabase): ArmamentoDao {
+        return db.armamentoDao()
     }
 
     @Provides
-    fun provideArmamentoDao(db: KarateDatabase): ArmamentoDao{
-        return db.armamentoDao()
+    fun provideDefesasDeArmasDao(db: KarateDatabase): DefesaArmaDao {
+        return db.defesasDeArmasDao()
+    }
+
+    @Provides
+    fun provideDeEventoDao(db: KarateDatabase): EventoDao {
+        return db.eventoDao()
     }
 }

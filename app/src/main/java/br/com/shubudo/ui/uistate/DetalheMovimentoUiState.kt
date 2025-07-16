@@ -21,6 +21,7 @@ sealed class DetalheMovimentoUiState {
         val projecao: List<Projecao>,
         val faixa: String,
         val armamento: List<Armamento>,
+        val defesasDeArma: List<Armamento>
 
         ) : DetalheMovimentoUiState()
 

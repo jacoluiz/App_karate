@@ -17,7 +17,9 @@ data class MovimentoEntity(
     val nome: String,
     val ordem: Int,
     val descricao: String,
-    val observacao: List<String>
+    val observacao: List<String>,
+    val video: String
+
 )
 
 fun MovimentoEntity.toMovimento() = Movimento(
@@ -28,5 +30,7 @@ fun MovimentoEntity.toMovimento() = Movimento(
     nome = nome,
     descricao = descricao,
     ordem = ordem,
-    observacao = observacao
+    observacao = observacao,
+    video = video
+
 )

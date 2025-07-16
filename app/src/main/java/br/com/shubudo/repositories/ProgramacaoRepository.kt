@@ -24,7 +24,8 @@ class ProgramacaoRepository @Inject constructor(
     private val sequenciaDeCombateRepository: SequenciaDeCombateRepository,
     private val projecaoRepository: ProjecoesRepository,
     private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository,
-    private val armamentoRepository: ArmamentoRepository
+    private val armamentoRepository: ArmamentoRepository,
+    private val defesaArmaRepository: DefesaArmaRepository // Novo repositório para defesas de armas
 ) {
     suspend fun findMovimentoByFaixaETipo(faixa: String, tipo: String): Flow<List<Movimento>> {
         val faixaResult = faixaRepository.findByNome(faixa).firstOrNull()
@@ -58,6 +59,7 @@ class ProgramacaoRepository @Inject constructor(
         val defesaPessoalExtraBanner = findDefesaPessoalExtraBannerByFaixa(faixa).first()
         val projecao = findProjecoesByFaixa(faixa).first()
         val armamentos = findArmamentosByFaixa(faixa).first()
+        val defesasDeArma = findDefesasDeArmasByFaixa(faixa).first() // Nova chamada
 
         val programacao = Programacao(
             faixa = faixa,
@@ -69,7 +71,8 @@ class ProgramacaoRepository @Inject constructor(
             sequenciaDeCombate = sequenciasDeCombate,
             projecoes = projecao,
             defesaExtraBanner = defesaPessoalExtraBanner,
-            armamento = armamentos
+            armamento = armamentos,
+            defesasDeArma = defesasDeArma // Atribuição das defesas de arma
         )
         return flow { emit(programacao) }
     }
@@ -138,5 +141,15 @@ class ProgramacaoRepository @Inject constructor(
         val faixaId = faixa?._id ?: idFaixa
         ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
         return armamentoRepository.findByFaixa(faixaId)
+    }
+
+    // Função para buscar Defesas de Armas por Faixa ou ID de Faixa
+    suspend fun findDefesasDeArmasByFaixa(
+        faixa: Faixa? = null,
+        idFaixa: String? = null
+    ): Flow<List<Armamento>> {
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        return defesaArmaRepository.findByFaixa(faixaId)
     }
 }

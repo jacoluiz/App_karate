@@ -16,7 +16,9 @@ data class ProjecaoEntity(
     val descricao: String,
     val observacao: List<String>,
     val ordem: Int,
-    val faixa: String
+    val faixa: String,
+    val video: String
+
 )
 
 fun ProjecaoEntity.toProjecao() = Projecao(
@@ -26,6 +28,8 @@ fun ProjecaoEntity.toProjecao() = Projecao(
     descricao = descricao,
     observacao = observacao,
     ordem = ordem,
-    faixa = faixa
+    faixa = faixa,
+    video = video
+
 )
 

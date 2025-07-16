@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowLeft
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
@@ -46,7 +48,7 @@ fun MovimentoComponent(movimento: Movimento, faixa: String) {
         ) {
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowLeft,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowLeft,
                     contentDescription = "Icon",
                     modifier = Modifier.size(24.dp),
                 )
@@ -73,7 +75,7 @@ fun MovimentoComponent(movimento: Movimento, faixa: String) {
 
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                     contentDescription = "Icon",
                     modifier = Modifier.size(24.dp),
                 )
@@ -157,23 +159,4 @@ fun itemLista(
         )
     }
 
-}
-
-@Composable
-@Preview(showBackground = true)
-fun MovimentoViewPreview() {
-    MovimentoComponent(
-        Movimento(
-            _id = "1",
-            faixa = "Branca",
-            tipoMovimento = "Chute",
-            base = "Luta",
-            nome = "Chute Frontal",
-            ordem = 1,
-            descricao = "Descrição",
-            observacao = listOf(
-                "Observação 1", "Observação 2", "Observação 3"
-            )
-        ), faixa = "Branca"
-    )
 }

@@ -21,8 +21,11 @@ fun LocalVideoPlayer(
 ) {
     LaunchedEffect(videoPath) {
         videoPath?.let { path ->
-            val file = File(path)
-            if (file.exists()) {
+            // Verifica se é um arquivo local ou uma URL remota
+            if (path.startsWith("http") || File(path).exists()) {
+                exoPlayer.playWhenReady = false
+                exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ONE
+                exoPlayer.volume = 0f
                 exoPlayer.setMediaItem(MediaItem.fromUri(path))
                 exoPlayer.prepare()
             } else {
@@ -43,3 +46,4 @@ fun LocalVideoPlayer(
         )
     }
 }
+

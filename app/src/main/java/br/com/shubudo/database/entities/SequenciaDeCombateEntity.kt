@@ -14,12 +14,16 @@ data class SequenciaDeCombateEntity(
     val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: String
+
 )
 
 fun SequenciaDeCombateEntity.toSequenciaDeCombate() = SequenciaDeCombate(
     _id = _id,
     faixa = faixa,
     numeroOrdem = numeroOrdem,
-    movimentos = movimentos
+    movimentos = movimentos,
+    video = video
+
 )

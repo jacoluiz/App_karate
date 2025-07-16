@@ -12,7 +12,9 @@ data class ProjecaoResponse(
     val descricao: String,
     val observacao: List<String> = emptyList(),
     val ordem: Int,
-    val faixa: String
+    val faixa: String,
+    val video: String
+
 )
 
 // Função de conversão para o modelo Projecao
@@ -24,7 +26,9 @@ fun ProjecaoResponse.toProjecao(): Projecao {
         descricao = descricao,
         observacao = observacao,
         ordem = ordem,
-        faixa = faixa
+        faixa = faixa,
+        video = video
+
     )
 }
 
@@ -37,13 +41,15 @@ fun ProjecaoResponse.toProjecaoEntity(): ProjecaoEntity {
         descricao = descricao,
         observacao = observacao,
         ordem = ordem,
-        faixa = faixa
+        faixa = faixa,
+        video = video
+
     )
 }
 
 // Interface Retrofit
 interface ProjecaoServices {
-    @GET("projecoes") // Endpoint para buscar as projeções
+    @GET("projecao") // Endpoint para buscar as projeções
     suspend fun getProjecoes(): List<ProjecaoResponse>
 }
 

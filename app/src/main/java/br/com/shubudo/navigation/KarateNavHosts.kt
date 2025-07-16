@@ -5,7 +5,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import br.com.shubudo.model.Aviso
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -16,7 +15,7 @@ fun KarateNavHost(
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(navController, startDestination = AppDestination.Login.route) {
+    NavHost(navController, startDestination = AppDestination.Evento.route) {
         // Tela de Login
         loginScreen(
             themeViewModel = themeViewModel,
@@ -24,7 +23,7 @@ fun KarateNavHost(
                 navController.navigateToNovoUsuario(username.toString())
             },
             onNavigateToHome = {
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Avisos)
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
             },
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
@@ -32,20 +31,8 @@ fun KarateNavHost(
         )
 
         // Tela de Avisos
-        avisosScreen(
-            onReload = { navController.navigateToAvisos() },
-            onAvisoClick = { aviso: Aviso ->
-                navController.navigateToDetalheAviso(aviso._id)
-            },
-            onAddAvisoClick = { navController.navigateToNovoAviso() }
-        )
-
-        // Tela de Detalhe do Aviso (com opções para deletar e editar)
-        detalheAvisoScreen(
-            onDelete = { navController.popBackStack() },
-            onEdit = { avisoId ->
-                navController.navigateToEditarAviso(avisoId.toString())
-            }
+        eventosScreen(
+            onReload = { navController.navigateToEventos() }
         )
 
         // Tela de Perfil
@@ -98,12 +85,6 @@ fun KarateNavHost(
             onSaveSuccess = { navController.popBackStack() },
             onCancelar = { navController.popBackStack() }
         )
-
-        // Tela de Criar ou Editar Aviso
-        novoAvisoScreen(
-            onSaveSuccess = { navController.navigateToAvisos() },
-            onCancel = { navController.popBackStack() }
-        )
     }
 }
 
@@ -116,17 +97,20 @@ fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
                 popUpTo(programacaoRoute)
             })
         }
-        BottomAppBarItem.Avisos -> {
-            navigateToAvisos(navOptions {
-                launchSingleTop = true
-                popUpTo(avisosRoute)
-            })
-        }
+
         BottomAppBarItem.Perfil -> {
             navigateToPerfil(navOptions {
                 launchSingleTop = true
                 popUpTo(perfilRoute)
             })
         }
+
+        BottomAppBarItem.Eventos -> {
+            navigateToEventos(navOptions {
+                launchSingleTop = true
+                popUpTo(eventosRoute)
+            })
+        }
     }
+
 }

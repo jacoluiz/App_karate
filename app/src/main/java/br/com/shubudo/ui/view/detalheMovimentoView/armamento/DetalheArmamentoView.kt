@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -62,16 +61,18 @@ fun TelaDetalheArmamento(
         EsqueletoTela(
             faixa = "Preta"
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 // Área superior: Player de vídeo
-                LocalVideoPlayer(
-                    videoPath = viewModel.currentVideoPath.value,
-                    exoPlayer = exoPlayer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    useController = false
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    LocalVideoPlayer(
+                        videoPath = viewModel.currentVideoPath.value,
+                        exoPlayer = exoPlayer,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp),
+                        useController = false
+                    )
+                }
                 // Linha com botões: Play/Pause e Reiniciar
                 Row(
                     modifier = Modifier

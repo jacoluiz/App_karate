@@ -12,5 +12,6 @@ data class Programacao(
     val defesaExtraBanner: List<DefesaPessoalExtraBanner>,
     val projecoes : List<Projecao>,
     val armamento: List<Armamento>,
+    val defesasDeArma: List<Armamento>
 ) {
 }

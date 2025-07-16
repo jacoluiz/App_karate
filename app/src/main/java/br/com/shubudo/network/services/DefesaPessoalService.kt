@@ -9,7 +9,9 @@ data class DefesaPessoalResponse(
     val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: String
+
 )
 
 fun DefesaPessoalResponse.toDefesaPessoal(): DefesaPessoal {
@@ -18,6 +20,8 @@ fun DefesaPessoalResponse.toDefesaPessoal(): DefesaPessoal {
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
+
     )
 }
 
@@ -27,6 +31,8 @@ fun DefesaPessoalResponse.toDefesaPessoalEntity(): DefesaPessoalEntity {
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
+
     )
 }
 

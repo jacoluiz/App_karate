@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -35,8 +34,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.shubudo.navigation.AppDestination
 import br.com.shubudo.navigation.KarateNavHost
-import br.com.shubudo.navigation.avisosRoute
-import br.com.shubudo.navigation.detalheAvisoRoute
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
 import br.com.shubudo.navigation.detalheMovimentoArgument
@@ -44,6 +41,7 @@ import br.com.shubudo.navigation.detalheMovimentoRuteFullpath
 import br.com.shubudo.navigation.editarPerfilRoute
 import br.com.shubudo.navigation.esqueciMinhaSenhaRote
 import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
+import br.com.shubudo.navigation.eventosRoute
 import br.com.shubudo.navigation.navigateToBottomAppBarItem
 import br.com.shubudo.navigation.novoUsuarioRote
 import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
@@ -85,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     val isShowBottomBar = when (currentDestination?.route) {
-                        AppDestination.Avisos.route, AppDestination.Perfil.route, AppDestination.Programacao.route -> true
+                         AppDestination.Perfil.route, AppDestination.Programacao.route, AppDestination.Evento.route -> true
                         else -> false
                     }
 
@@ -93,7 +91,7 @@ class MainActivity : ComponentActivity() {
                     val topAppBarTitle = when (currentDestination?.route) {
                         editarPerfilRoute -> "Editar Perfil"
                         perfilRoute -> "Perfil"
-                        AppDestination.Avisos.route -> "Avisos"
+                        AppDestination.Evento.route -> "Evento"
                         AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
                         detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
@@ -106,12 +104,11 @@ class MainActivity : ComponentActivity() {
 
                         novoUsuarioRote -> "Precisamos de alguns dados"
                         novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
-                        detalheAvisoRoute -> "Aviso"
                         else -> "Shubu-dô App"
                     }
 
                     val showBottomBack = when (currentDestination?.route) {
-                        detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, esqueciMinhaSenhaRoteSemUsername, detalheAvisoRoute -> true
+                        detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, esqueciMinhaSenhaRoteSemUsername -> true
                         else -> false
                     }
 
@@ -197,7 +194,7 @@ class MainActivity : ComponentActivity() {
 
     private fun hideSystemUI() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController?.let {
+        windowInsetsController.let {
             // Ocultar a barra de status e a barra de navegação
             it.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
             // Modo imersivo persistente
@@ -257,13 +254,13 @@ fun KarateApp(
                 if (isShowBottomBar) {
                     KarateBottomAppBar(selectedItem = when (currentRoute) {
                         perfilRoute -> BottomAppBarItem.Perfil
-                        avisosRoute -> BottomAppBarItem.Avisos
+                        eventosRoute -> BottomAppBarItem.Eventos
                         programacaoRoute -> BottomAppBarItem.Conteudo
-                        else -> BottomAppBarItem.Avisos
+                        else -> BottomAppBarItem.Eventos
                     }, items = remember {
                         listOf(
+                            BottomAppBarItem.Eventos,
                             BottomAppBarItem.Perfil,
-                            BottomAppBarItem.Avisos,
                             BottomAppBarItem.Conteudo,
                         )
                     }, onItemClick = { item ->

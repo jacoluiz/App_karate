@@ -1,8 +1,10 @@
 package br.com.shubudo.ui.view.detalheMovimentoView
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,6 +21,7 @@ import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaDeCombate.TelaSequen
 import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaExtraBanner.TelaExtraBannerManager
 import br.com.shubudo.ui.view.detalheMovimentoView.armamento.TelaArmamentoManager
 import br.com.shubudo.ui.view.detalheMovimentoView.defesaPessoal.TelaDefesaPessoalManager
+import br.com.shubudo.ui.view.detalheMovimentoView.defesasDeArmas.TelaDefesaDeArmaManager
 import br.com.shubudo.ui.view.detalheMovimentoView.kata.TelaKataManager
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.TelaProjecaoManager
 import br.com.shubudo.ui.viewModel.DetalheArmamentoViewModel
@@ -51,6 +54,9 @@ fun DetalheMovimentoView(
             } else if (uiState.armamento.isNotEmpty()) {
                 val viewModel: DetalheArmamentoViewModel = viewModel()
                 TelaArmamentoManager(uiState, viewModel, onBackNavigationClick)
+            } else if (uiState.defesasDeArma.isNotEmpty()) {
+                val viewModel: DetalheArmamentoViewModel = viewModel()
+                TelaDefesaDeArmaManager(uiState, viewModel, onBackNavigationClick)
             }
         }
 
@@ -83,7 +89,16 @@ fun EsqueletoTela(
             color = backgroundColor,
             shape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp)
         ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
             content()
+
+
         }
     }
 }

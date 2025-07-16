@@ -7,5 +7,6 @@ data class Projecao(
     val descricao: String,
     val observacao: List<String> = emptyList(),
     val ordem: Int,
-    val faixa: String
+    val faixa: String,
+    val video: String
 )

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Feed
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material3.BottomAppBar
@@ -32,12 +33,12 @@ sealed class BottomAppBarItem(
         Icons.Default.SportsMartialArts, "Conteudo"
     )
 
-    object Avisos : BottomAppBarItem(
-        Icons.Outlined.Campaign, "Avisos"
-    )
-
     object Perfil : BottomAppBarItem(
         Icons.Default.AccountCircle, "Perfil"
+    )
+
+    object Eventos : BottomAppBarItem(
+        Icons.Default.Event, "Eventos"
     )
 }
 

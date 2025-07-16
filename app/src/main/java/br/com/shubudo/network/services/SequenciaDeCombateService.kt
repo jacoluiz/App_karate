@@ -9,7 +9,9 @@ data class SequenciaDeCombateResponse(
     val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: String
+
 )
 
 fun SequenciaDeCombateResponse.toSequenciaDeCombate(): SequenciaDeCombate {
@@ -18,6 +20,8 @@ fun SequenciaDeCombateResponse.toSequenciaDeCombate(): SequenciaDeCombate {
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
+
     )
 }
 
@@ -27,6 +31,8 @@ fun SequenciaDeCombateResponse.toSequenciaDeCombateEntity(): SequenciaDeCombateE
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
+
     )
 }
 

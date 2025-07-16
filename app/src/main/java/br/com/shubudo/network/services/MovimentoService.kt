@@ -12,7 +12,9 @@ data class MovimentoResponse(
     val nome: String,
     val descricao: String,
     val ordem: Int,
-    val observacao: List<String>
+    val observacao: List<String>,
+    val video: String
+
 )
 
 fun MovimentoResponse.toMovimento(): Movimento {
@@ -25,6 +27,8 @@ fun MovimentoResponse.toMovimento(): Movimento {
         descricao = descricao,
         ordem = ordem,
         observacao = observacao,
+        video = video
+
     )
 }
 
@@ -38,6 +42,8 @@ fun MovimentoResponse.toMovimentoEntity(): MovimentoEntity {
         descricao = descricao,
         ordem = ordem,
         observacao = observacao,
+        video = video
+
     )
 }
 

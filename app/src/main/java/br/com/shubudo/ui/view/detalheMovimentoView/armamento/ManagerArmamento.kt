@@ -42,7 +42,7 @@ fun TelaArmamentoManager(
             TelaDetalheArmamento(
                 viewModel = viewModel,
                 armamento = armamento,
-                onBackNavigationClick = onBackNavigationClick
+                onBackNavigationClick = { selectedArmamento = null }
             )
         } else {
             TelaListaArmamento(

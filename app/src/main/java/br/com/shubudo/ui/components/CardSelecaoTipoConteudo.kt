@@ -67,7 +67,9 @@ sealed class Conteudo(
         texto = "Armamento",
     )
 
-
+    object DefesasDeArma : Conteudo(
+        texto = "Defesas de armas",
+    )
 
 }
 
@@ -101,7 +103,6 @@ fun CardSelecaoTipoConteudo(
                         }
                     )
                 }
-
             }
         }
     }
@@ -142,9 +143,14 @@ fun preencherLista(p: Programacao): List<Conteudo> {
         itensTemp.add(Conteudo.Projecao)
     }
 
-    if (p.armamento.isNotEmpty()){
-        Conteudo.Armamento.icon = ImageVector.vectorResource(id = R.drawable.ic_aramamento)
+    if (p.armamento.isNotEmpty()) {
+        Conteudo.Armamento.icon = ImageVector.vectorResource(id = R.drawable.ic_armamento)
         itensTemp.add(Conteudo.Armamento)
+    }
+
+    if (p.defesasDeArma.isNotEmpty()) {
+        Conteudo.DefesasDeArma.icon = ImageVector.vectorResource(id = R.drawable.ic_defesas_de_armas)
+        itensTemp.add(Conteudo.DefesasDeArma)
     }
 
     return itensTemp

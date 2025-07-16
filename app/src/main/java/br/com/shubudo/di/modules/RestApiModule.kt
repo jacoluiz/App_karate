@@ -1,15 +1,6 @@
 package br.com.shubudo.di.modules
 
-import br.com.shubudo.network.services.ArmamentoServices
-import br.com.shubudo.network.services.AvisoService
-import br.com.shubudo.network.services.DefesaPessoalExtraBannerServices
-import br.com.shubudo.network.services.DefesaPessoalServices
-import br.com.shubudo.network.services.FaixasServices
-import br.com.shubudo.network.services.KataServices
-import br.com.shubudo.network.services.MovimentoService
-import br.com.shubudo.network.services.ProjecaoServices
-import br.com.shubudo.network.services.SequenciaDeCombateService
-import br.com.shubudo.network.services.UsuarioService
+import br.com.shubudo.network.services.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,89 +14,93 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RestApiModule {
-    val baseUrl = "http://3.15.7.165:3000/"
+
+    private const val BASE_URL = "https://api.calendariokarate.click/"
 
     @Provides
     @Singleton
-    fun providerRetroFit(client : OkHttpClient) : Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpLoggingInterceptor() : HttpLoggingInterceptor {
+    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            setLevel(HttpLoggingInterceptor.Level.BODY)
+            level = HttpLoggingInterceptor.Level.BODY
         }
     }
 
     @Provides
     @Singleton
-    fun providerOkHttpClient(loggingInterceptor : HttpLoggingInterceptor) : OkHttpClient {
-        return OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
     }
 
     @Provides
     @Singleton
-    fun provideFaixasService(retrofit : Retrofit) : FaixasServices {
-        return retrofit.create(FaixasServices::class.java)
+    fun provideRetrofit(
+        client: OkHttpClient
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
     }
+
+    // Serviços Retrofit
 
     @Provides
     @Singleton
-    fun provideDefesaPessoalService(retrofit : Retrofit) : DefesaPessoalServices {
-        return retrofit.create(DefesaPessoalServices::class.java)
-    }
+    fun provideFaixasService(retrofit: Retrofit): FaixasServices =
+        retrofit.create(FaixasServices::class.java)
 
     @Provides
     @Singleton
-    fun providerKataService(retrofit : Retrofit) : KataServices {
-        return retrofit.create(KataServices::class.java)
-    }
+    fun provideDefesaPessoalService(retrofit: Retrofit): DefesaPessoalServices =
+        retrofit.create(DefesaPessoalServices::class.java)
 
     @Provides
     @Singleton
-    fun providerMovimentoService(retrofit : Retrofit) : MovimentoService {
-        return retrofit.create(MovimentoService::class.java)
-    }
+    fun provideKataService(retrofit: Retrofit): KataServices =
+        retrofit.create(KataServices::class.java)
 
     @Provides
     @Singleton
-    fun providerSequenciaDeCombateService(retrofit : Retrofit) : SequenciaDeCombateService {
-        return retrofit.create(SequenciaDeCombateService::class.java)
-    }
+    fun provideMovimentoService(retrofit: Retrofit): MovimentoService =
+        retrofit.create(MovimentoService::class.java)
 
     @Provides
     @Singleton
-    fun providerUsuarioService(retrofit : Retrofit) : UsuarioService {
-        return retrofit.create(UsuarioService::class.java)
-    }
+    fun provideSequenciaDeCombateService(retrofit: Retrofit): SequenciaDeCombateService =
+        retrofit.create(SequenciaDeCombateService::class.java)
 
     @Provides
     @Singleton
-    fun provideProjecaoService(retrofit : Retrofit) : ProjecaoServices {
-        return retrofit.create(ProjecaoServices::class.java)
-    }
+    fun provideUsuarioService(retrofit: Retrofit): UsuarioService =
+        retrofit.create(UsuarioService::class.java)
 
     @Provides
     @Singleton
-    fun provideDefesaPessoalExtraBannerService(retrofit : Retrofit) : DefesaPessoalExtraBannerServices {
-        return retrofit.create(DefesaPessoalExtraBannerServices::class.java)
-    }
+    fun provideProjecaoService(retrofit: Retrofit): ProjecaoServices =
+        retrofit.create(ProjecaoServices::class.java)
 
     @Provides
     @Singleton
-    fun provideAvisoService(retrofit : Retrofit) : AvisoService {
-        return retrofit.create(AvisoService::class.java)
-    }
+    fun provideDefesaPessoalExtraBannerService(retrofit: Retrofit): DefesaPessoalExtraBannerServices =
+        retrofit.create(DefesaPessoalExtraBannerServices::class.java)
 
     @Provides
     @Singleton
-    fun provideArmamentoService(retrofit : Retrofit) : ArmamentoServices {
-        return retrofit.create(ArmamentoServices::class.java)
-    }
+    fun provideArmamentoService(retrofit: Retrofit): ArmamentoServices =
+        retrofit.create(ArmamentoServices::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDefesaArmaService(retrofit: Retrofit): DefesaArmaServices =
+        retrofit.create(DefesaArmaServices::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEventoService(retrofit: Retrofit): EventoService =
+        retrofit.create(EventoService::class.java)
 }

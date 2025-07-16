@@ -13,8 +13,8 @@ android {
         applicationId = "br.com.shubudo"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.0.11"
+        versionCode = 14
+        versionName = "1.0.14"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

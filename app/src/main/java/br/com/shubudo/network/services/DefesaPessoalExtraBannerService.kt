@@ -9,7 +9,9 @@ data class DefesaPessoalExtraBannerResponse(
     val _id: String,
     val faixa: String,
     val numeroOrdem: Int,
-    val movimentos: List<Movimento>
+    val movimentos: List<Movimento>,
+    val video: String
+
 )
 
 fun DefesaPessoalExtraBannerResponse.toDefesaPessoalExtraBanner(): DefesaPessoalExtraBanner {
@@ -18,6 +20,8 @@ fun DefesaPessoalExtraBannerResponse.toDefesaPessoalExtraBanner(): DefesaPessoal
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
+
     )
 }
 
@@ -27,6 +31,7 @@ fun DefesaPessoalExtraBannerResponse.toDefesaPessoalExtraBannerEntity(): DefesaP
         faixa = faixa,
         numeroOrdem = numeroOrdem,
         movimentos = movimentos,
+        video = video
     )
 }
 

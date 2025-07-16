@@ -6,6 +6,7 @@ import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Movimento
+import br.com.shubudo.model.Video
 
 @Entity(tableName = "defesas_pessoais_extra_banner")
 @TypeConverters(Convertes::class)
@@ -16,6 +17,7 @@ data class DefesaPessoalExtraBannerEntity(
     val faixa: String,
     val numeroOrdem: Int,
     val movimentos: List<Movimento>,
+    val video: String
 
 )
 
@@ -23,6 +25,7 @@ fun DefesaPessoalExtraBannerEntity.toDefesaPessoalExtraBanner() = DefesaPessoalE
     _id = _id,
     faixa = faixa,
     numeroOrdem = numeroOrdem,
-    movimentos = movimentos
+    movimentos = movimentos,
+    video = video
 
 )
