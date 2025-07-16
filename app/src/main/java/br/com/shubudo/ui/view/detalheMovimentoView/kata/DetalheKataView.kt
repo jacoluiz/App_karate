@@ -237,21 +237,37 @@ fun TelaDetalheKata(
                             it.descricao == viewModel.currentVideo.value?.orientacao 
                         }
                         
-                        Row(
+                        // Criando uma grade para os botões de movimento
+                        val tempos = currentTemposVideos?.tempo ?: emptyList()
+                        val rows = (tempos.size + 4) / 5 // Dividir em linhas de 5 botões
+                        
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            currentTemposVideos?.tempo?.forEachIndexed { index, time ->
-                                TextButton(
-                                    onClick = {
-                                        viewModel.seekTo(exoPlayer, time * 1000L)
-                                    },
-                                    modifier = Modifier.padding(horizontal = 4.dp)
+                            for (row in 0 until rows) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Text(
-                                        text = "${index + 1}º",
-                                        color = Color.White
-                                    )
+                                    for (col in 0 until 5) {
+                                        val index = row * 5 + col
+                                        if (index < tempos.size) {
+                                            TextButton(
+                                                onClick = {
+                                                    viewModel.seekTo(exoPlayer, tempos[index] * 1000L)
+                                                },
+                                                modifier = Modifier.padding(horizontal = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = "${index + 1}º",
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
