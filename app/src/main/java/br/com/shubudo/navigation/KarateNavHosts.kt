@@ -32,7 +32,7 @@ fun KarateNavHost(
 
         // Tela de Avisos
         eventosScreen(
-            onReload = { eventosViewModel.recarregarEventos() },
+            onReload = { },
             onEventClick = { eventoId -> 
                 navController.navigateToEventoDetalhe(eventoId) 
             }
