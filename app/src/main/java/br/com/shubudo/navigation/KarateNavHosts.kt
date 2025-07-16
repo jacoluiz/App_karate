@@ -2,6 +2,7 @@ package br.com.shubudo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
@@ -30,11 +31,11 @@ fun KarateNavHost(
             }
         )
 
-        // Tela de Avisos
+        // Tela de Eventos
         eventosScreen(
-            onReload = { },
-            onEventClick = { eventoId -> 
-                navController.navigateToEventoDetalhe(eventoId) 
+            onReload = { navController.navigate(eventosRoute) },
+            onEventClick = { eventoId ->
+                navController.navigateToEventoDetalhe(eventoId)
             }
         )
 
@@ -88,14 +89,14 @@ fun KarateNavHost(
             onSaveSuccess = { navController.popBackStack() },
             onCancelar = { navController.popBackStack() }
         )
+
+        // Tela de Detalhe do Evento
+        eventoDetalheScreen {
+            navController.popBackStack()
+        }
     }
-    
-    // Tela de Detalhe do Evento
-    eventoDetalheScreen {
-        navController.popBackStack()
-    }
-    
-    // Tela de Detalhe do Evento
+}
+
 // Navegação para a tela correta dependendo do item da BottomBar
 fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
     when (item) {
@@ -120,5 +121,4 @@ fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
             })
         }
     }
-
 }
