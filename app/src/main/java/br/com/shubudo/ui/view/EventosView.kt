@@ -32,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -100,7 +101,11 @@ fun EventosView(
     onAddEventoClick: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-
+    
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
     when (uiState) {
         is EventoUiState.Loading -> {
             Box(
@@ -306,6 +311,7 @@ fun EventosView(
                 }
             }
         }
+    }
     }
 }
 
