@@ -18,7 +18,13 @@ fun NavGraphBuilder.eventosScreen(
     onReload: () -> Unit,
     onEventClick: (String) -> Unit
 ) {
-    composable(route = eventosRoute) {
+    composable(
+        route = eventosRoute,
+        enterTransition = { null },
+        exitTransition = { null },
+        popEnterTransition = { null },
+        popExitTransition = { null }
+    ) {
         val viewModel = hiltViewModel<EventosViewModel>()
         val uiState by viewModel.eventoUiState.collectAsState()
 

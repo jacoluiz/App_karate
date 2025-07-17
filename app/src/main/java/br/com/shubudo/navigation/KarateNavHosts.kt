@@ -16,9 +16,13 @@ fun KarateNavHost(
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(
+    NavHost(        
         navController = navController, 
-        startDestination = AppDestination.Evento.route
+        startDestination = AppDestination.Evento.route,
+        enterTransition = { null },
+        exitTransition = { null },
+        popEnterTransition = { null },
+        popExitTransition = { null }
     ) {
         // Tela de Login
         loginScreen(

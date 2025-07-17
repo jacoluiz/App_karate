@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -20,7 +21,13 @@ internal const val eventoDetalheRouteWithArgs = "$eventoDetalheRoute/{$eventoIdA
 fun NavGraphBuilder.eventoDetalheScreen(
     onBackClick: () -> Unit
 ) {
-    composable(route = eventoDetalheRouteWithArgs) { backStackEntry ->
+    composable(
+        route = eventoDetalheRouteWithArgs,
+        enterTransition = { null },
+        exitTransition = { null },
+        popEnterTransition = { null },
+        popExitTransition = { null }
+    ) { backStackEntry ->
         val eventoId = backStackEntry.arguments?.getString(eventoIdArgument)
         val viewModel = hiltViewModel<EventoDetalheViewModel>()
 
