@@ -134,7 +134,8 @@ fun TelaDetalheMovimentoPadrao(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
                         onClick = {
@@ -149,7 +150,7 @@ fun TelaDetalheMovimentoPadrao(
                         Icon(
                             imageVector = Icons.Default.Replay,
                             contentDescription = "Reiniciar",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
 

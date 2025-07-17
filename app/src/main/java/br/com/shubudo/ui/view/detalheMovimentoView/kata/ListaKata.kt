@@ -100,7 +100,7 @@ fun TelaListaKata(
                             Text(
                                 text = "${kata.quantidadeMovimentos} movimentos",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }

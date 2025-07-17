@@ -114,7 +114,7 @@ fun TelaListaProjecao(
                             Text(
                                 text = projecao.ordem.toOrdinarioFeminino(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }

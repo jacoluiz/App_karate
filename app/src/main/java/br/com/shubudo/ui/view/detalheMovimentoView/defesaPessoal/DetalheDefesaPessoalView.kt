@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,7 +22,7 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,9 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.DefesaPessoal
-import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.LocalVideoPlayer
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
 import br.com.shubudo.utils.toOrdinarioFeminino
@@ -56,7 +53,6 @@ fun TelaDetalheDefesaPessoal(
     defesaPessoal: DefesaPessoal,
     onBackNavigationClick: () -> Unit
 ) {
-    val listState = rememberLazyListState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var isPlaying by remember { mutableStateOf(false) }
@@ -115,9 +111,9 @@ fun TelaDetalheDefesaPessoal(
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(48.dp)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Text(
                         text = defesaPessoal.numeroOrdem.toOrdinarioFeminino(),
                         style = MaterialTheme.typography.headlineMedium,
@@ -125,7 +121,7 @@ fun TelaDetalheDefesaPessoal(
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
-                    
+
                     Text(
                         text = "Defesa Pessoal",
                         style = MaterialTheme.typography.titleMedium,
@@ -165,7 +161,8 @@ fun TelaDetalheDefesaPessoal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
                         onClick = {
@@ -180,7 +177,7 @@ fun TelaDetalheDefesaPessoal(
                         Icon(
                             imageVector = Icons.Default.Replay,
                             contentDescription = "Reiniciar",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
 
@@ -237,7 +234,7 @@ fun TelaDetalheDefesaPessoal(
 
                     defesaPessoal.movimentos.forEachIndexed { index, movimento ->
                         if (index > 0) {
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 16.dp),
                                 color = MaterialTheme.colorScheme.outlineVariant
                             )
@@ -273,7 +270,7 @@ fun TelaDetalheDefesaPessoal(
                             // Observações se existirem
                             if (movimento.observacao.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(12.dp))
-                                
+
                                 Text(
                                     text = "Observações:",
                                     style = MaterialTheme.typography.titleSmall,
@@ -314,10 +311,4 @@ fun TelaDetalheDefesaPessoal(
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
-
-    // Botão de voltar flutuante (backup)
-    BotaoVoltar(
-        onBackNavigationClick = onBackNavigationClick,
-        listState = listState
-    )
 }
