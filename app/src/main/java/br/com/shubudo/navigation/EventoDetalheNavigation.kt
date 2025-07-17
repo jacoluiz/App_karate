@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.EventoDetalheView
 import br.com.shubudo.ui.viewModel.EventoDetalheViewModel
 
@@ -18,7 +19,13 @@ internal const val eventoDetalheRouteWithArgs = "$eventoDetalheRoute/{$eventoIdA
 fun NavGraphBuilder.eventoDetalheScreen(
     onBackClick: () -> Unit
 ) {
-    composable(eventoDetalheRouteWithArgs) { backStackEntry ->
+    composable(
+        route = eventoDetalheRouteWithArgs,
+        enterTransition = { fadeIn() },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { fadeOut() }
+    ) { backStackEntry ->
         val eventoId = backStackEntry.arguments?.getString(eventoIdArgument)
         val viewModel = hiltViewModel<EventoDetalheViewModel>()
         
@@ -45,5 +52,8 @@ fun NavController.navigateToEventoDetalhe(
     eventoId: String,
     navOptions: NavOptions? = null
 ) {
-    navigate("$eventoDetalheRoute/$eventoId", navOptions)
+    val combinedNavOptions = navOptions ?: NavOptions.Builder()
+        .setLaunchSingleTop(true)
+        .build()
+    navigate("$eventoDetalheRoute/$eventoId", combinedNavOptions)
 }
