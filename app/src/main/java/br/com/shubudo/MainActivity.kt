@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -195,11 +196,11 @@ class MainActivity : ComponentActivity() {
     private fun hideSystemUI() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.let {
-            // Ocultar a barra de status e a barra de navegação
-            it.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
-            // Modo imersivo persistente
-            it.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            // Mostrar a barra de status mas ocultar a barra de navegação
+            it.hide(WindowInsetsCompat.Type.navigationBars())
+            it.show(WindowInsetsCompat.Type.statusBars())
+            // Comportamento para mostrar barras temporárias ao deslizar
+            it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 }
@@ -226,6 +227,7 @@ fun KarateApp(
         modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(
+            modifier = Modifier.statusBarsPadding(),
             topBar = {
                 if (isShowTopBar) {
                     KarateTopAppBar(

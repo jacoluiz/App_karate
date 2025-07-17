@@ -7,7 +7,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.EventosView
 import br.com.shubudo.ui.viewModel.EventosViewModel
 
@@ -17,13 +16,7 @@ fun NavGraphBuilder.eventosScreen(
     onReload: () -> Unit,
     onEventClick: (String) -> Unit
 ) {
-    composable(
-        route = eventosRoute,
-        enterTransition = { fadeIn() },
-        exitTransition = { fadeOut() },
-        popEnterTransition = { fadeIn() },
-        popExitTransition = { fadeOut() }
-    ) {
+    composable(route = eventosRoute) {
         val viewModel = hiltViewModel<EventosViewModel>()
         val uiState by viewModel.eventoUiState.collectAsState()
 
@@ -38,8 +31,5 @@ fun NavGraphBuilder.eventosScreen(
 fun NavController.navigateToEventos(
     navOptions: NavOptions? = null,
 ) {
-    val combinedNavOptions = navOptions ?: NavOptions.Builder()
-        .setLaunchSingleTop(true)
-        .build()
-    navigate(eventosRoute, combinedNavOptions)
+    navigate(eventosRoute, navOptions)
 }
