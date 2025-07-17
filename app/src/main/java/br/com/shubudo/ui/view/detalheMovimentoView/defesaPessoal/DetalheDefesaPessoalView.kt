@@ -1,37 +1,54 @@
 package br.com.shubudo.ui.view.detalheMovimentoView.defesaPessoal
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.LocalVideoPlayer
-import br.com.shubudo.ui.view.detalheMovimentoView.EsqueletoTela
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
+import br.com.shubudo.utils.toOrdinarioFeminino
 
 @Composable
 fun TelaDetalheDefesaPessoal(
@@ -41,6 +58,7 @@ fun TelaDetalheDefesaPessoal(
 ) {
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     var isPlaying by remember { mutableStateOf(false) }
 
     // Inicializa o ExoPlayer com o vídeo da defesa pessoal
@@ -48,81 +66,256 @@ fun TelaDetalheDefesaPessoal(
         createExoPlayer(context, defesaPessoal.video)
     }
 
-    EsqueletoTela(faixa = faixa) {
-        LazyColumn(
-            state = listState,
+    DisposableEffect(exoPlayer) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .verticalScroll(scrollState)
         ) {
-            // Cabeçalho: Player de vídeo
-            item {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    LocalVideoPlayer(
-                        exoPlayer = exoPlayer,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp),
-                        useController = false,
-                        videoPath = defesaPessoal.video
+            // Header com título
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(top = 48.dp, bottom = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Botão de voltar
+                IconButton(
+                    onClick = onBackNavigationClick,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .size(36.dp)
+                        .background(Color(0x30FFFFFF), RoundedCornerShape(18.dp))
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Voltar",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = "Defesa Pessoal",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = defesaPessoal.numeroOrdem.toOrdinarioFeminino(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    
+                    Text(
+                        text = "Defesa Pessoal",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
-            // Cabeçalho: Botões de controle (Play/Pause e Reiniciar)
-            item {
+
+            // Área do vídeo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                LocalVideoPlayer(
+                    exoPlayer = exoPlayer,
+                    modifier = Modifier.fillMaxSize(),
+                    useController = false,
+                    videoPath = defesaPessoal.video
+                )
+            }
+
+            // Controles de vídeo
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(4.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(16.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    IconButton(onClick = {
-                        exoPlayer.seekTo(0)
-                        exoPlayer.play()
-                        isPlaying = true
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Replay,
-                            contentDescription = "Reiniciar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    IconButton(onClick = {
-                        if (isPlaying) {
-                            exoPlayer.pause()
-                        } else {
+                    IconButton(
+                        onClick = {
+                            exoPlayer.seekTo(0)
                             exoPlayer.play()
-                        }
-                        isPlaying = !isPlaying
-                    }) {
+                            isPlaying = true
+                        },
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
                         Icon(
-                            imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            imageVector = Icons.Default.Replay,
+                            contentDescription = "Reiniciar",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(16.dp))
+
+                    IconButton(
+                        onClick = {
+                            if (isPlaying) {
+                                exoPlayer.pause()
+                            } else {
+                                exoPlayer.play()
+                            }
+                            isPlaying = !isPlaying
+                        },
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (isPlaying) "Pausar" else "Reproduzir",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
             }
+
             // Lista de movimentos
-            items(defesaPessoal.movimentos) { movimento ->
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(4.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
                     Text(
-                        text = movimento.nome,
-                        style = MaterialTheme.typography.titleLarge,
+                        text = "Movimentos da Defesa",
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(16.dp)
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = movimento.descricao,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    defesaPessoal.movimentos.forEachIndexed { index, movimento ->
+                        if (index > 0) {
+                            Divider(
+                                modifier = Modifier.padding(vertical = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "${index + 1}º Movimento",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = movimento.nome,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = movimento.descricao,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            // Observações se existirem
+                            if (movimento.observacao.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                Text(
+                                    text = "Observações:",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    movimento.observacao.forEach { observacao ->
+                                        Row(
+                                            verticalAlignment = Alignment.Top
+                                        ) {
+                                            Text(
+                                                text = "•",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(end = 8.dp, top = 2.dp)
+                                            )
+                                            Text(
+                                                text = observacao,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            // Espaço no final para evitar que o conteúdo fique escondido
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
-    // Botão de voltar
+
+    // Botão de voltar flutuante (backup)
     BotaoVoltar(
         onBackNavigationClick = onBackNavigationClick,
         listState = listState
