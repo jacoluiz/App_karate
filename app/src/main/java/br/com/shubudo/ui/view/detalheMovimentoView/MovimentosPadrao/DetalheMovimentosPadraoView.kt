@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -59,12 +60,11 @@ fun TelaDetalheMovimentoPadrao(
     var isPlaying by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Criando o ExoPlayer corretamente
-    val exoPlayer = remember(context, movimento.video) {
+    // Corrigido: contexto obtido fora do remember
+    val exoPlayer: ExoPlayer? = remember(movimento.video) {
         movimento.video?.let { createExoPlayer(context, it) }
     }
-    
-    // Libera o ExoPlayer quando a tela é fechada
+
     DisposableEffect(exoPlayer) {
         onDispose {
             exoPlayer?.release()
@@ -91,6 +91,7 @@ fun TelaDetalheMovimentoPadrao(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = movimento.nome,
                         style = MaterialTheme.typography.headlineMedium,
@@ -99,9 +100,9 @@ fun TelaDetalheMovimentoPadrao(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     movimento.tipoMovimento?.let {
                         Text(
                             text = it,
@@ -112,7 +113,7 @@ fun TelaDetalheMovimentoPadrao(
                     }
                 }
             }
-            
+
             // Área do vídeo
             if (exoPlayer != null && movimento.video != null) {
                 Box(
@@ -127,7 +128,7 @@ fun TelaDetalheMovimentoPadrao(
                         useController = false
                     )
                 }
-                
+
                 // Controles de vídeo
                 Row(
                     modifier = Modifier
@@ -151,9 +152,9 @@ fun TelaDetalheMovimentoPadrao(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.width(16.dp))
-                    
+
                     IconButton(
                         onClick = {
                             if (isPlaying) {
@@ -177,7 +178,7 @@ fun TelaDetalheMovimentoPadrao(
                     }
                 }
             }
-            
+
             // Detalhes do movimento
             Card(
                 modifier = Modifier
@@ -198,9 +199,9 @@ fun TelaDetalheMovimentoPadrao(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -212,45 +213,45 @@ fun TelaDetalheMovimentoPadrao(
                                 icone = Icons.Default.Apps
                             )
                         }
-                        
+
                         itemDetalheMovimento(
                             descricao = "Base",
                             valor = movimento.base,
                             icone = Icons.Default.Accessibility
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Divider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Text(
                         text = "Descrição",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     Text(
                         text = movimento.descricao,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    
+
                     if (movimento.observacao.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
-                        
+
                         Text(
                             text = "Observações e Dicas",
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -275,15 +276,16 @@ fun TelaDetalheMovimentoPadrao(
                     }
                 }
             }
-            
+
             // Espaço no final para evitar que o conteúdo fique escondido pelo botão de voltar
             Spacer(modifier = Modifier.height(80.dp))
+
+
         }
-        
-        // Botão de voltar
-        BotaoVoltar(
-            listState = remember { androidx.compose.foundation.lazy.rememberLazyListState() },
-            onBackNavigationClick = onBackNavigationClick
-        )
     }
+    val listState = rememberLazyListState()
+    BotaoVoltar(
+        listState = listState,
+        onBackNavigationClick = onBackNavigationClick
+    )
 }

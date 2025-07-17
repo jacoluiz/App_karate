@@ -62,8 +62,6 @@ fun TelaDetalheKata(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-
-    // Instância do ExoPlayer
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             addListener(object : Player.Listener {
@@ -90,31 +88,22 @@ fun TelaDetalheKata(
         }
     }
 
-    // Liberando o ExoPlayer quando o Composable sair de cena
     DisposableEffect(exoPlayer) {
         onDispose { exoPlayer.release() }
     }
 
-    // Carrega os vídeos sempre que o ViewModel ou o Kata mudarem
     LaunchedEffect(viewModel, kata) {
         viewModel.loadVideos(kata, context, exoPlayer)
     }
 
-    // Extrai o caminho do vídeo atual a partir do viewModel
     val videoPath = viewModel.localFilePaths.value[viewModel.currentVideo.value?.orientacao]
-
-    // Estado para controlar o movimento atual
     var currentMovementIndex by remember { mutableIntStateOf(0) }
-
     val coroutineScope = rememberCoroutineScope()
-
-    // Configuração do pager para navegar entre movimentos
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { kata.movimentos.size }
     )
 
-    // Sincroniza o índice do movimento com o pager
     LaunchedEffect(currentMovementIndex) {
         coroutineScope.launch {
             if (currentMovementIndex != pagerState.currentPage) {
@@ -130,15 +119,13 @@ fun TelaDetalheKata(
     }
 
     if (!viewModel.videoCarregado.value) {
-        // Exibe um overlay de carregamento enquanto o vídeo não estiver pronto
-        LoadingOverlay(true) { }
+        LoadingOverlay(true) {}
     } else {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF202020) // Cor de fundo escura
+            color = Color(0xFF202020)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Área do vídeo
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -152,7 +139,6 @@ fun TelaDetalheKata(
                         useController = false
                     )
 
-                    // Botão de voltar
                     IconButton(
                         onClick = onBackNavigationClick,
                         modifier = Modifier
@@ -170,12 +156,9 @@ fun TelaDetalheKata(
                     }
                 }
 
-                // Controles de vídeo
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF2A2A2A)
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
                     shape = RoundedCornerShape(0.dp)
                 ) {
                     Column(
@@ -183,20 +166,14 @@ fun TelaDetalheKata(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Botões de controle
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            IconButton(
-                                onClick = {
-                                    if (viewModel.isPlaying.value) {
-                                        viewModel.pause(exoPlayer)
-                                    } else {
-                                        viewModel.play(exoPlayer)
-                                    }
-                                }
-                            ) {
+                            IconButton(onClick = {
+                                if (viewModel.isPlaying.value) viewModel.pause(exoPlayer)
+                                else viewModel.play(exoPlayer)
+                            }) {
                                 Icon(
                                     imageVector = if (viewModel.isPlaying.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = "Play/Pause",
@@ -204,13 +181,10 @@ fun TelaDetalheKata(
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-
-                            IconButton(
-                                onClick = {
-                                    viewModel.seekTo(exoPlayer, 0)
-                                    viewModel.play(exoPlayer)
-                                }
-                            ) {
+                            IconButton(onClick = {
+                                viewModel.seekTo(exoPlayer, 0)
+                                viewModel.play(exoPlayer)
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Replay,
                                     contentDescription = "Reiniciar",
@@ -218,32 +192,20 @@ fun TelaDetalheKata(
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-
-                            IconButton(
-                                onClick = {
-                                    if (kata.video.isNotEmpty()) {
-                                        val currentVideo = viewModel.currentVideo.value
-                                        val currentOrientation = currentVideo?.orientacao
-
-                                        val nextOrientation = when (currentOrientation) {
-                                            Orientacao.FRENTE -> Orientacao.ESQUERDA
-                                            Orientacao.ESQUERDA -> Orientacao.DIREITA
-                                            Orientacao.DIREITA -> Orientacao.COSTAS
-                                            Orientacao.COSTAS -> Orientacao.FRENTE
-                                            else -> Orientacao.FRENTE
-                                        }
-
-                                        val nextVideo = kata.video.find {
-                                            it.orientacao == nextOrientation
-                                        }
-
-                                        if (nextVideo != null) {
-                                            viewModel.changeVideo(nextVideo, exoPlayer)
-                                            viewModel.pause(exoPlayer)
-                                        }
+                            IconButton(onClick = {
+                                kata.video.find {
+                                    it.orientacao == when (viewModel.currentVideo.value?.orientacao) {
+                                        Orientacao.FRENTE -> Orientacao.ESQUERDA
+                                        Orientacao.ESQUERDA -> Orientacao.DIREITA
+                                        Orientacao.DIREITA -> Orientacao.COSTAS
+                                        Orientacao.COSTAS -> Orientacao.FRENTE
+                                        else -> Orientacao.FRENTE
                                     }
+                                }?.let {
+                                    viewModel.changeVideo(it, exoPlayer)
+                                    viewModel.pause(exoPlayer)
                                 }
-                            ) {
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.FlipCameraAndroid,
                                     contentDescription = "Alternar ângulo",
@@ -253,7 +215,6 @@ fun TelaDetalheKata(
                             }
                         }
 
-                        // Texto para pular para movimento
                         Text(
                             text = "Pular para o movimento:",
                             color = Color.White,
@@ -264,15 +225,12 @@ fun TelaDetalheKata(
                             textAlign = TextAlign.Center
                         )
 
-                        // Botões numerados para pular para movimentos específicos
                         val currentTemposVideos = kata.temposVideos.find {
                             it.descricao == viewModel.currentVideo.value?.orientacao
                         }
-
-                        // Criando uma grade para os botões de movimento
                         val tempos = currentTemposVideos?.tempo ?: emptyList()
-                        val rows = (tempos.size + 4) / 5 // Dividir em linhas de 5 botões
-                        val totalMovements = kotlin.math.min(tempos.size, kata.movimentos.size)
+                        val totalMovements = kata.movimentos.size
+                        val rows = (totalMovements + 4) / 5
 
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -288,12 +246,11 @@ fun TelaDetalheKata(
                                     for (col in 0 until 5) {
                                         val index = row * 5 + col
                                         if (index < totalMovements) {
+                                            val tempoMs =
+                                                tempos.getOrNull(index)?.times(1000L) ?: 0L
                                             TextButton(
                                                 onClick = {
-                                                    viewModel.seekTo(
-                                                        exoPlayer,
-                                                        tempos[index] * 1000L
-                                                    )
+                                                    viewModel.seekTo(exoPlayer, tempoMs)
                                                     currentMovementIndex = index
                                                     coroutineScope.launch {
                                                         pagerState.scrollToPage(index)
@@ -301,10 +258,7 @@ fun TelaDetalheKata(
                                                 },
                                                 modifier = Modifier.padding(horizontal = 2.dp)
                                             ) {
-                                                Text(
-                                                    text = "${index + 1}º",
-                                                    color = Color.White
-                                                )
+                                                Text(text = "${index + 1}º", color = Color.White)
                                             }
                                         }
                                     }
@@ -314,18 +268,14 @@ fun TelaDetalheKata(
                     }
                 }
 
-                // Detalhes do movimento atual
                 if (kata.movimentos.isNotEmpty() && currentMovementIndex < kata.movimentos.size) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF2A2A2A)
-                        ),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        // Pager para navegar entre os movimentos
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxWidth()
@@ -337,65 +287,67 @@ fun TelaDetalheKata(
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = "${(page + 1)}º movimento",
+                                    text = "${page + 1}º movimento",
                                     color = Color.White,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
-
                                 Spacer(modifier = Modifier.height(8.dp))
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     movimento.tipoMovimento?.let {
                                         Column {
-                                            Text(
-                                                text = "Tipo:",
-                                                color = Color.Gray,
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                            Text(
-                                                text = it,
-                                                color = Color.White,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
-                                    }
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 4.dp)
+                                            ) {
+                                                Text(
+                                                    text = "Tipo:",
+                                                    color = Color.Gray,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                Text(
+                                                    text = "Base:",
+                                                    color = Color.Gray,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                            Row {
+                                                Text(
+                                                    text = it,
+                                                    color = Color.White,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    modifier = Modifier.weight(1f)
+                                                )
 
-                                    Column {
+                                                Text(
+                                                    text = movimento.base,
+                                                    color = Color.White,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
                                         Text(
-                                            text = "Base:",
-                                            color = Color.Gray,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                        Text(
-                                            text = movimento.base,
+                                            text = movimento.nome,
                                             color = Color.White,
+                                            style = MaterialTheme.typography.titleSmall.copy(
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = movimento.descricao,
+                                            color = Color.LightGray,
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Text(
-                                    text = movimento.nome,
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Medium
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Text(
-                                    text = movimento.descricao,
-                                    color = Color.LightGray,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
                             }
                         }
                     }
