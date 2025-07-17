@@ -1,5 +1,7 @@
 package br.com.shubudo.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -7,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.EventoDetalheView
 import br.com.shubudo.ui.viewModel.EventoDetalheViewModel
@@ -28,16 +29,16 @@ fun NavGraphBuilder.eventoDetalheScreen(
     ) { backStackEntry ->
         val eventoId = backStackEntry.arguments?.getString(eventoIdArgument)
         val viewModel = hiltViewModel<EventoDetalheViewModel>()
-        
+
         // Load the event when the screen is first displayed
         LaunchedEffect(eventoId) {
             if (eventoId != null) {
                 viewModel.loadEvento(eventoId)
             }
         }
-        
+
         val uiState by viewModel.uiState.collectAsState()
-        
+
         // Only show the detail view if we have a valid event
         uiState.evento?.let { evento ->
             EventoDetalheView(

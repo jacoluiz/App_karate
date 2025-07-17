@@ -28,7 +28,6 @@ import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.itemDetalheMovimento
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
-import br.com.shubudo.utils.toOrdinarioFeminino
 
 @Composable
 fun TelaListaMovimentoPadrao(
@@ -37,7 +36,7 @@ fun TelaListaMovimentoPadrao(
     onCardClick: (movimento: Movimento) -> Unit
 ) {
     val listState = rememberLazyListState()
-    
+
     LazyColumn(
         state = listState,
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -53,7 +52,7 @@ fun TelaListaMovimentoPadrao(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
-        
+
         items(uiState.movimento) { movimento ->
             Card(
                 colors = CardDefaults.cardColors(
@@ -82,7 +81,7 @@ fun TelaListaMovimentoPadrao(
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start,
@@ -97,14 +96,14 @@ fun TelaListaMovimentoPadrao(
                         }
 
                         Spacer(modifier = Modifier.width(16.dp))
-                        
+
                         itemDetalheMovimento(
                             descricao = "Base",
                             valor = movimento.base,
                             icone = Icons.Default.Accessibility
                         )
                     }
-                    
+
                     // Preview of description (first 80 chars)
                     if (movimento.descricao.isNotEmpty()) {
                         Text(
@@ -117,12 +116,12 @@ fun TelaListaMovimentoPadrao(
                 }
             }
         }
-        
+
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
-    
+
     BotaoVoltar(
         listState = listState,
         onBackNavigationClick = onBackNavigationClick
