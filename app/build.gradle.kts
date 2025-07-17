@@ -7,14 +7,14 @@ plugins {
 }
 android {
     namespace = "br.com.shubudo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "br.com.shubudo"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 14
-        versionName = "1.0.14"
+        targetSdk = 35
+        versionCode = 17
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

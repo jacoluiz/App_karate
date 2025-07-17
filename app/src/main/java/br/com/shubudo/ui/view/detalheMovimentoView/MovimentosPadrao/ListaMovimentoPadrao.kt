@@ -79,14 +79,6 @@ fun TelaListaMovimentoPadrao(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         )
-                        
-                        Text(
-                            text = movimento.ordem.toOrdinarioFeminino(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
