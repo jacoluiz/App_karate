@@ -20,13 +20,7 @@ internal const val eventoDetalheRouteWithArgs = "$eventoDetalheRoute/{$eventoIdA
 fun NavGraphBuilder.eventoDetalheScreen(
     onBackClick: () -> Unit
 ) {
-    composable(
-        route = eventoDetalheRouteWithArgs,
-        enterTransition = { fadeIn() },
-        exitTransition = { fadeOut() },
-        popEnterTransition = { fadeIn() },
-        popExitTransition = { fadeOut() }
-    ) { backStackEntry ->
+    composable(route = eventoDetalheRouteWithArgs) { backStackEntry ->
         val eventoId = backStackEntry.arguments?.getString(eventoIdArgument)
         val viewModel = hiltViewModel<EventoDetalheViewModel>()
 
@@ -53,8 +47,5 @@ fun NavController.navigateToEventoDetalhe(
     eventoId: String,
     navOptions: NavOptions? = null
 ) {
-    val combinedNavOptions = navOptions ?: NavOptions.Builder()
-        .setLaunchSingleTop(true)
-        .build()
-    navigate("$eventoDetalheRoute/$eventoId", combinedNavOptions)
+    navigate("$eventoDetalheRoute/$eventoId", navOptions)
 }

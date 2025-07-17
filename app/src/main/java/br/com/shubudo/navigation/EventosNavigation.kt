@@ -18,13 +18,7 @@ fun NavGraphBuilder.eventosScreen(
     onReload: () -> Unit,
     onEventClick: (String) -> Unit
 ) {
-    composable(
-        route = eventosRoute,
-        enterTransition = { fadeIn() },
-        exitTransition = { fadeOut() },
-        popEnterTransition = { fadeIn() },
-        popExitTransition = { fadeOut() }
-    ) {
+    composable(route = eventosRoute) {
         val viewModel = hiltViewModel<EventosViewModel>()
         val uiState by viewModel.eventoUiState.collectAsState()
 
@@ -39,8 +33,5 @@ fun NavGraphBuilder.eventosScreen(
 fun NavController.navigateToEventos(
     navOptions: NavOptions? = null,
 ) {
-    val combinedNavOptions = navOptions ?: NavOptions.Builder()
-        .setLaunchSingleTop(true)
-        .build()
-    navigate(eventosRoute, combinedNavOptions)
+    navigate(eventosRoute, navOptions)
 }
