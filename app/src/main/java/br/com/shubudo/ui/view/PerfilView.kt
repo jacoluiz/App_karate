@@ -30,6 +30,9 @@ import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.PerfilUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 
@@ -50,15 +53,8 @@ fun PerfilView(
             }
         }
         is PerfilUiState.Empty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Nenhum dado encontrado.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
+            LaunchedEffect("navigateToLogin") {
+                onLogout()
             }
         }
         is PerfilUiState.Success -> {
@@ -79,7 +75,6 @@ fun PerfilView(
         }
     }
 }
-
 @Composable
 fun PerfilContent(
     nome: String,
@@ -92,109 +87,112 @@ fun PerfilContent(
     onLogout: () -> Unit,
     onEditarPerfil: () -> Unit
 ) {
-    // Topo colorido com foto, nome e faixa
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp) // altura do cabeçalho
-            .background(MaterialTheme.colorScheme.primary)
-    ) {
-        // Coluna que centraliza o conteúdo no topo
-        Column(
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Topo com fundo colorido e conteúdo centralizado
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Foto de perfil circular
-            Image(
-                painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            // Nome do usuário
-            Text(
-                text = nome,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-            // Faixa do usuário
-            Text(
-                text = "Faixa $corFaixa",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-
-    // Conteúdo principal
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(60.dp))
-        // Card com as informações pessoais
-        Card(
-            modifier = Modifier
-                .padding(top = 150.dp) // para ficar abaixo do topo colorido
-                .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                    contentDescription = "Foto de perfil",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = nome,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Text(
+                    text = "Faixa $corFaixa",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                )
+            }
+        }
+
+        // Card com informações
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 24.dp)
+                .fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = "Informações Pessoais",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                // Email
-                RowInfo(label = "Email", value = email)
-                // Peso
-                RowInfo(label = "Peso", value = "$peso kg")
-                // Altura
-                RowInfo(label = "Altura", value = "$altura cm")
-                // Idade
-                RowInfo(label = "Idade", value = idade)
+
+                InfoItem("Email", email)
+                InfoItem("Peso", "$peso kg")
+                InfoItem("Altura", "$altura cm")
+                InfoItem("Idade", idade)
             }
         }
 
-        // Botão de Editar Perfil
-        Button(
-            onClick = onEditarPerfil,
+        // Botões
+        Column(
             modifier = Modifier
-                .padding(top = 24.dp)
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Editar Perfil")
-        }
+            Button(
+                onClick = onEditarPerfil,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Editar Perfil")
+            }
 
-        // Botão de Logout
-        Button(
-            onClick = onLogout,
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxWidth()
-        ) {
-            Text(text = "Logout")
+            Button(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Logout")
+            }
         }
     }
 }
 
 @Composable
-fun RowInfo(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+fun InfoItem(label: String, value: String) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

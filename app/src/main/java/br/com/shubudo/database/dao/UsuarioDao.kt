@@ -26,4 +26,8 @@ interface UsuarioDao {
      */
     @Update
     suspend fun atualizarUsuario(usuario: UsuarioEntity): Int
+
+    @Query("DELETE FROM usuario") // ou o nome correto da tabela
+    suspend fun limparUsuario()
+
 }

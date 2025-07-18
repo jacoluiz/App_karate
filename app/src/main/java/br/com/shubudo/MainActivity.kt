@@ -17,8 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -43,7 +43,6 @@ import br.com.shubudo.navigation.editarPerfilRoute
 import br.com.shubudo.navigation.esqueciMinhaSenhaRote
 import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
 import br.com.shubudo.navigation.eventosRoute
-import br.com.shubudo.navigation.navigateToBottomAppBarItem
 import br.com.shubudo.navigation.novoUsuarioRote
 import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
 import br.com.shubudo.navigation.perfilRoute
@@ -53,6 +52,7 @@ import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
+import br.com.shubudo.ui.viewModel.PerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -66,50 +66,68 @@ class MainActivity : ComponentActivity() {
         hideSystemUI()
         super.onCreate(savedInstanceState)
         checkAndRequestPermissions()
+        SessionManager.inicializar(applicationContext)
 
         setContent {
-            val themeViewModel: ThemeViewModel = viewModel() // Injeção do ViewModel
-            val dropDownMenuViewModel: DropDownMenuViewModel = viewModel() // Injeção do ViewModel
+            val themeViewModel: ThemeViewModel = viewModel()
+            val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
+            val perfilViewModel: PerfilViewModel = viewModel()
 
-            AppShubudoTheme(faixa = themeViewModel.currentFaixa.value) {
+            val uiState by perfilViewModel.uiState.collectAsState()
+            val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
+
+            val faixaParaTema = SessionManager.usuarioLogado?.corFaixa
+                ?: themeViewModel.getFaixaAtualOuAleatoria()
+
+            AppShubudoTheme(faixa = faixaParaTema) {
+
                 val navController = rememberNavController()
                 val backStackEntryState by navController.currentBackStackEntryAsState()
                 val currentDestination = backStackEntryState?.destination
+
                 Surface {
-                    // Implementação da UI, conforme o código original...
                     val isShowTopBar = when (currentDestination?.route) {
-                        detalheMovimentoRuteFullpath -> false
+                        detalheMovimentoRuteFullpath,
                         AppDestination.Login.route -> false
+
                         else -> true
                     }
 
                     val isShowBottomBar = when (currentDestination?.route) {
-                         AppDestination.Perfil.route, AppDestination.Programacao.route, AppDestination.Evento.route -> true
+                        AppDestination.Perfil.route,
+                        AppDestination.Programacao.route,
+                        AppDestination.Login.route,
+                        AppDestination.Evento.route -> true
+
                         else -> false
                     }
 
-                    // Definições dos títulos, botões, etc., conforme o código original
+
                     val topAppBarTitle = when (currentDestination?.route) {
                         editarPerfilRoute -> "Editar Perfil"
                         perfilRoute -> "Perfil"
                         AppDestination.Evento.route -> "Evento"
                         AppDestination.Login.route -> "Login"
                         AppDestination.Programacao.route -> "Conteúdo"
-                        detalheFaixaRuteFullpath -> ("Faixa " + backStackEntryState?.arguments?.getString(
+                        detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
                             detalheFaixaArgument
-                        ))
+                        )
 
                         detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
                             detalheMovimentoArgument
                         )
 
-                        novoUsuarioRote -> "Precisamos de alguns dados"
-                        novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
+                        novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
                         else -> "Shubu-dô App"
                     }
 
                     val showBottomBack = when (currentDestination?.route) {
-                        detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, esqueciMinhaSenhaRoteSemUsername -> true
+                        detalheFaixaRuteFullpath,
+                        novoUsuarioRote,
+                        novoUsuarioRoteSemUsername,
+                        esqueciMinhaSenhaRote,
+                        esqueciMinhaSenhaRoteSemUsername -> true
+
                         else -> false
                     }
 
@@ -123,23 +141,22 @@ class MainActivity : ComponentActivity() {
                         else -> true
                     }
 
-                    if (topAppBarTitle != null) {
-                        KarateApp(
-                            isShowTopBar = isShowTopBar,
-                            isShowBottomBar = isShowBottomBar,
-                            topAppBarTitle = topAppBarTitle,
-                            showBottomBack = showBottomBack,
+                    KarateApp(
+                        isShowTopBar = isShowTopBar,
+                        isShowBottomBar = isShowBottomBar,
+                        topAppBarTitle = topAppBarTitle ?: "",
+                        showBottomBack = showBottomBack,
+                        navController = navController,
+                        showColorTopAppBar = showColorTopAppBar,
+                        showTitleTopAppBar = showTitleTopAppBar,
+                        themeViewModel = themeViewModel,
+                        isLoggedIn = isLoggedIn
+                    ) {
+                        KarateNavHost(
                             navController = navController,
-                            showColorTopAppBar = showColorTopAppBar,
-                            showTitleTopAppBar = showTitleTopAppBar,
-                            themeViewModel = themeViewModel
-                        ) {
-                            KarateNavHost(
-                                navController = navController,
-                                themeViewModel = themeViewModel,
-                                dropDownMenuViewModel = dropDownMenuViewModel
-                            )
-                        }
+                            themeViewModel = themeViewModel,
+                            dropDownMenuViewModel = dropDownMenuViewModel
+                        )
                     }
                 }
             }
@@ -182,29 +199,18 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                // Permissões concedidas
-                // Log.i("Permission", "Todas as permissões foram concedidas.")
-            } else {
-                // Permissões negadas
-                // Log.e("Permission", "Algumas permissões foram negadas.")
-            }
-        }
     }
 
     private fun hideSystemUI() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.let {
-            // Mostrar a barra de status mas ocultar a barra de navegação
             it.hide(WindowInsetsCompat.Type.navigationBars())
             it.show(WindowInsetsCompat.Type.statusBars())
-            // Comportamento para mostrar barras temporárias ao deslizar
-            it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            it.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 }
-
 
 @Composable
 fun KarateApp(
@@ -213,19 +219,18 @@ fun KarateApp(
     topAppBarTitle: String,
     testeDeTela: Boolean = false,
     showBottomBack: Boolean = false,
-    showColorTopAppBar: Boolean = true,
     navController: NavHostController,
+    showColorTopAppBar: Boolean = true,
     showTitleTopAppBar: Boolean = true,
     themeViewModel: ThemeViewModel,
+    isLoggedIn: Boolean,
     content: @Composable () -> Unit
 ) {
     val currentBackStack by navController.currentBackStackEntryAsState()
-    val currentDestination = currentBackStack?.destination
-    val currentRoute = currentDestination?.route
+    val currentRoute = currentBackStack?.destination?.route
     val focusManager = LocalFocusManager.current
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.statusBarsPadding(),
             topBar = {
@@ -237,7 +242,8 @@ fun KarateApp(
                         showTitle = showTitleTopAppBar,
                         onBackNavigationClick = {
                             navController.popBackStack()
-                        })
+                        }
+                    )
                 }
             },
             floatingActionButton = {
@@ -254,24 +260,45 @@ fun KarateApp(
             },
             bottomBar = {
                 if (isShowBottomBar) {
-                    KarateBottomAppBar(selectedItem = when (currentRoute) {
-//                        perfilRoute -> BottomAppBarItem.Perfil
-                        eventosRoute -> BottomAppBarItem.Eventos
-                        programacaoRoute -> BottomAppBarItem.Conteudo
-                        else -> BottomAppBarItem.Eventos
-                    }, items = remember {
-                        listOf(
-                            BottomAppBarItem.Eventos,
-//                            BottomAppBarItem.Perfil,
-                            BottomAppBarItem.Conteudo,
-                        )
-                    }, onItemClick = { item ->
-                        navController.navigateToBottomAppBarItem(item)
-                    })
-                }
-            }) {
-            Box(
+                    KarateBottomAppBar(
+                        navController = navController,
+                        onItemClick = { item ->
+                            when (item) {
+                                BottomAppBarItem.Perfil -> {
+                                    if (isLoggedIn) {
+                                        navController.navigate(perfilRoute) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    } else {
+                                        navController.navigate(AppDestination.Login.route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
 
+                                BottomAppBarItem.Eventos -> {
+                                    navController.navigate(eventosRoute) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+
+                                BottomAppBarItem.Conteudo -> {
+                                    navController.navigate(programacaoRoute) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        }
+                    )
+
+                }
+            }
+        ) {
+            Box(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
@@ -282,7 +309,6 @@ fun KarateApp(
                         })
                     }
             ) {
-
                 content()
             }
         }

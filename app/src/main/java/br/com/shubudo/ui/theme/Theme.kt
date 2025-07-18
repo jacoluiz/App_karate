@@ -241,6 +241,7 @@ private val LightGraoMestreColorScheme = lightColorScheme(
 fun AppShubudoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(), faixa: String, content: @Composable () -> Unit
 ) {
+
     val colorScheme = when (faixa) {
         "Branca" -> if (darkTheme) DarkBrancaColorScheme else LightBrancaColorScheme
         "Amarela" -> if (darkTheme) DarkAmarelaColorScheme else LightAmarelaColorScheme

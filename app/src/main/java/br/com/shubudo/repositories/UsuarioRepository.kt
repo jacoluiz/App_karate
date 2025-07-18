@@ -54,6 +54,10 @@ class UsuarioRepository @Inject constructor(
         }
     }
 
+    suspend fun logout() {
+        dao.limparUsuario() // ou deleteAll(), dependendo da sua DAO
+    }
+
     /**
      * Atualiza o perfil do usuário, validando duplicidades no email e username.
      *

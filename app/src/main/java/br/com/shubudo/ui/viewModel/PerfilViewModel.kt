@@ -2,6 +2,7 @@ package br.com.shubudo.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.PerfilUiState
@@ -36,16 +37,25 @@ class PerfilViewModel @Inject constructor(
                 _uiState.update { PerfilUiState.Loading }
             }.collectLatest { usuario ->
                 if (usuario == null) {
-                    _uiState.update {
-                        PerfilUiState.Empty
-                    }
+                    SessionManager.usuarioLogado = null // garantir reset
+                    _uiState.update { PerfilUiState.Empty }
                 } else {
-                    // Chama loadUsuario diretamente para atualizar o estado
+                    SessionManager.usuarioLogado = usuario // manter atualizado
                     loadUsuario(usuario)
                 }
             }
         }
     }
+
+    fun logout(onLoggedOut: () -> Unit) {
+        viewModelScope.launch {
+            repository.logout()
+            SessionManager.usuarioLogado = null // limpa sessão
+            _uiState.value = PerfilUiState.Empty
+            onLoggedOut()
+        }
+    }
+
 
     private fun loadUsuario(usuario: Usuario) {
         _uiState.update {
