@@ -125,4 +125,8 @@ class DetalheArmamentoViewModel : ViewModel() {
         }
         return file.absolutePath
     }
+
+    fun setIsPlaying(value: Boolean) {
+        isPlaying.value = value
+    }
 }

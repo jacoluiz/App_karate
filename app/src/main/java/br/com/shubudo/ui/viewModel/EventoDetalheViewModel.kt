@@ -1,8 +1,8 @@
 package br.com.shubudo.ui.viewModel
 
+import EventoDetalheUiState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.shubudo.model.Evento
 import br.com.shubudo.repositories.EventoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +12,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class EventoDetalheUiState(
-    val isLoading: Boolean = false,
-    val evento: Evento? = null,
-    val error: String? = null
-)
 
 @HiltViewModel
 class EventoDetalheViewModel @Inject constructor(

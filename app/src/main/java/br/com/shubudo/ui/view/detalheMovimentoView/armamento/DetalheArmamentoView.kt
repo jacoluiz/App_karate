@@ -1,38 +1,27 @@
 package br.com.shubudo.ui.view.detalheMovimentoView.armamento
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Armamento
 import br.com.shubudo.ui.components.BotaoVoltar
+import br.com.shubudo.ui.components.ControlesVideoPadrao
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.components.LocalVideoPlayer
-import br.com.shubudo.ui.view.detalheMovimentoView.EsqueletoTela
 import br.com.shubudo.ui.viewModel.DetalheArmamentoViewModel
 
 @Composable
@@ -42,98 +31,121 @@ fun TelaDetalheArmamento(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-
-    // Instância do ExoPlayer
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+
     DisposableEffect(exoPlayer) {
         onDispose { exoPlayer.release() }
     }
 
-    // Carrega o vídeo do armamento assim que o ViewModel ou o Armamento mudarem
     LaunchedEffect(viewModel, armamento) {
         viewModel.loadVideo(armamento, context, exoPlayer)
     }
 
+    val scrollState = rememberScrollState()
+    val listState = rememberLazyListState()
+
     if (!viewModel.videoCarregado.value) {
-        // Exibe um overlay de carregamento enquanto o vídeo não estiver pronto
-        LoadingOverlay(isLoading = true) { }
+        LoadingOverlay(isLoading = true) {}
     } else {
-        EsqueletoTela(
-            faixa = "Preta"
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                // Área superior: Player de vídeo
-                Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+            ) {
+                // Cabeçalho com nome da arma
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                )
+                            ),
+                        )
+                        .padding(top = 48.dp, bottom = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = armamento.arma,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Vídeo
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
                     LocalVideoPlayer(
                         videoPath = viewModel.currentVideoPath.value,
                         exoPlayer = exoPlayer,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp),
+                        modifier = Modifier.fillMaxSize(),
                         useController = false
                     )
                 }
-                // Linha com botões: Play/Pause e Reiniciar
-                Row(
+
+                // Controles
+                ControlesVideoPadrao(
+                    exoPlayer = exoPlayer,
+                    isPlaying = viewModel.isPlaying.value,
+                    onPlayingChange = { viewModel.setIsPlaying(it) }
+                )
+
+                // Detalhes do Armamento
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Center
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    IconButton(onClick = {
-                        if (viewModel.isPlaying.value) {
-                            viewModel.pause(exoPlayer)
-                        } else {
-                            viewModel.play(exoPlayer)
-                        }
-                    }) {
-                        Icon(
-                            imageVector = if (viewModel.isPlaying.value) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                            contentDescription = "Play/Pause",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    IconButton(onClick = {
-                        viewModel.seekTo(exoPlayer, 0L)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Replay,
-                            contentDescription = "Reiniciar Vídeo",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
-                ) {
-                    // Exibe o nome do armamento
-                    Text(
-                        text = armamento.arma,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-
-                    )
-                    // Exibe somente a descrição de cada movimento
-                    armamento.movimentos.forEach { movimento ->
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
                         Text(
-                            text = movimento.descricao,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp)
+                            text = "Movimentos com ${armamento.arma}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
-                    }
 
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        armamento.movimentos.forEachIndexed { index, movimento ->
+                            if (index > 0) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+                            }
+
+                            Text(
+                                text = movimento.descricao,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
 
-    // Cria um estado de lista para ser usado no Botão de voltar
-    val listState = rememberLazyListState()
-
-    // Botão de voltar
     BotaoVoltar(
         onBackNavigationClick = onBackNavigationClick,
         listState = listState

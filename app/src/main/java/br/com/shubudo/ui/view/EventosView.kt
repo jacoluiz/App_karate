@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.sp
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Evento
 import br.com.shubudo.ui.components.LoadingOverlay
-import br.com.shubudo.ui.uistate.EventoUiState
+import br.com.shubudo.ui.uistate.EventosUiState
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -95,7 +95,7 @@ fun String.formatDayMonth(): String {
 
 @Composable
 fun EventosView(
-    uiState: EventoUiState,
+    uiState: EventosUiState,
     onReload: () -> Unit = {},
     onEventClick: (String) -> Unit = {},
     onAddEventoClick: () -> Unit = {}
@@ -107,7 +107,7 @@ fun EventosView(
         color = MaterialTheme.colorScheme.background
     ) {
     when (uiState) {
-        is EventoUiState.Loading -> {
+        is EventosUiState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -130,11 +130,11 @@ fun EventosView(
             }
         }
 
-        is EventoUiState.Success, is EventoUiState.Empty -> {
+        is EventosUiState.Success, is EventosUiState.Empty -> {
             val futuros = mutableListOf<Evento>()
             val passados = mutableListOf<Evento>()
 
-            if (uiState is EventoUiState.Success) {
+            if (uiState is EventosUiState.Success) {
                 uiState.eventosAgrupados.values.flatten().forEach { evento ->
                     if (evento.dataInicio.isPastEvent()) passados.add(evento) else futuros.add(
                         evento

@@ -42,8 +42,8 @@ class Convertes {
     }
 
     @TypeConverter
-    fun fromTempoVideoList(tempoVideoList: List<TempoVideo>): String {
-        return Gson().toJson(tempoVideoList)
+    fun fromTempoVideoList(tempoVideoModelList: List<TempoVideo>): String {
+        return Gson().toJson(tempoVideoModelList)
     }
 
     @TypeConverter

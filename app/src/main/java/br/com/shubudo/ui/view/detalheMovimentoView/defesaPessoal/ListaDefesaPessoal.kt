@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,8 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.R
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
@@ -76,10 +79,12 @@ fun TelaListaDefesaPessoal(
                             horizontalArrangement = Arrangement.Start
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Security,
+                                painter = painterResource(id = R.drawable.ic_defesa_pessoal),
                                 contentDescription = "Defesa Pessoal",
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 12.dp)
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .padding(end = 12.dp)
                             )
                             
                             Text(

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -81,7 +82,7 @@ fun ProgramacaoView(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .wrapContentHeight()
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
@@ -91,9 +92,9 @@ fun ProgramacaoView(
                             ),
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                         )
-                        .padding(vertical = 24.dp, horizontal = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                        .padding(vertical = 24.dp, horizontal = 16.dp)
+                )
+                {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,

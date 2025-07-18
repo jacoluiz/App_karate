@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,14 +17,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,8 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.components.BotaoVoltar
+import br.com.shubudo.ui.components.ControlesVideoPadrao
 import br.com.shubudo.ui.components.LocalVideoPlayer
-import br.com.shubudo.ui.components.itemDetalheMovimento
+import br.com.shubudo.ui.components.ItemDetalheMovimento
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
 
 @Composable
@@ -84,7 +78,14 @@ fun TelaDetalheMovimentoPadrao(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            )
+                        ),
+                    )
                     .padding(top = 48.dp, bottom = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -128,56 +129,12 @@ fun TelaDetalheMovimentoPadrao(
                         useController = false
                     )
                 }
-
                 // Controles de vídeo
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = {
-                            exoPlayer.seekTo(0)
-                            exoPlayer.play()
-                            isPlaying = true
-                        },
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Replay,
-                            contentDescription = "Reiniciar",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    IconButton(
-                        onClick = {
-                            if (isPlaying) {
-                                exoPlayer.pause()
-                            } else {
-                                exoPlayer.play()
-                            }
-                            isPlaying = !isPlaying
-                        },
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                    ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pausar" else "Reproduzir",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
+                ControlesVideoPadrao(
+                    exoPlayer = exoPlayer,
+                    isPlaying = isPlaying,
+                    onPlayingChange = { isPlaying = it }
+                )
             }
 
             // Detalhes do movimento
@@ -208,14 +165,14 @@ fun TelaDetalheMovimentoPadrao(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         movimento.tipoMovimento?.let {
-                            itemDetalheMovimento(
+                            ItemDetalheMovimento(
                                 descricao = "Tipo",
                                 valor = it,
                                 icone = Icons.Default.Apps
                             )
                         }
 
-                        itemDetalheMovimento(
+                        ItemDetalheMovimento(
                             descricao = "Base",
                             valor = movimento.base,
                             icone = Icons.Default.Accessibility

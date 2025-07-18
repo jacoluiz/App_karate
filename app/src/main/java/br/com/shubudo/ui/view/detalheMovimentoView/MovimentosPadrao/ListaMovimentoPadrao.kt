@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.components.BotaoVoltar
-import br.com.shubudo.ui.components.itemDetalheMovimento
+import br.com.shubudo.ui.components.ItemDetalheMovimento
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
 
 @Composable
@@ -88,7 +88,7 @@ fun TelaListaMovimentoPadrao(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         movimento.tipoMovimento?.let {
-                            itemDetalheMovimento(
+                            ItemDetalheMovimento(
                                 descricao = "",
                                 valor = it,
                                 icone = Icons.Default.Apps
@@ -97,7 +97,7 @@ fun TelaListaMovimentoPadrao(
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        itemDetalheMovimento(
+                        ItemDetalheMovimento(
                             descricao = "Base",
                             valor = movimento.base,
                             icone = Icons.Default.Accessibility

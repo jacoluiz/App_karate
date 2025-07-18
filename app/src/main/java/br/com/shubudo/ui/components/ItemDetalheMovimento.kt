@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FrontHand
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun itemDetalheMovimento(
+fun ItemDetalheMovimento(
     descricao: String,
     valor: String,
     icone: ImageVector? = null,
@@ -29,7 +29,7 @@ fun itemDetalheMovimento(
     val icone = when (valor) {
         "Chute" -> Icons.Default.SportsMartialArts
         "Ataque de mão" -> Icons.Default.FrontHand
-        "Defesa" -> Icons.Default.Security
+        "Defesa" -> Icons.Default.Shield
         else -> icone
     }
     Row(

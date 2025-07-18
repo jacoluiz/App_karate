@@ -25,7 +25,7 @@ class ProgramacaoRepository @Inject constructor(
     private val projecaoRepository: ProjecoesRepository,
     private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository,
     private val armamentoRepository: ArmamentoRepository,
-    private val defesaArmaRepository: DefesaArmaRepository // Novo repositório para defesas de armas
+    private val defesaArmaRepository: DefesaDeArmaRepository // Novo repositório para defesas de armas
 ) {
     suspend fun findMovimentoByFaixaETipo(faixa: String, tipo: String): Flow<List<Movimento>> {
         val faixaResult = faixaRepository.findByNome(faixa).firstOrNull()
