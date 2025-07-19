@@ -1,96 +1,112 @@
 package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.ui.viewModel.EsqueciMinhaSenhaViewModel
 
 @Composable
 fun EsqueciMinhaSenhaView(
-    username: String,
-    onSendResetRequest: (String) -> Unit
+    username: String = "",
+    onSendResetRequest: () -> Boolean = { true },
+    onSenhaRedefinida: () -> Unit
 ) {
-    val email = remember { mutableStateOf(username) }
+    val viewModel = hiltViewModel<EsqueciMinhaSenhaViewModel>()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Que pena que esqueceu sua senha, mas vamos resolver isso rapidinho!",
-                color = MaterialTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Por hora n temos um reset de senha automatico\n\nFale com o Jacó para resolver esse problema!",
-
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp
-                    )
-//                    TextField(
-//                        value = email.value,
-//                        onValueChange = { email.value = it },
-//                        label = { Text("Digite seu e-mail", color = MaterialTheme.colorScheme.onPrimary )},
-//                        placeholder = { Text("email@exemplo.com", color = MaterialTheme.colorScheme.onPrimary ) },
-//                        singleLine = true,
-//                        colors = TextFieldDefaults.colors(
-//                            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-//                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-//                            focusedIndicatorColor = Color.Transparent,
-//                            unfocusedIndicatorColor = Color.Transparent,
-//                            focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
-//                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-//                        ),
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                    Spacer(modifier = Modifier.height(16.dp))
-//                    Button(
-//                        onClick = { onSendResetRequest(email.value) },
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        Text("Enviar Solicitação")
-//                    }
-                }
-            }
+    LaunchedEffect(username) {
+        if (username.isNotEmpty()) {
+            viewModel.email.value = username
         }
+    }
+
+    val etapa by remember { viewModel.etapa }
+    val sucesso by remember { viewModel.sucesso }
+    val erro by remember { viewModel.mensagemErro }
+
+    if (sucesso) {
+        AlertDialog(
+            onDismissRequest = { onSenhaRedefinida() },
+            confirmButton = {
+                TextButton(onClick = onSenhaRedefinida) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Sucesso") },
+            text = { Text("Senha redefinida com sucesso!") }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (etapa == 1) {
+            EtapaUm(viewModel)
+        } else {
+            EtapaDois(viewModel)
+        }
+        erro?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, color = Color.Red)
+        }
+    }
+}
+
+
+@Composable
+fun EtapaUm(viewModel: EsqueciMinhaSenhaViewModel) {
+    val email = viewModel.email.value
+
+    OutlinedTextField(
+        value = email,
+        onValueChange = { viewModel.email.value = it },
+        label = { Text("E-mail") }
+    )
+    Spacer(Modifier.height(16.dp))
+    Button(onClick = { viewModel.solicitarCodigo() }) {
+        Text("Enviar código")
+    }
+}
+
+@Composable
+fun EtapaDois(viewModel: EsqueciMinhaSenhaViewModel) {
+    val codigo = viewModel.codigo.value
+    val novaSenha = viewModel.novaSenha.value
+
+    OutlinedTextField(
+        value = codigo,
+        onValueChange = { viewModel.codigo.value = it },
+        label = { Text("Código") }
+    )
+    Spacer(Modifier.height(8.dp))
+    OutlinedTextField(
+        value = novaSenha,
+        onValueChange = { viewModel.novaSenha.value = it },
+        label = { Text("Nova senha") },
+        visualTransformation = PasswordVisualTransformation()
+    )
+    Spacer(Modifier.height(16.dp))
+    Button(onClick = { viewModel.redefinirSenha() }) {
+        Text("Redefinir senha")
     }
 }

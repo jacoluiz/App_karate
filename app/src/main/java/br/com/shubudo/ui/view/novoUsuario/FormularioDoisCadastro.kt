@@ -1,30 +1,40 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
+
+fun applyShiftedMask(input: TextFieldValue): TextFieldValue {
+    val digits = input.text.filter { it.isDigit() }
+    val limitedDigits = digits.takeLast(3)
+
+    val maskedText = when (limitedDigits.length) {
+        1 -> "0,0${limitedDigits[0]}"
+        2 -> "0,$limitedDigits"
+        3 -> "${limitedDigits[0]},${limitedDigits.substring(1)}"
+        else -> "0,00"
+    }
+
+    return TextFieldValue(maskedText, TextRange(maskedText.length))
+}
 
 @Composable
 fun PaginaDoisCadastro(
@@ -35,114 +45,326 @@ fun PaginaDoisCadastro(
     val focusRequesterPeso = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
+    var alturaValue by remember {
+        mutableStateOf(TextFieldValue(novoUsuarioViewModel.altura.ifBlank { "0,00" }))
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        TextField(
+        // Header
+        Column {
+            Text(
+                text = "Informações Físicas",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "Complete seus dados para finalizar o cadastro",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
+        // Email Field
+        ModernTextField(
             value = novoUsuarioViewModel.email,
             onValueChange = { novoUsuarioViewModel.email = it },
-            label = { Text("E-mail", color = MaterialTheme.colorScheme.onPrimary) },
-            placeholder = {
-                Text(
-                    "E-mail",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
-                unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp, top = 16.dp)
-                .focusRequester(focusRequesterEmail),
-            keyboardActions = KeyboardActions(
-                onNext = { focusRequesterAltura.requestFocus() }  // Move o foco para o próximo campo
-            ),
+            label = "E-mail",
+            placeholder = "email@exemplo.com",
+            leadingIcon = Icons.Default.Email,
+            focusRequester = focusRequesterEmail,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             ),
-
-            singleLine = true,
+            keyboardActions = KeyboardActions(
+                onNext = { focusRequesterAltura.requestFocus() }
+            )
         )
 
-        var alturaValue by remember { mutableStateOf(TextFieldValue("0,00")) }
-
-        TextField(
+        // Height Field
+        ModernTextFieldWithMask(
             value = alturaValue,
-            singleLine = true,
-            label = { Text("Altura (cm)", color = MaterialTheme.colorScheme.onPrimary) },
-            placeholder = { Text("0,00", color = MaterialTheme.colorScheme.onPrimary) },
-
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
-                unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-
+            onValueChange = { newValue ->
+                alturaValue = applyShiftedMask(newValue)
+                novoUsuarioViewModel.altura = alturaValue.text
+            },
+            label = "Altura (cm)",
+            placeholder = "0,00",
+            leadingIcon = Icons.Default.Height,
+            suffix = "cm",
+            focusRequester = focusRequesterAltura,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             ),
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequesterAltura),
-
             keyboardActions = KeyboardActions(
-                onNext = { focusRequesterPeso.requestFocus() }  // Move o foco para o próximo campo
+                onNext = { focusRequesterPeso.requestFocus() }
             ),
-
-            onValueChange = { newValue ->
-                alturaValue = applyShiftedMask(newValue)
-                novoUsuarioViewModel.altura =
-                    alturaValue.text // Atualiza o ViewModel com o valor formatado
-            },
+            helperText = "Formato: 1,75 para 175cm"
         )
 
-        TextField(
+        // Weight Field
+        ModernTextField(
             value = novoUsuarioViewModel.peso,
-            onValueChange = { novoUsuarioViewModel.peso = it },
-            label = { Text("Peso", color = MaterialTheme.colorScheme.onPrimary) },
-            placeholder = {
-                Text(
-                    "Somente os quilos Ex: 72",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
+            onValueChange = { value ->
+                val filteredValue = value.filter { it.isDigit() }
+                novoUsuarioViewModel.peso = filteredValue
             },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onPrimary,  // Cor do texto quando o campo está em foco
-                unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-
+            label = "Peso (kg)",
+            placeholder = "Ex: 72",
+            leadingIcon = Icons.Default.FitnessCenter,
+            suffix = "kg",
+            focusRequester = focusRequesterPeso,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
             ),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() }
+            )
+        )
 
+        // Summary Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Resumo do cadastro",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SummaryItem("Nome", novoUsuarioViewModel.nome)
+                    SummaryItem("Faixa", novoUsuarioViewModel.faixa)
+                    SummaryItem("E-mail", novoUsuarioViewModel.email)
+                    SummaryItem("Altura", if (novoUsuarioViewModel.altura.isNotBlank()) "${novoUsuarioViewModel.altura} cm" else "")
+                    SummaryItem("Peso", if (novoUsuarioViewModel.peso.isNotBlank()) "${novoUsuarioViewModel.peso} kg" else "")
+                }
+            }
+        }
+
+        // Validation Message
+        if (novoUsuarioViewModel.email.isBlank() ||
+            novoUsuarioViewModel.altura.isBlank() ||
+            novoUsuarioViewModel.altura == "0,00" ||
+            novoUsuarioViewModel.peso.isBlank()) {
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                )
+            ) {
+                Text(
+                    text = "⚠️ Preencha todos os campos para continuar",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    suffix: String? = null,
+    focusRequester: FocusRequester,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    helperText: String? = null
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            suffix = suffix?.let {
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            },
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp, top = 16.dp)
-                .focusRequester(focusRequesterPeso),
-            keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus() } // Fecha o teclado ao pressionar "Done"
+                .focusRequester(focusRequester),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             ),
-            singleLine = true,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
 
+        helperText?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
+        }
     }
+}
+
+@Composable
+private fun ModernTextFieldWithMask(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: String,
+    placeholder: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    suffix: String? = null,
+    focusRequester: FocusRequester,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    helperText: String? = null
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            suffix = suffix?.let {
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            ),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
+
+        helperText?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SummaryItem(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$label:",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(
+            text = value.ifBlank { "-" },
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Medium
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
+    }
+
+    HorizontalDivider(
+        modifier = Modifier.padding(vertical = 4.dp),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    )
 }

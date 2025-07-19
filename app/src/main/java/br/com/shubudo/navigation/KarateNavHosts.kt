@@ -60,10 +60,21 @@ fun KarateNavHost(
             onEditarPerfil = { navController.navigateToEditarPerfil() }
         )
 
+        // Tela de Confirmação de E-mail
+        confirmacaoEmailScreen(
+            onConfirmado = {
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
+            }
+        )
 
         // Tela de Esqueci Minha Senha
         esqueciMinhaSenhaScreen(
-            onSendResetRequest = { navController.popBackStack() }
+            onSendResetRequest = { navController.popBackStack() },
+            onSenhaRedefinida = {
+                navController.navigate("login") {
+                    popUpTo("esqueciMinhaSenha") { inclusive = true }
+                }
+            }
         )
 
         // Tela de Programação
@@ -88,7 +99,9 @@ fun KarateNavHost(
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToLogin = { navController.popBackStack() }
+            onNavigateToLogin = { email ->
+                navController.navigateToConfirmacaoEmail(email)
+            }
         )
 
         // Tela de Editar Perfil

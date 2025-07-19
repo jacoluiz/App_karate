@@ -10,22 +10,28 @@ internal const val esqueciMinhaSenhaRote = "esqueciMinhaSenha/{username}"
 internal const val esqueciMinhaSenhaRoteSemUsername = "esqueciMinhaSenha" // Sem argumento
 
 
-fun NavGraphBuilder.esqueciMinhaSenhaScreen(onSendResetRequest: () -> Boolean) {
+fun NavGraphBuilder.esqueciMinhaSenhaScreen(
+    onSendResetRequest: () -> Boolean,
+    onSenhaRedefinida: () -> Unit
+) {
     composable(esqueciMinhaSenhaRote) { backStackEntry ->
         EsqueciMinhaSenhaView(
             username = backStackEntry.arguments?.getString("username") ?: "",
-            onSendResetRequest = { onSendResetRequest() }
-            )
+            onSendResetRequest = onSendResetRequest,
+            onSenhaRedefinida = onSenhaRedefinida
+        )
     }
 
-    // Rota alternativa sem username
     composable(esqueciMinhaSenhaRoteSemUsername) {
         EsqueciMinhaSenhaView(
-            username = "" ,
-            onSendResetRequest = { onSendResetRequest() }
+            username = "",
+            onSendResetRequest = onSendResetRequest,
+            onSenhaRedefinida = onSenhaRedefinida
         )
     }
 }
+
+
 
 fun NavController.navigateToEsqueciMinhaSenha(
     username: String = "",

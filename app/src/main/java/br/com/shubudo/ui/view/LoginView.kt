@@ -1,5 +1,13 @@
 package br.com.shubudo.ui.view
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -11,21 +19,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,8 +51,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,7 +61,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -58,12 +75,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.LoginUiState
 import br.com.shubudo.ui.viewModel.LoginViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+import kotlinx.coroutines.delay
+
 @Composable
 fun LoginView(
     onNavigateToHome: (String) -> Unit,
@@ -79,188 +102,675 @@ fun LoginView(
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(uiState) {
-        if (uiState is LoginUiState.Success) {
-            onNavigateToHome(username)
-        }
-    }
+    val usernameFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
 
-    if (uiState is LoginUiState.Error) {
-        AlertDialog(
-            onDismissRequest = { viewModel.resetUiState() },
-            confirmButton = {
-                TextButton(onClick = { viewModel.resetUiState() }) {
-                    Text("OK")
-                }
-            },
-            title = { Text("Erro") },
-            text = { Text((uiState as LoginUiState.Error).message) }
+    // Animações
+    val logoScale by animateFloatAsState(
+        targetValue = if (uiState is LoginUiState.Loading) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "logo_scale"
+    )
+
+    val showSuccessDialog = uiState is LoginUiState.Success
+
+    if (showSuccessDialog) {
+        LoginSuccessDialog(
+            onDismiss = {
+                viewModel.resetUiState()
+                onNavigateToHome(username)
+            }
         )
     }
 
-    Column(
+    // Dialog de erro moderno
+    if (uiState is LoginUiState.Error) {
+        DialogErro(
+            message = (uiState as LoginUiState.Error).message,
+            onDismiss = { viewModel.resetUiState() }
+        )
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surface
+                    )
+                )
+            )
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
-            .verticalScroll(rememberScrollState())
     ) {
-        // Cabeçalho com gradiente
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Logo e Header
+            HeaderSection(
+                logoScale = logoScale,
+                isLoading = uiState is LoginUiState.Loading
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Card de Login
+            LoginCard(
+                username = username,
+                onUsernameChange = { username = it },
+                password = password,
+                onPasswordChange = { password = it },
+                passwordVisible = passwordVisible,
+                onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+                onLogin = { viewModel.login(username, password, themeViewModel) },
+                isLoading = uiState is LoginUiState.Loading,
+                usernameFocusRequester = usernameFocusRequester,
+                passwordFocusRequester = passwordFocusRequester,
+                focusManager = focusManager
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Ações Secundárias
+            SecondaryActions(
+                onNavigateToNovoUsuario = { onNavigateToNovoUsuario(username) },
+                onNavigateToEsqueciMinhaSenha = { onNavigateToEsqueciMinhaSenha(username) }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun HeaderSection(
+    logoScale: Float,
+    isLoading: Boolean
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Logo com animação
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
+                .size(120.dp)
+                .scale(logoScale)
+                .clip(CircleShape)
                 .background(
-                    brush = Brush.verticalGradient(
+                    brush = Brush.radialGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         )
-                    ),
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                )
+                    )
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Image(
+                painter = painterResource(R.drawable.ic_launcher_round),
+                contentDescription = "Logo",
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_round),
-                    contentDescription = "Logo",
-                    modifier = Modifier
-                        .size(90.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                    .size(90.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Karate Shubu-dô",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
+            // Indicador de loading sobreposto
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(100.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 3.dp
                 )
             }
         }
 
-        // Card com campos de login
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(16.dp)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Karate Shubu-dô",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Bem-vindo de volta!",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun LoginCard(
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityToggle: () -> Unit,
+    onLogin: () -> Unit,
+    isLoading: Boolean,
+    usernameFocusRequester: FocusRequester,
+    passwordFocusRequester: FocusRequester,
+    focusManager: androidx.compose.ui.focus.FocusManager
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(32.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    placeholder = { Text("Email ou nome de usuário") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Text(
+                text = "Entrar na sua conta",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
 
+            // Campo de usuário
+            ModernTextField(
+                value = username,
+                onValueChange = onUsernameChange,
+                label = "Email ou nome de usuário",
+                placeholder = "Digite seu email ou usuário",
+                leadingIcon = Icons.Default.Person,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { passwordFocusRequester.requestFocus() }
+                ),
+                focusRequester = usernameFocusRequester
+            )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = { Text("Senha") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = null
-                            )
+            // Campo de senha
+            ModernTextField(
+                value = password,
+                onValueChange = onPasswordChange,
+                label = "Senha",
+                placeholder = "Digite sua senha",
+                leadingIcon = Icons.Default.Lock,
+                trailingIcon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                onTrailingIconClick = onPasswordVisibilityToggle,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        if (username.isNotBlank() && password.isNotBlank()) {
+                            onLogin()
                         }
-                    },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    }
+                ),
+                focusRequester = passwordFocusRequester
+            )
+
+            // Botão de login
+            Button(
+                onClick = onLogin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = username.isNotBlank() && password.isNotBlank() && !isLoading,
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
-
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        viewModel.login(username, password, themeViewModel)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = uiState !is LoginUiState.Loading
-                ) {
-                    if (uiState is LoginUiState.Loading) {
+            ) {
+                if (isLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
                         )
-                    } else {
-                        Text("Entrar")
+                        Text(
+                            text = "Entrando...",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "Entrar",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    trailingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    onTrailingIconClick: (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            trailingIcon = trailingIcon?.let { icon ->
+                {
+                    IconButton(onClick = { onTrailingIconClick?.invoke() }) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            },
+            visualTransformation = visualTransformation,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
+    }
+}
+
+@Composable
+private fun SecondaryActions(
+    onNavigateToNovoUsuario: () -> Unit,
+    onNavigateToEsqueciMinhaSenha: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Precisa de ajuda?",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(
+                    onClick = onNavigateToNovoUsuario,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Criar conta",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                TextButton(
+                    onClick = onNavigateToEsqueciMinhaSenha,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Help,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Esqueci senha",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
         }
+    }
+}
 
-        // Ações adicionais
-        Row(
+@Composable
+fun LoginSuccessDialog(
+    onDismiss: () -> Unit
+) {
+    var isVisible by remember { mutableStateOf(false) }
+
+    // Animação de entrada
+    LaunchedEffect(Unit) {
+        delay(100)
+        isVisible = true
+    }
+
+    // Animações
+    val scale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0.8f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(300),
+        label = "alpha"
+    )
+
+    // Animação do ícone de sucesso
+    val iconScale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "iconScale"
+    )
+
+    // Animação de pulso para o ícone
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(16.dp)
+                .scale(scale),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 16.dp
+            )
         ) {
-            TextButton(onClick = { onNavigateToNovoUsuario(username) }) {
-                Text("Criar conta")
-            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                // Botão de fechar
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Fechar",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
 
-            TextButton(onClick = { onNavigateToEsqueciMinhaSenha(username) }) {
-                Text("Esqueci minha senha")
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Ícone de sucesso com animação
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .scale(iconScale * pulseScale)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF4CAF50),
+                                        Color(0xFF2E7D32)
+                                    )
+                                ),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Sucesso",
+                            tint = Color.White,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Título
+                    Text(
+                        text = "Login Realizado!",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Descrição
+                    Text(
+                        text = "Você fez login com sucesso!\nBem-vindo de volta.",
+                        fontSize = 16.sp,
+                        color = Color(0xFF666666),
+                        textAlign = TextAlign.Center,
+                        lineHeight = 22.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Botão de ação
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 12.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Continuar",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+
+                // Elementos decorativos
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .background(
+                            Color(0xFF4CAF50).copy(alpha = 0.6f),
+                            CircleShape
+                        )
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-2).dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(2.dp)
+                        .background(
+                            Color(0xFF2196F3).copy(alpha = 0.4f),
+                            CircleShape
+                        )
+                        .align(Alignment.TopStart)
+                        .offset(x = 16.dp, y = 16.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(3.dp)
+                        .background(
+                            Color(0xFF9C27B0).copy(alpha = 0.5f),
+                            CircleShape
+                        )
+                        .align(Alignment.BottomEnd)
+                        .offset(x = (-32).dp, y = (-16).dp)
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DialogErro(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = "Erro de Login",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.error
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Entendi")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    )
 }

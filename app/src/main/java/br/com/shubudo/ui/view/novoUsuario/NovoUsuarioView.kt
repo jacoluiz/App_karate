@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import PaginaUmCadastro
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -8,36 +7,52 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.ui.uistate.CadastroUiState
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -50,173 +65,322 @@ fun NovoUsuarioView(
     novoUsuarioViewModel: NovoUsuarioViewModel = hiltViewModel(),
     onNavigateToLogin: (String) -> Unit,
 ) {
-    var showDialog by remember { mutableStateOf(false) }
+    val uiState by novoUsuarioViewModel.uiState.collectAsState()
     var isPaginaDois by remember { mutableStateOf(false) }
+    val currentPage = if (isPaginaDois) 2 else 1
+
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+    var isSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is CadastroUiState.Success -> {
+                dialogMessage = (uiState as CadastroUiState.Success).message
+                isSuccess = true
+                showDialog = true
+            }
+
+            is CadastroUiState.Error -> {
+                dialogMessage = (uiState as CadastroUiState.Error).error
+                isSuccess = false
+                showDialog = true
+            }
+
+            else -> Unit
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
-            .imePadding(),
+            .imePadding()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Seja bem-vindo ${if (username.isNotEmpty()) "${novoUsuarioViewModel.nome} " else ""}ao Shubu-dô APP! Precisamos de alguns dados para continuar.",
-            color = MaterialTheme.colorScheme.onPrimary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp)
-        )
+        HeaderSection(username, novoUsuarioViewModel.nome)
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        ProgressIndicator(currentPage = currentPage)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-            elevation = CardDefaults.cardElevation(8.dp)
-
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(6.dp)
         ) {
-            Column(
-
-                horizontalAlignment = Alignment.CenterHorizontally
-
-            ) {
-                // Adicione o AnimatedContent aqui
-                AnimatedContent(
-                    targetState = isPaginaDois,
-                    transitionSpec = {
-                        if (targetState) {
-                            (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> -width } + fadeOut())
-                        } else {
-                            (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> width } + fadeOut())
-                        }
-                    }, label = ""
-                ) { targetState ->
+            AnimatedContent(
+                targetState = isPaginaDois,
+                transitionSpec = {
                     if (targetState) {
-                        PaginaDoisCadastro(novoUsuarioViewModel)
+                        slideInHorizontally { it } + fadeIn() togetherWith
+                                slideOutHorizontally { -it } + fadeOut()
                     } else {
-                        PaginaUmCadastro(
-                            novoUsuarioViewModel,
-                            dropDownMenuViewModel,
-                            themeViewModel
-                        )
+                        slideInHorizontally { -it } + fadeIn() togetherWith
+                                slideOutHorizontally { it } + fadeOut()
                     }
+                },
+                label = "CadastroAnimation"
+            ) { target ->
+                if (target) {
+                    PaginaDoisCadastro(novoUsuarioViewModel)
+                } else {
+                    PaginaUmCadastro(novoUsuarioViewModel, dropDownMenuViewModel, themeViewModel)
                 }
             }
         }
-        Text(
-            "Preencha os campos para contiunuar",
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        NavigationButtons(
+            currentPage = currentPage,
+            onPrevious = { isPaginaDois = false },
+            onNext = {
+                if (isPaginaDois) {
+                    novoUsuarioViewModel.cadastrarUsuario()
+                } else {
+                    isPaginaDois = true
+                }
+            },
+            isNextEnabled = if (isPaginaDois)
+                validarPaginaDoisCompleta(novoUsuarioViewModel)
+            else
+                validarPaginaUmCompleta(novoUsuarioViewModel)
         )
-        Row {
-            AnimatedVisibility(
-                visible = isPaginaDois,
-                exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -50 })
-            ) {
-                TextButton(
-                    modifier = Modifier.padding(top = 16.dp),
-                    onClick = { isPaginaDois = false }
-                ) {
-                    Text(
-                        text = "Voltar",
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 22.dp)
-                    )
-                }
-            }
-            AnimatedVisibility(
-                visible = true,
-                exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -50 })
-            ) {
-                ElevatedButton(
-                    modifier = Modifier.padding(top = 16.dp),
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
-                    ),
-                    onClick = {
-                        if ( validarPaginaUmCompleta(novoUsuarioViewModel) && !isPaginaDois) {
-                            isPaginaDois = true
-                        } else if ( validarPaginaUmCompleta(novoUsuarioViewModel) && isPaginaDois) {
-                            novoUsuarioViewModel.cadastrarUsuario()
-                            showDialog = true
-                        }
-                    },
-                ) {
-                    Text(
-                        text = if (!isPaginaDois) "Proximo" else "Finalizar",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(horizontal = 22.dp)
-                    )
-                }
 
-                if (showDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDialog = false },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    showDialog = false
-                                    onNavigateToLogin(novoUsuarioViewModel.nome)
-                                }) {
-                                Text("OK")
-                            }
-                        },
-                        title = { Text("Cadastro realizado com sucesso") },
-                        text = {
-                            Text(
-                                "Seu cadastro foi criado com sucesso! Agora é só aguardar a autorização do administrador. Fale com o Jacó para ser mais rapido"
-                            )
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showDialog = false
+                        if (isSuccess) {
+                            onNavigateToLogin(novoUsuarioViewModel.email)
                         }
+                    }) {
+                        Text("OK")
+                    }
+                },
+                title = {
+                    Text(
+                        if (isSuccess) "Cadastro realizado com sucesso"
+                        else "Erro no cadastro"
                     )
-                }
+                },
+                text = { Text(dialogMessage) }
+            )
+        }
+    }
+}
 
+
+@Composable
+private fun HeaderSection(username: String, userName: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Icon
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Seja bem-vindo ao Shubu-dô APP!",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Precisamos de alguns dados para continuar.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun ProgressIndicator(currentPage: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Step 1
+        ProgressStep(
+            stepNumber = 1,
+            title = "Dados Pessoais",
+            isActive = currentPage == 1,
+            isCompleted = currentPage > 1
+        )
+
+        // Connector
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(2.dp)
+                .background(
+                    color = if (currentPage > 1)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(1.dp)
+                )
+        )
+
+        // Step 2
+        ProgressStep(
+            stepNumber = 2,
+            title = "Informações Físicas",
+            isActive = currentPage == 2,
+            isCompleted = false
+        )
+    }
+}
+
+@Composable
+private fun ProgressStep(
+    stepNumber: Int,
+    title: String,
+    isActive: Boolean,
+    isCompleted: Boolean
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(
+                    when {
+                        isCompleted -> MaterialTheme.colorScheme.primary
+                        isActive -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isCompleted) {
+                Text(
+                    text = "✓",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                Text(
+                    text = stepNumber.toString(),
+                    color = if (isActive)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal
+            ),
+            color = if (isActive)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun NavigationButtons(
+    currentPage: Int,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    isNextEnabled: Boolean
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedVisibility(
+            visible = currentPage == 2,
+            enter = slideInHorizontally { -it } + fadeIn(),
+            exit = slideOutHorizontally { -it } + fadeOut()
+        ) {
+            OutlinedButton(
+                onClick = onPrevious,
+                modifier = Modifier.height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Voltar",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+            }
+        }
+
+        Button(
+            onClick = onNext,
+            enabled = isNextEnabled,
+            modifier = Modifier
+                .height(56.dp)
+                .widthIn(min = 120.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            )
+        ) {
+            Text(
+                text = if (currentPage == 1) "Próximo" else "Finalizar",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
         }
     }
 }
 
 fun validarPaginaUmCompleta(viewModel: NovoUsuarioViewModel): Boolean {
     return viewModel.nome.isNotBlank() &&
-            viewModel.senhaAtendeAosRequisitos &&
             viewModel.faixa.isNotBlank() &&
-            viewModel.senha == viewModel.confirmarSenha
+            viewModel.senha.isNotBlank() &&
+            viewModel.confirmarSenha.isNotBlank() &&
+            viewModel.senha == viewModel.confirmarSenha &&
+            viewModel.senhaAtendeAosRequisitos
 }
 
 fun validarPaginaDoisCompleta(viewModel: NovoUsuarioViewModel): Boolean {
-    return viewModel.nome.isNotBlank() &&
-            viewModel.senhaAtendeAosRequisitos &&
-            viewModel.faixa.isNotBlank() &&
-            viewModel.senha == viewModel.confirmarSenha &&
-            viewModel.peso.isNotBlank() &&
+    return viewModel.email.isNotBlank() &&
             viewModel.altura.isNotBlank() &&
-            viewModel.email.isNotBlank()
-
-}
-
-// Função para aplicar a máscara #,##
-fun applyShiftedMask(input: TextFieldValue): TextFieldValue {
-    // Filtra apenas os dígitos
-    val digits = input.text.filter { it.isDigit() }
-
-    // Limita o número de dígitos a três
-    val limitedDigits = digits.takeLast(3)
-
-    // Formata o texto de acordo com a máscara "0,00"
-    val maskedText = when (limitedDigits.length) {
-        1 -> "0,0${limitedDigits[0]}"
-        2 -> "0,${limitedDigits}"
-        3 -> "${limitedDigits[0]},${limitedDigits.substring(1, 3)}"
-        else -> "0,00"
-    }
-
-    // Cursor posicionado no final
-    return TextFieldValue(maskedText, TextRange(maskedText.length))
+            viewModel.altura != "0,00" &&
+            viewModel.peso.isNotBlank()
 }
