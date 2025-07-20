@@ -109,6 +109,87 @@ data class DateValidation(
     val age: Int? = null
 )
 
+// Função para aplicar máscara de altura no formato x,xx
+private fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
+    // Remove qualquer caractere que não seja dígito ou vírgula
+    val digitsOnly = input.filter { it.isDigit() || it == ',' }
+
+    // Se estiver vazio, retorna vazio
+    if (digitsOnly.isEmpty()) return Pair("", 0)
+
+    // Remove vírgulas duplicadas ou no início
+    val cleanInput = digitsOnly.replace(Regex(",+"), ",").removePrefix(",")
+
+    // Se só tem vírgula, retorna vazio
+    if (cleanInput == ",") return Pair("", 0)
+
+    // Separa por vírgula
+    val parts = cleanInput.split(",")
+
+    val result = when {
+        // Se não tem vírgula e tem 1 dígito
+        parts.size == 1 && parts[0].length <= 1 -> parts[0]
+
+        // Se não tem vírgula e tem mais de 1 dígito, adiciona vírgula automaticamente
+        parts.size == 1 && parts[0].length > 1 -> {
+            val digits = parts[0]
+            if (digits.length >= 3) {
+                // Limita a 3 dígitos e formata como x,xx
+                "${digits[0]},${digits.substring(1, 3)}"
+            } else {
+                "${digits[0]},${digits.substring(1)}"
+            }
+        }
+
+        // Se já tem vírgula
+        parts.size == 2 -> {
+            val beforeComma = parts[0].take(1) // Máximo 1 dígito antes da vírgula
+            val afterComma = parts[1].take(2)  // Máximo 2 dígitos depois da vírgula
+
+            if (beforeComma.isEmpty()) {
+                if (afterComma.isEmpty()) "" else ",${afterComma}"
+            } else {
+                "${beforeComma},${afterComma}"
+            }
+        }
+
+        // Casos com múltiplas vírgulas - pega apenas a primeira parte válida
+        else -> {
+            val firstPart = parts[0].take(1)
+            val secondPart = if (parts.size > 1) parts[1].take(2) else ""
+            if (firstPart.isEmpty()) secondPart else "${firstPart},${secondPart}"
+        }
+    }
+
+    // Calcula a nova posição do cursor
+    val cursorPosition = when {
+        // Se a vírgula foi inserida automaticamente, posiciona o cursor no final
+        result.length > previousValue.length && result.contains(",") && !previousValue.contains(",") -> {
+            result.length
+        }
+        // Caso contrário, posiciona no final
+        else -> result.length
+    }
+
+    return Pair(result, cursorPosition)
+}
+
+// Função para validar altura
+private fun validateHeight(height: String): Boolean {
+    if (height.isEmpty()) return true // Campo vazio é válido (opcional)
+
+    // Regex para validar formato x,xx onde x são dígitos
+    val heightRegex = Regex("^[0-2]$|^[0-2],[0-9]{1,2}$")
+
+    if (!heightRegex.matches(height)) return false
+
+    // Converte para float para validação adicional
+    val heightValue = height.replace(",", ".").toFloatOrNull() ?: return false
+
+    // Valida range realístico (0.5m a 2.5m)
+    return heightValue in 0.5f..2.5f
+}
+
 @Composable
 fun EditarPerfilView(
     uiState: EditarPerfilUiState,
@@ -392,16 +473,11 @@ fun EditarPerfilContent(
                             )
                         )
 
-                        AnimatedTextField(
+                        // Campo altura com máscara
+                        HeightTextField(
                             value = currentAltura,
                             onValueChange = { currentAltura = it },
-                            label = "Altura (cm)",
-                            icon = Icons.Default.Height,
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Done
-                            )
+                            modifier = Modifier.weight(1f)
                         )
                     }
 
@@ -573,6 +649,101 @@ private fun AnimatedTextField(
             disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HeightTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(value)) }
+    val isValid = validateHeight(value)
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = when {
+            !isValid && value.isNotEmpty() -> MaterialTheme.colorScheme.error
+            isFocused -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+        },
+        animationSpec = tween(200),
+        label = "border_color"
+    )
+
+    val labelColor = when {
+        !isValid && value.isNotEmpty() -> MaterialTheme.colorScheme.error
+        isFocused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    }
+
+    // Atualiza o TextFieldValue quando o value externo muda
+    androidx.compose.runtime.LaunchedEffect(value) {
+        if (textFieldValue.text != value) {
+            textFieldValue = textFieldValue.copy(text = value)
+        }
+    }
+
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = textFieldValue,
+            onValueChange = { newTextFieldValue ->
+                val (maskedValue, cursorPosition) = applyHeightMask(newTextFieldValue.text, textFieldValue.text)
+
+                // Atualiza o estado local com a nova posição do cursor
+                textFieldValue = newTextFieldValue.copy(
+                    text = maskedValue,
+                    selection = androidx.compose.ui.text.TextRange(cursorPosition)
+                )
+
+                // Notifica a mudança para o componente pai
+                onValueChange(maskedValue)
+            },
+            label = { Text("Altura (m)") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Height,
+                    contentDescription = null,
+                    tint = labelColor
+                )
+            },
+            placeholder = {
+                Text(
+                    text = "1,75",
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { isFocused = it.isFocused },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Done
+            ),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = animatedBorderColor,
+                unfocusedBorderColor = animatedBorderColor,
+                focusedLabelColor = labelColor,
+                unfocusedLabelColor = labelColor,
+                focusedLeadingIconColor = labelColor,
+                unfocusedLeadingIconColor = labelColor
+            ),
+            isError = !isValid && value.isNotEmpty(),
+            singleLine = true
+        )
+
+        // Mensagem de validação
+        if (textFieldValue.text.isNotEmpty() && !isValid) {
+            Text(
+                text = "Formato: x,xx (ex: 1,75). Altura entre 0,5m e 2,5m",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
 }
 
 @Composable

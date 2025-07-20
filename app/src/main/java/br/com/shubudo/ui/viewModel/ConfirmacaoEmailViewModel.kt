@@ -1,9 +1,12 @@
 package br.com.shubudo.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
 import br.com.shubudo.auth.CognitoAuthManager
+import br.com.shubudo.database.dao.UsuarioDao
+import br.com.shubudo.model.toUsuarioEntity
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.ConfirmacaoEmailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ConfirmacaoEmailViewModel @Inject constructor(
     private val cognito: CognitoAuthManager,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val usuarioDao: UsuarioDao // precisa estar disponível via Hilt
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ConfirmacaoEmailUiState>(ConfirmacaoEmailUiState.Idle)
@@ -25,13 +29,14 @@ class ConfirmacaoEmailViewModel @Inject constructor(
 
     var email: String? = null
     private var senha: String? = null
+    private var corFaixa: String? = null
 
     fun iniciar(email: String, senha: String) {
         this.email = email
         this.senha = senha
     }
 
-    fun confirmarCodigo() {
+    fun confirmarCodigo(themeViewModel: ThemeViewModel) {
         val email = this.email
         val senha = this.senha
 
@@ -47,9 +52,19 @@ class ConfirmacaoEmailViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         val usuario = usuarioRepository.login(email, senha)
+
+                        // Salva localmente agora que o usuário foi confirmado
+                        usuario.toUsuarioEntity()?.let { usuarioDao.salvarUsuario(it) }
                         SessionManager.usuarioLogado = usuario
+
+                        // Aplica o tema da faixa correta - usa a faixa do usuário cadastrado
+                        Log.d("ConfirmacaoEmail", "Aplicando tema da faixa: ${usuario.corFaixa}")
+                        themeViewModel.changeThemeFaixa(usuario.corFaixa)
+
                         _uiState.value = ConfirmacaoEmailUiState.Success("Conta confirmada e usuário logado com sucesso!")
+
                     } catch (e: Exception) {
+                        Log.e("ConfirmacaoEmail", "Erro ao fazer login após confirmação", e)
                         _uiState.value = ConfirmacaoEmailUiState.Error("Erro ao fazer login após confirmação: ${e.message}")
                     }
                 }

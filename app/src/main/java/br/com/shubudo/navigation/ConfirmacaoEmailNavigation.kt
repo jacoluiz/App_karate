@@ -1,5 +1,6 @@
 package br.com.shubudo.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -13,7 +14,8 @@ internal const val confirmacaoEmailRoute = "confirmacao_email"
 internal const val confirmacaoEmailArgument = "email"
 internal const val confirmacaoSenhaArgument = "senha"
 internal const val confirmacaoCorFaixaArgument = "corFaixa"
-internal const val confirmacaoEmailFullPath = "$confirmacaoEmailRoute/{$confirmacaoEmailArgument}/{$confirmacaoSenhaArgument}/{$confirmacaoCorFaixaArgument}"
+internal const val confirmacaoEmailFullPath =
+    "$confirmacaoEmailRoute/{$confirmacaoEmailArgument}/{$confirmacaoSenhaArgument}/{$confirmacaoCorFaixaArgument}"
 
 fun NavGraphBuilder.confirmacaoEmailScreen(
     themeViewModel: ThemeViewModel,
@@ -25,14 +27,19 @@ fun NavGraphBuilder.confirmacaoEmailScreen(
         val corFaixa = backStackEntry.arguments?.getString(confirmacaoCorFaixaArgument) ?: ""
         val viewModel = hiltViewModel<ConfirmacaoEmailViewModel>()
 
-        // Altera o tema com base na faixa selecionada
-        themeViewModel.changeThemeFaixa(corFaixa)
+        // Mantém o tema da faixa selecionada durante o cadastro
+        LaunchedEffect(corFaixa) {
+            if (corFaixa.isNotBlank()) {
+                themeViewModel.changeThemeFaixa(corFaixa)
+            }
+        }
 
         ConfirmacaoEmailView(
             email = email,
             senha = senha,
             viewModel = viewModel,
-            onConfirmado = onConfirmado
+            onConfirmado = onConfirmado,
+            themeViewModel = themeViewModel
         )
     }
 }

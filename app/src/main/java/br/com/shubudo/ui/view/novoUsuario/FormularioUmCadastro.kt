@@ -179,8 +179,8 @@ fun PaginaUmCadastro(
                             },
                             onClick = {
                                 novoUsuarioViewModel.faixa = faixa
-                                themeViewModel.changeThemeFaixa(faixa)
                                 showBeltDropdown = false
+                                // O tema será aplicado pelo LaunchedEffect no NovoUsuarioView
                             }
                         )
                     }

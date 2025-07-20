@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.ConfirmacaoEmailUiState
 import br.com.shubudo.ui.viewModel.ConfirmacaoEmailViewModel
+import br.com.shubudo.ui.viewModel.ThemeViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -65,7 +66,8 @@ fun ConfirmacaoEmailView(
     email: String,
     senha: String,
     onConfirmado: () -> Unit,
-    viewModel: ConfirmacaoEmailViewModel = hiltViewModel()
+    viewModel: ConfirmacaoEmailViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel
 ) {
     val focusManager = LocalFocusManager.current
     val uiState by viewModel.uiState.collectAsState()
@@ -148,7 +150,7 @@ fun ConfirmacaoEmailView(
             isLoading = uiState is ConfirmacaoEmailUiState.Loading,
             onClick = {
                 focusManager.clearFocus()
-                viewModel.confirmarCodigo()
+                viewModel.confirmarCodigo(themeViewModel)
             }
         )
 

@@ -190,7 +190,6 @@ class UsuarioRepository @Inject constructor(
                     val usuarioParaApi = usuario.copy(senha = "")
                     try {
                         val usuarioSalvo = service.criarUsuarios(usuarioParaApi)
-                        usuarioSalvo.toUsuarioEntity().let { dao.salvarUsuario(it) }
                         result.complete(usuarioSalvo.toUsuario())
                     } catch (e: Exception) {
                         result.complete(usuario)

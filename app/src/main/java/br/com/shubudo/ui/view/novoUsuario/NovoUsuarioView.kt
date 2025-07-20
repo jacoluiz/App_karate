@@ -95,6 +95,13 @@ fun NovoUsuarioView(
         }
     }
 
+    // Mantém o tema da faixa selecionada durante todo o processo
+    LaunchedEffect(novoUsuarioViewModel.faixa) {
+        if (novoUsuarioViewModel.faixa.isNotBlank()) {
+            themeViewModel.changeThemeFaixa(novoUsuarioViewModel.faixa)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
