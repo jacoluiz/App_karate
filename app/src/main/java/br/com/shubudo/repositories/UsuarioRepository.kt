@@ -1,6 +1,5 @@
 package br.com.shubudo.repositories
 
-import android.util.Log
 import br.com.shubudo.auth.CognitoAuthManager
 import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.database.entities.toUsuario
@@ -44,53 +43,45 @@ class UsuarioRepository @Inject constructor(
 
     fun getUsuario() = dao.obterUsuarioLogado().map { it?.toUsuario() }
 
-    suspend fun login(userInput: String, password: String): Usuario? = withContext(Dispatchers.IO) {
-        // Timeout de 30 segundos para evitar travamento
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun login(userInput: String, password: String): Usuario = withContext(Dispatchers.IO) {
         withTimeoutOrNull(30000) {
             suspendCancellableCoroutine { cont ->
                 val usernameSafe = userInput.trim()
-                val passwordSafe = password
-
-                Log.i("UsuarioRepository", "Login começou para usuário: $usernameSafe")
-
                 val authHandler = object : AuthenticationHandler {
                     override fun onSuccess(
                         userSession: CognitoUserSession?,
                         newDevice: CognitoDevice?
                     ) {
-                        Log.i("UsuarioRepository", "✅ Login Cognito bem-sucedido!")
-
                         if (userSession == null || !userSession.isValid) {
-                            Log.e("UsuarioRepository", "❌ Sessão inválida do Cognito")
                             if (cont.isActive) {
                                 cont.resume(null, onCancellation = null)
                             }
                             return
                         }
 
-                        Log.i("UsuarioRepository", "🔍 Buscando usuário na API...")
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
                                 val usuarios = service.getUsuarios().map { it.toUsuario() }
                                 val usuario = usuarios.find {
-                                    it.email.equals(userInput, true) || it.username.equals(userInput, true)
+                                    it.email.equals(
+                                        userInput,
+                                        true
+                                    ) || it.username.equals(userInput, true)
                                 }
 
                                 if (usuario != null) {
-                                    Log.i("UsuarioRepository", "✅ Usuário encontrado: ${usuario.username}")
                                     dao.deletarTodos()
                                     usuario.toUsuarioEntity()?.let { dao.salvarUsuario(it) }
                                     if (cont.isActive) {
                                         cont.resume(usuario, onCancellation = null)
                                     }
                                 } else {
-                                    Log.e("UsuarioRepository", "❌ Usuário não encontrado na API")
                                     if (cont.isActive) {
                                         cont.resumeWithException(Exception("Usuário não existe na API"))
                                     }
                                 }
                             } catch (e: Exception) {
-                                Log.e("UsuarioRepository", "❌ Erro ao buscar usuário na API: ${e.message}")
                                 if (cont.isActive) {
                                     cont.resumeWithException(e)
                                 }
@@ -99,7 +90,6 @@ class UsuarioRepository @Inject constructor(
                     }
 
                     override fun onFailure(exception: Exception?) {
-                        Log.e("UsuarioRepository", "❌ Erro no login Cognito: ${exception?.message}", exception)
                         if (cont.isActive) {
                             cont.resumeWithException(
                                 exception ?: Exception("Falha desconhecida no login Cognito")
@@ -111,15 +101,13 @@ class UsuarioRepository @Inject constructor(
                         authenticationContinuation: AuthenticationContinuation?,
                         userId: String?
                     ) {
-                        Log.i("UsuarioRepository", "🔄 getAuthenticationDetails chamado para: $userId")
 
                         if (authenticationContinuation != null) {
-                            val authDetails = AuthenticationDetails(usernameSafe, passwordSafe, null)
+                            val authDetails =
+                                AuthenticationDetails(usernameSafe, password, null)
                             authenticationContinuation.setAuthenticationDetails(authDetails)
                             authenticationContinuation.continueTask()
-                            Log.i("UsuarioRepository", "🔄 AuthenticationDetails fornecido e continuando...")
                         } else {
-                            Log.e("UsuarioRepository", "❌ AuthenticationContinuation é null")
                             if (cont.isActive) {
                                 cont.resumeWithException(Exception("AuthenticationContinuation é null"))
                             }
@@ -127,14 +115,12 @@ class UsuarioRepository @Inject constructor(
                     }
 
                     override fun getMFACode(continuation: MultiFactorAuthenticationContinuation?) {
-                        Log.w("UsuarioRepository", "⚠️ MFA requerido, não implementado")
                         if (cont.isActive) {
                             cont.resumeWithException(Exception("MFA não suportado"))
                         }
                     }
 
                     override fun authenticationChallenge(continuation: ChallengeContinuation?) {
-                        Log.w("UsuarioRepository", "⚠️ Desafio adicional não implementado")
                         if (cont.isActive) {
                             cont.resumeWithException(Exception("Desafio de autenticação não suportado"))
                         }
@@ -142,17 +128,14 @@ class UsuarioRepository @Inject constructor(
                 }
 
                 try {
-                    Log.i("UsuarioRepository", "🚀 Iniciando signIn no Cognito...")
-                    cognito.signIn(usernameSafe, passwordSafe, authHandler)
+                    cognito.signIn(usernameSafe, password, authHandler)
                 } catch (e: Exception) {
-                    Log.e("UsuarioRepository", "❌ Erro ao iniciar signIn: ${e.message}", e)
                     if (cont.isActive) {
                         cont.resumeWithException(e)
                     }
                 }
             }
         } ?: run {
-            Log.e("UsuarioRepository", "⏰ Timeout no login - operação cancelada")
             throw Exception("Timeout no login")
         }
     }
@@ -173,12 +156,17 @@ class UsuarioRepository @Inject constructor(
                 }
 
                 override fun onFailure(exception: Exception) {
-                    Log.e("UsuarioRepository", "Erro forgotPassword: ${exception.message}", exception)
                     cont.tryResume(false)?.let { token -> cont.completeResume(token) }
                 }
             })
         }
     }
+
+    suspend fun getCorFaixaLocal(userInput: String): String? = withContext(Dispatchers.IO) {
+        val usuario = dao.getUsuarioByEmailOuUsername(userInput.trim())
+        return@withContext usuario?.corFaixa
+    }
+
 
     fun confirmarNovaSenha(codigo: String, novaSenha: String): Boolean {
         return try {
@@ -189,7 +177,6 @@ class UsuarioRepository @Inject constructor(
             }
             true
         } catch (e: Exception) {
-            Log.e("UsuarioRepository", "Erro confirmando nova senha: ${e.message}")
             false
         }
     }
@@ -206,7 +193,6 @@ class UsuarioRepository @Inject constructor(
                         usuarioSalvo.toUsuarioEntity().let { dao.salvarUsuario(it) }
                         result.complete(usuarioSalvo.toUsuario())
                     } catch (e: Exception) {
-                        Log.e("UsuarioRepository", "Erro ao enviar para API: ${e.message}")
                         result.complete(usuario)
                     }
                 }
@@ -214,13 +200,12 @@ class UsuarioRepository @Inject constructor(
 
             override fun onFailure(exception: Exception?) {
                 val msg = exception?.message.orEmpty()
-                Log.e("UsuarioRepository", "Erro no cadastro Cognito: $msg")
                 if (msg.contains("User already exists", ignoreCase = true)) {
-                    Log.w("UsuarioRepository", "Usuário já existe. Pode estar pendente de confirmação.")
-                    result.complete(usuario)
+                    result.complete(null) // agora retorna nulo corretamente
                 } else {
                     result.complete(null)
                 }
+
             }
         })
 
@@ -234,7 +219,6 @@ class UsuarioRepository @Inject constructor(
             currentUser?.signOut()
             dao.limparUsuario()
         } catch (e: Exception) {
-            Log.e("UsuarioRepository", "Erro no logout: ${e.message}")
             // Limpar dados locais mesmo se houver erro no logout do Cognito
             dao.limparUsuario()
         }
@@ -244,7 +228,6 @@ class UsuarioRepository @Inject constructor(
         try {
             val localUserEntity = dao.obterUsuarioLogado().firstOrNull()
             if (localUserEntity == null || localUserEntity._id.isBlank()) {
-                Log.e("UsuarioRepository", "Usuário local inválido.")
                 return@withContext null
             }
 
@@ -253,27 +236,23 @@ class UsuarioRepository @Inject constructor(
 
             val outrosUsuarios = usuarios.filter { it._id != localUserEntity._id }
             if (outrosUsuarios.any { it.email.equals(usuario.email, ignoreCase = true) }) {
-                Log.e("UsuarioRepository", "Email duplicado.")
                 return@withContext null
             }
             if (outrosUsuarios.any { it.username.equals(usuario.username, ignoreCase = true) }) {
-                Log.e("UsuarioRepository", "Username duplicado.")
                 return@withContext null
             }
 
-            val userToUpdate = usuario.copy(_id = localUserEntity._id, senha = localUserEntity.senha)
+            val userToUpdate =
+                usuario.copy(_id = localUserEntity._id, senha = localUserEntity.senha)
             service.atualizarUsuario(localUserEntity._id, userToUpdate)?.let {
                 userToUpdate.toUsuarioEntity()?.let { dao.atualizarUsuario(it) }
                 return@withContext userToUpdate
             } ?: run {
-                Log.e("UsuarioRepository", "Falha ao atualizar o perfil na API.")
                 return@withContext null
             }
         } catch (ce: CancellationException) {
-            Log.e("UsuarioRepository", "Operação cancelada", ce)
             throw ce
         } catch (e: Exception) {
-            Log.e("UsuarioRepository", "Erro ao atualizar usuário", e)
             null
         }
     }

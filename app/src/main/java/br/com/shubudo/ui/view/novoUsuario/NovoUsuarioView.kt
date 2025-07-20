@@ -26,17 +26,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,7 +64,7 @@ fun NovoUsuarioView(
     username: String,
     dropDownMenuViewModel: DropDownMenuViewModel,
     novoUsuarioViewModel: NovoUsuarioViewModel = hiltViewModel(),
-    onNavigateToLogin: (String) -> Unit,
+    onNavigateToLogin: (String, String, String) -> Unit,
 ) {
     val uiState by novoUsuarioViewModel.uiState.collectAsState()
     var isPaginaDois by remember { mutableStateOf(false) }
@@ -72,6 +73,9 @@ fun NovoUsuarioView(
     var showDialog by remember { mutableStateOf(false) }
     var dialogMessage by remember { mutableStateOf("") }
     var isSuccess by remember { mutableStateOf(false) }
+
+    // Verifica se está carregando
+    val isLoading = uiState is CadastroUiState.Loading
 
     LaunchedEffect(uiState) {
         when (uiState) {
@@ -99,7 +103,7 @@ fun NovoUsuarioView(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HeaderSection(username, novoUsuarioViewModel.nome)
+        HeaderSection()
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -137,6 +141,7 @@ fun NovoUsuarioView(
 
         NavigationButtons(
             currentPage = currentPage,
+            isLoading = isLoading,
             onPrevious = { isPaginaDois = false },
             onNext = {
                 if (isPaginaDois) {
@@ -152,33 +157,26 @@ fun NovoUsuarioView(
         )
 
         if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                confirmButton = {
-                    TextButton(onClick = {
+            if (isSuccess) {
+                SuccessDialog(
+                    userName = novoUsuarioViewModel.nome,
+                    onDismiss = {
                         showDialog = false
-                        if (isSuccess) {
-                            onNavigateToLogin(novoUsuarioViewModel.email)
-                        }
-                    }) {
-                        Text("OK")
+                        onNavigateToLogin(novoUsuarioViewModel.email, novoUsuarioViewModel.senha, novoUsuarioViewModel.faixa)
                     }
-                },
-                title = {
-                    Text(
-                        if (isSuccess) "Cadastro realizado com sucesso"
-                        else "Erro no cadastro"
-                    )
-                },
-                text = { Text(dialogMessage) }
-            )
+                )
+            } else {
+                ErrorDialog(
+                    message = dialogMessage,
+                    onDismiss = { showDialog = false }
+                )
+            }
         }
     }
 }
 
-
 @Composable
-private fun HeaderSection(username: String, userName: String) {
+private fun HeaderSection() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -320,6 +318,7 @@ private fun ProgressStep(
 @Composable
 private fun NavigationButtons(
     currentPage: Int,
+    isLoading: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     isNextEnabled: Boolean
@@ -335,6 +334,7 @@ private fun NavigationButtons(
         ) {
             OutlinedButton(
                 onClick = onPrevious,
+                enabled = !isLoading, // Desabilita o botão voltar quando está carregando
                 modifier = Modifier.height(56.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -349,7 +349,7 @@ private fun NavigationButtons(
 
         Button(
             onClick = onNext,
-            enabled = isNextEnabled,
+            enabled = isNextEnabled && !isLoading, // Desabilita quando está carregando
             modifier = Modifier
                 .height(56.dp)
                 .widthIn(min = 120.dp),
@@ -359,12 +359,30 @@ private fun NavigationButtons(
                 disabledContainerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
             )
         ) {
-            Text(
-                text = if (currentPage == 1) "Próximo" else "Finalizar",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Mostra loading indicator quando está carregando e é a página 2
+                if (isLoading && currentPage == 2) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                }
+
+                Text(
+                    text = when {
+                        currentPage == 1 -> "Próximo"
+                        isLoading -> "Finalizando..."
+                        else -> "Finalizar"
+                    },
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
-            )
+            }
         }
     }
 }
@@ -383,4 +401,80 @@ fun validarPaginaDoisCompleta(viewModel: NovoUsuarioViewModel): Boolean {
             viewModel.altura.isNotBlank() &&
             viewModel.altura != "0,00" &&
             viewModel.peso.isNotBlank()
+}
+
+@Composable
+private fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Entendi",
+                    color = MaterialTheme.colorScheme.onError,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        },
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Ops! Algo deu errado",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Tente novamente em alguns instantes.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
 }

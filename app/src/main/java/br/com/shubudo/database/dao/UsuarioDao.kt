@@ -30,4 +30,7 @@ interface UsuarioDao {
     @Query("DELETE FROM usuario") // ou o nome correto da tabela
     suspend fun limparUsuario()
 
+    @Query("SELECT * FROM usuario WHERE email = :input OR username = :input LIMIT 1")
+    suspend fun getUsuarioByEmailOuUsername(input: String): UsuarioEntity?
+
 }

@@ -21,13 +21,6 @@ class LoginViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun login(username: String, password: String, themeViewModel: ThemeViewModel) {
-        // Validação básica
-        if (username.isBlank() || password.isBlank()) {
-            _uiState.value = LoginUiState.Error("Usuário e senha são obrigatórios.")
-            return
-        }
-
-        // Validação básica
         if (username.isBlank() || password.isBlank()) {
             _uiState.value = LoginUiState.Error("Usuário e senha são obrigatórios.")
             return
@@ -35,48 +28,60 @@ class LoginViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
+
             try {
                 Log.i("LoginViewModel", "Iniciando login para: $username")
 
-                val result = repository.login(username.trim(), password)
-                if (result != null) {
-                    Log.i("LoginViewModel", "Login bem-sucedido para: ${result.username}")
-                    Log.i("LoginViewModel", "Login bem-sucedido para: ${result.username}")
-                    _uiState.value = LoginUiState.Success(result)
-                    SessionManager.usuarioLogado = result
-                    themeViewModel.changeThemeFaixa(result.corFaixa)
-                } else {
-                    Log.w("LoginViewModel", "Login falhou - resultado nulo")
-                    Log.w("LoginViewModel", "Login falhou - resultado nulo")
+                val result = try {
+                    repository.login(username.trim(), password)
+                } catch (e: Exception) {
+                    val message = e.message ?: ""
+
+                    when {
+                        message.contains("User is not confirmed", ignoreCase = true) -> {
+                            val corFaixa = repository.getCorFaixaLocal(username) ?: "branca"
+                            _uiState.value = LoginUiState.NavigateToConfirmEmail(username, corFaixa)
+                        }
+
+                        message.contains("Incorrect username or password", ignoreCase = true) -> {
+                            _uiState.value = LoginUiState.Error("Usuário ou senha incorretos.")
+                        }
+
+                        message.contains("User does not exist", ignoreCase = true) -> {
+                            _uiState.value = LoginUiState.Error("Usuário não encontrado.")
+                        }
+
+                        message.contains("Network", ignoreCase = true) -> {
+                            _uiState.value = LoginUiState.Error("Erro de conexão. Verifique sua internet.")
+                        }
+
+                        else -> {
+                            Log.e("LoginViewModel", "Erro inesperado: ${e.message}", e)
+                            _uiState.value = LoginUiState.Error("Erro inesperado: ${e.message}")
+                        }
+                    }
+
+                    // Para encerrar o bloco
+                    return@launch
+                }
+
+                if (result == null) {
                     _uiState.value = LoginUiState.Error("Usuário ou senha inválidos.")
+                    return@launch
                 }
+
+                Log.i("LoginViewModel", "Login bem-sucedido para: ${result.username}")
+                _uiState.value = LoginUiState.Success(result)
+                SessionManager.usuarioLogado = result
+                themeViewModel.changeThemeFaixa(result.corFaixa)
+
             } catch (e: Exception) {
-                Log.e("LoginViewModel", "Erro ao fazer login: ${e.message}", e)
-
-                // Tratar diferentes tipos de erro
-                val errorMessage = when {
-                    e.message?.contains("User does not exist", ignoreCase = true) == true ->
-                        "Usuário não encontrado. Verifique suas credenciais."
-
-                    e.message?.contains(
-                        "Incorrect username or password",
-                        ignoreCase = true
-                    ) == true ->
-                        "Usuário ou senha incorretos."
-
-                    e.message?.contains("User is not confirmed", ignoreCase = true) == true ->
-                        "Usuário não confirmado. Verifique seu email."
-
-                    e.message?.contains("Network", ignoreCase = true) == true ->
-                        "Erro de conexão. Verifique sua internet."
-
-                    else -> "Erro ao tentar fazer login. Tente novamente."
-                }
-
-                _uiState.value = LoginUiState.Error(errorMessage)
+                Log.e("LoginViewModel", "Erro inesperado fora do try interno: ${e.message}", e)
+                _uiState.value = LoginUiState.Error("Erro inesperado: ${e.message}")
             }
         }
     }
+
 
     fun resetUiState() {
         _uiState.value = LoginUiState.Idle

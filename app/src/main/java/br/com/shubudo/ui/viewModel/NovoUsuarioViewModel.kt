@@ -26,12 +26,13 @@ class NovoUsuarioViewModel @Inject constructor(
     var email by mutableStateOf("")
     var senha by mutableStateOf("")
     var confirmarSenha by mutableStateOf("")
-    var faixa by mutableStateOf("Branca")
+    var faixa by mutableStateOf("")
     var peso by mutableStateOf("")
     var altura by mutableStateOf("0,00")
     var senhaAtendeAosRequisitos by mutableStateOf(false)
 
     fun cadastrarUsuario() {
+
         viewModelScope.launch {
             _uiState.value = CadastroUiState.Loading
 
@@ -53,7 +54,7 @@ class NovoUsuarioViewModel @Inject constructor(
                     corFaixa = faixa,
                     peso = peso,
                     altura = altura,
-                    username = email, // Você pode mudar para outro campo como userInput
+                    username = email,
                     idade = "0",
                     perfil = "básico"
                 )
@@ -63,11 +64,19 @@ class NovoUsuarioViewModel @Inject constructor(
                 if (resultado != null) {
                     _uiState.value = CadastroUiState.Success("Usuário cadastrado com sucesso!")
                 } else {
-                    _uiState.value = CadastroUiState.Error("Falha ao cadastrar usuário.")
+                    _uiState.value =
+                        CadastroUiState.Error("Esse e-mail já está em uso. Tente outro ou faça login.")
                 }
 
             } catch (e: Exception) {
-                _uiState.value = CadastroUiState.Error("Erro ao cadastrar usuário: ${e.message}")
+                val mensagemErro = when {
+                    e.message?.contains("User already exists", ignoreCase = true) == true -> {
+                        "Esse e-mail já está em uso. Use outro ou finalize o cadastro anterior."
+                    }
+
+                    else -> "Erro ao cadastrar usuário: ${e.message}"
+                }
+                _uiState.value = CadastroUiState.Error(mensagemErro)
             }
         }
     }

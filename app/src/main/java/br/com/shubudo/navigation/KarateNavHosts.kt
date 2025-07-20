@@ -37,6 +37,9 @@ fun KarateNavHost(
             },
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
+            },
+            onNavigateToConfirmEmail = { email, senha, corFaixa ->
+                navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
             }
         )
 
@@ -62,6 +65,7 @@ fun KarateNavHost(
 
         // Tela de Confirmação de E-mail
         confirmacaoEmailScreen(
+            themeViewModel = themeViewModel,
             onConfirmado = {
                 navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
             }
@@ -99,8 +103,8 @@ fun KarateNavHost(
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToLogin = { email ->
-                navController.navigateToConfirmacaoEmail(email)
+            onNavigateToLogin = { email, senha, corFaixa ->
+                navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
             }
         )
 
@@ -129,13 +133,11 @@ fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
         }
 
         BottomAppBarItem.Perfil -> {
-            // sempre remove a rota anterior e força a reentrada
             navigate(perfilRoute) {
                 popUpTo(perfilRoute) { inclusive = true }
                 launchSingleTop = true
             }
         }
-
 
         BottomAppBarItem.Eventos -> {
             navigateToEventos(navOptions {

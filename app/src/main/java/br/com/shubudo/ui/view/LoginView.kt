@@ -29,10 +29,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
@@ -93,6 +93,7 @@ fun LoginView(
     themeViewModel: ThemeViewModel,
     onNavigateToNovoUsuario: (String) -> Unit,
     onNavigateToEsqueciMinhaSenha: (String) -> Unit,
+    onNavigateToConfirmEmail: (String, String, String) -> Unit
 ) {
     val viewModel: LoginViewModel = hiltViewModel()
     var username by remember { mutableStateOf("") }
@@ -126,11 +127,21 @@ fun LoginView(
     // Dialog de erro moderno
     if (uiState is LoginUiState.Error) {
         DialogErro(
-            message = (uiState as LoginUiState.Error).message,
+            message = (uiState as LoginUiState.Error).mensagem,
             onDismiss = { viewModel.resetUiState() }
         )
     }
 
+    if (uiState is LoginUiState.NavigateToConfirmEmail) {
+        val state = uiState as LoginUiState.NavigateToConfirmEmail
+        val email = state.username
+        val corFaixa = state.corFaixa
+
+        LaunchedEffect(email) {
+            viewModel.resetUiState()
+            onNavigateToConfirmEmail(email, password, corFaixa)
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -455,7 +466,7 @@ private fun SecondaryActions(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -505,7 +516,7 @@ private fun SecondaryActions(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Help,
+                            imageVector = Icons.AutoMirrored.Filled.Help,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -541,12 +552,6 @@ fun LoginSuccessDialog(
             stiffness = Spring.StiffnessLow
         ),
         label = "scale"
-    )
-
-    val alpha by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(300),
-        label = "alpha"
     )
 
     // Animação do ícone de sucesso

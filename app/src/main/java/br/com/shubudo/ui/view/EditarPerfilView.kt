@@ -1,25 +1,84 @@
 package br.com.shubudo.ui.view
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerFormatter
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -37,8 +96,19 @@ import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.Period
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+data class DateValidation(
+    val isValid: Boolean,
+    val message: String,
+    val age: Int? = null
+)
+
 @Composable
 fun EditarPerfilView(
     uiState: EditarPerfilUiState,
@@ -60,15 +130,17 @@ fun EditarPerfilView(
             is EditarPerfilUiState.Loading -> {
                 LoadingState()
             }
+
             is EditarPerfilUiState.Empty -> {
                 EmptyState()
             }
+
             is EditarPerfilUiState.Success -> {
                 EditarPerfilContent(
                     nome = uiState.nome,
                     username = uiState.username,
                     email = uiState.email,
-                    idade = uiState.idade,
+                    dataNascimento = uiState.idade,
                     peso = uiState.peso,
                     altura = uiState.altura,
                     corFaixa = uiState.corFaixa,
@@ -175,7 +247,7 @@ fun EditarPerfilContent(
     nome: String,
     username: String,
     email: String,
-    idade: String,
+    dataNascimento: String,
     peso: String,
     altura: String,
     corFaixa: String,
@@ -188,18 +260,24 @@ fun EditarPerfilContent(
     var currentNome by remember { mutableStateOf(nome) }
     var currentUsername by remember { mutableStateOf(username) }
     var currentEmail by remember { mutableStateOf(email) }
-    var currentIdade by remember { mutableStateOf(idade) }
+    var currentDataNascimento by remember { mutableStateOf(dataNascimento) }
     var currentPeso by remember { mutableStateOf(peso) }
     var currentAltura by remember { mutableStateOf(altura) }
     var currentFaixa by remember { mutableStateOf(corFaixa) }
 
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
     val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta")
 
     // Estado para indicar se a operação de salvar está em andamento
     var isSaving by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    // Validação da data de nascimento
+    val dateValidation = remember(currentDataNascimento) {
+        validateBirthDate(currentDataNascimento)
+    }
 
     Box(
         modifier = Modifier
@@ -285,28 +363,23 @@ fun EditarPerfilContent(
                     )
 
                     Text(
-                        text = "Dados Físicos",
+                        text = "Dados Pessoais",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
+                    )
+
+                    // Data de Nascimento Field
+                    DateOfBirthField(
+                        value = formatDateForDisplay(currentDataNascimento),
+                        validation = dateValidation,
+                        onDatePickerClick = { showDatePicker = true }
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        AnimatedTextField(
-                            value = currentIdade,
-                            onValueChange = { currentIdade = it },
-                            label = "Idade",
-                            icon = Icons.Default.DateRange,
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            )
-                        )
-
                         AnimatedTextField(
                             value = currentPeso,
                             onValueChange = { currentPeso = it },
@@ -318,18 +391,19 @@ fun EditarPerfilContent(
                                 imeAction = ImeAction.Next
                             )
                         )
-                    }
 
-                    AnimatedTextField(
-                        value = currentAltura,
-                        onValueChange = { currentAltura = it },
-                        label = "Altura (cm)",
-                        icon = Icons.Default.Height,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
+                        AnimatedTextField(
+                            value = currentAltura,
+                            onValueChange = { currentAltura = it },
+                            label = "Altura (cm)",
+                            icon = Icons.Default.Height,
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Decimal,
+                                imeAction = ImeAction.Done
+                            )
                         )
-                    )
+                    }
 
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -354,6 +428,7 @@ fun EditarPerfilContent(
             // Action Buttons
             ActionButtons(
                 isSaving = isSaving,
+                isFormValid = currentNome.isNotBlank(), // Remove a validação rígida da data para permitir salvar com idade antiga
                 onSave = {
                     if (!isSaving) {
                         isSaving = true
@@ -363,7 +438,7 @@ fun EditarPerfilContent(
                                 username = currentUsername,
                                 email = currentEmail,
                                 corFaixa = currentFaixa,
-                                idade = currentIdade,
+                                idade = currentDataNascimento,
                                 peso = currentPeso,
                                 altura = currentAltura,
                                 senha = ""
@@ -389,6 +464,17 @@ fun EditarPerfilContent(
                     showFaixaDialog = false
                 },
                 onDismiss = { showFaixaDialog = false }
+            )
+        }
+
+        // Date Picker Dialog
+        if (showDatePicker) {
+            DatePickerModal(
+                onDateSelected = { selectedDate ->
+                    currentDataNascimento = selectedDate
+                    showDatePicker = false
+                },
+                onDismiss = { showDatePicker = false }
             )
         }
     }
@@ -490,6 +576,90 @@ private fun AnimatedTextField(
 }
 
 @Composable
+private fun DateOfBirthField(
+    value: String,
+    validation: DateValidation,
+    onDatePickerClick: () -> Unit
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    // Verifica se é um valor antigo (apenas número)
+    val isOldFormat = value.matches(Regex("^\\d{1,3}$"))
+    val displayValue = if (isOldFormat) "" else formatDateForDisplay(value)
+    val placeholderText = if (isOldFormat) "Toque para selecionar data de nascimento" else "Selecione sua data de nascimento"
+    val borderColor = when {
+        !validation.isValid && value.isNotEmpty() && !isOldFormat -> MaterialTheme.colorScheme.error
+        isOldFormat -> MaterialTheme.colorScheme.tertiary
+        isFocused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    }
+
+    val labelColor = when {
+        !validation.isValid && value.isNotEmpty() && !isOldFormat -> MaterialTheme.colorScheme.error
+        isOldFormat -> MaterialTheme.colorScheme.tertiary
+        isFocused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    }
+
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onDatePickerClick() }
+        ) {
+            OutlinedTextField(
+                value = displayValue,
+                onValueChange = { },
+                label = { Text("Data de Nascimento") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        tint = labelColor
+                    )
+                },
+                placeholder = {
+                    Text(
+                        text = placeholderText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                },
+                readOnly = true,
+                enabled = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { isFocused = it.isFocused },
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledBorderColor = borderColor,
+                    disabledLabelColor = labelColor,
+                    disabledLeadingIconColor = labelColor,
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface
+                ),
+                isError = !validation.isValid && value.isNotEmpty() && !isOldFormat
+            )
+        }
+
+        // Validation message
+        if (value.isNotEmpty()) {
+            val messageColor = when {
+                isOldFormat -> MaterialTheme.colorScheme.tertiary
+                validation.isValid -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.error
+            }
+
+            Text(
+                text = validation.message,
+                style = MaterialTheme.typography.bodySmall,
+                color = messageColor,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
 private fun BeltSelectionCard(
     currentFaixa: String,
     onClick: () -> Unit
@@ -553,6 +723,7 @@ private fun BeltSelectionCard(
 @Composable
 private fun ActionButtons(
     isSaving: Boolean,
+    isFormValid: Boolean,
     onSave: () -> Unit,
     onCancelar: () -> Unit
 ) {
@@ -591,12 +762,14 @@ private fun ActionButtons(
                 .weight(1f)
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            enabled = !isSaving
+            enabled = !isSaving && isFormValid
         ) {
             AnimatedContent(
                 targetState = isSaving,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(
+                        animationSpec = tween(200)
+                    )
                 },
                 label = "button_content"
             ) { saving ->
@@ -702,4 +875,127 @@ private fun BeltSelectionDialog(
         shape = RoundedCornerShape(20.dp),
         properties = DialogProperties()
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerModal(
+    onDateSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = null,
+        yearRange = 1900..2099
+    )
+
+    val confirmEnabled = remember(datePickerState.selectedDateMillis) {
+        derivedStateOf {
+            datePickerState.selectedDateMillis != null
+        }
+    }
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val date = Date(millis)
+                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+                        onDateSelected(formatter.format(date))
+                    }
+                },
+                enabled = confirmEnabled.value
+            ) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            title = {
+                Text(
+                    text = "Selecione sua data de nascimento",
+                    modifier = Modifier.padding(16.dp)
+                )
+            },
+        )
+    }
+}
+
+// Função para validar data de nascimento
+private fun validateBirthDate(dateString: String): DateValidation {
+    if (dateString.isEmpty()) {
+        return DateValidation(false, "Data de nascimento é obrigatória")
+    }
+
+    // Se for apenas um número (idade antiga do banco), considera como válido mas pede para atualizar
+    if (dateString.matches(Regex("^\\d{1,3}$"))) {
+        val age = dateString.toIntOrNull()
+        return if (age != null && age in 5..120) {
+            DateValidation(true, "Idade: $age anos - Atualize para data completa", age)
+        } else {
+            DateValidation(false, "Idade inválida - Digite uma data de nascimento")
+        }
+    }
+
+    return try {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+        formatter.isLenient = false // Não permite datas inválidas como 31/02/2023
+        val birthDate = formatter.parse(dateString) ?: return DateValidation(false, "Data inválida")
+
+        val birthLocalDate = birthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        val today = LocalDate.now()
+
+        // Verifica se a data não é futura
+        if (birthLocalDate.isAfter(today)) {
+            return DateValidation(false, "Data não pode ser futura")
+        }
+
+        // Calcula a idade
+        val age = Period.between(birthLocalDate, today).years
+
+        // Verifica limites de idade
+        when {
+            age < 5 -> DateValidation(false, "Idade mínima: 5 anos")
+            age > 120 -> DateValidation(false, "Idade máxima: 120 anos")
+            else -> DateValidation(true, "$age anos", age)
+        }
+    } catch (e: Exception) {
+        DateValidation(false, "Formato de data inválido")
+    }
+}
+
+// Função para formatar data para exibição
+private fun formatDateForDisplay(dateString: String): String {
+    if (dateString.isEmpty()) return ""
+
+    // Se for apenas um número (idade), retorna vazio para permitir edição
+    if (dateString.matches(Regex("^\\d{1,3}$"))) {
+        return ""
+    }
+
+    // Se já está no formato dd/MM/yyyy, retorna como está
+    if (dateString.matches(Regex("^\\d{2}/\\d{2}/\\d{4}$"))) {
+        return dateString
+    }
+
+    // Se está no formato ISO (yyyy-MM-dd), converte para dd/MM/yyyy
+    if (dateString.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))) {
+        return try {
+            val inputFormatter = SimpleDateFormat("yyyy-MM-dd", Locale("pt", "BR"))
+            val outputFormatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+            val date = inputFormatter.parse(dateString)
+            date?.let { outputFormatter.format(it) } ?: dateString
+        } catch (e: Exception) {
+            dateString
+        }
+    }
+
+    return dateString
 }

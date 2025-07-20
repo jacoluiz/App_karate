@@ -3,13 +3,16 @@ package br.com.shubudo.auth
 import android.content.Context
 import android.util.Log
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.ForgotPasswordHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.VerificationHandler
 import com.amazonaws.regions.Regions
 
 class CognitoAuthManager(context: Context) {
@@ -55,6 +58,19 @@ class CognitoAuthManager(context: Context) {
     fun forgotPassword(username: String, handler: ForgotPasswordHandler) {
         val user = userPool.getUser(username)
         user.forgotPassword(handler)
+    }
+
+    fun reenviarCodigoConfirmacao(email: String, callback: (Boolean, String?) -> Unit) {
+        val user = userPool.getUser(email)
+        user.resendConfirmationCodeInBackground(object : VerificationHandler {
+            override fun onSuccess(verificationCodeDeliveryMedium: CognitoUserCodeDeliveryDetails?) {
+                callback(true, null)
+            }
+
+            override fun onFailure(exception: Exception?) {
+                callback(false, exception?.localizedMessage ?: "Erro ao reenviar o código")
+            }
+        })
     }
 
     fun confirmCode(username: String, code: String, callback: (Boolean, String?) -> Unit) {

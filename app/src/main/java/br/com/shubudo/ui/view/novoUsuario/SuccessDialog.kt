@@ -1,13 +1,27 @@
 package br.com.shubudo.ui.view.novoUsuario
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,7 +92,7 @@ fun SuccessDialog(
 
                     // Message
                     Text(
-                        text = "Olá $userName! Seu cadastro foi criado com sucesso. Agora é só aguardar a autorização do administrador. Fale com o Jacó para ser mais rápido.",
+                        text = "Olá $userName! Seu cadastro foi criado com sucesso. Agora é só confirmar seu e-mail.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center,
@@ -109,9 +123,8 @@ fun SuccessDialog(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             val steps = listOf(
-                                "Aguarde a aprovação do administrador",
-                                "Você receberá um e-mail quando for aprovado",
-                                "Entre em contato com Jacó para agilizar o processo"
+                                "Aguarde e-mail de aprovação",
+                                "Validar código do e-mail aqui no APP"
                             )
 
                             steps.forEach { step ->
