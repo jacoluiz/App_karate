@@ -76,7 +76,9 @@ class MainActivity : ComponentActivity() {
             val uiState by perfilViewModel.uiState.collectAsState()
             val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
 
-            val faixaParaTema = SessionManager.usuarioLogado?.corFaixa
+            // Priorizar a faixa selecionada no ThemeViewModel sobre a faixa do usuário logado
+            val faixaParaTema = themeViewModel.getCurrentFaixa()
+                ?: SessionManager.usuarioLogado?.corFaixa
                 ?: themeViewModel.getFaixaAtualOuAleatoria()
 
             AppShubudoTheme(faixa = faixaParaTema) {

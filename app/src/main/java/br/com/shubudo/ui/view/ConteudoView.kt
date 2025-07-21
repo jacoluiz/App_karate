@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
@@ -79,6 +81,10 @@ fun ProgramacaoView(
         }
 
         is ProgramacaoUiState.Success -> {
+            LaunchedEffect(Unit) {
+                SessionManager.usuarioLogado?.corFaixa?.let { themeViewModel.changeThemeFaixa(it) }
+            }
+
             Column(modifier = Modifier.fillMaxSize()) {
                 // Cabeçalho com fundo gradiente
                 Box(
@@ -95,8 +101,7 @@ fun ProgramacaoView(
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                         )
                         .padding(vertical = 24.dp, horizontal = 16.dp)
-                )
-                {
+                ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -147,7 +152,6 @@ fun ProgramacaoView(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-                        // Grid de faixas
                         val availableFaixas = uiState.faixas.sortedBy { it.ordem }
 
                         LazyVerticalGrid(
@@ -200,7 +204,6 @@ fun FaixaCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Faixa icon
             val iconPainter = if (faixa == "Branca" && !isDarkTheme) {
                 painterResource(id = R.drawable.ic_faixa_outline)
             } else {
