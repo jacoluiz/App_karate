@@ -6,7 +6,6 @@ import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Movimento
-import br.com.shubudo.model.Video
 
 @Entity(tableName = "defesas_pessoais_extra_banner")
 @TypeConverters(Convertes::class)

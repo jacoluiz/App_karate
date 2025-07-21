@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -55,7 +54,7 @@ fun TelaDetalheDefesaPessoal(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
 
     // Inicializa o ExoPlayer com o vídeo da defesa pessoal
     val exoPlayer = remember(context, defesaPessoal.video) {

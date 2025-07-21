@@ -54,7 +54,7 @@ fun TelaDetalheProjecao(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
 
     val exoPlayer = remember(context, projecao.video) {
         createExoPlayer(context, projecao.video)

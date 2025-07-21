@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
-import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaDeCombate.TelaListaSequenciaDeCombate
 
 
 @Composable

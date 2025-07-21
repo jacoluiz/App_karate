@@ -51,7 +51,7 @@ fun TelaDetalheMovimentoPadrao(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
     // Corrigido: contexto obtido fora do remember

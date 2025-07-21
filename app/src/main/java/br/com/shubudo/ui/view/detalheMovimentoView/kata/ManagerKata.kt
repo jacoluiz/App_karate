@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view.detalheMovimentoView.kata
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn

@@ -23,7 +23,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class KataViewModel : ViewModel() {
-    var isPlaying = mutableStateOf(false)
+    var isPlaying = mutableStateOf(true)
         private set
 
     var currentVideo = mutableStateOf<Video?>(null)

@@ -53,7 +53,7 @@ fun TelaDetalheExtraBanner(
     onBackNavigationClick: () -> Unit
 ) {
     val context = LocalContext.current
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
     val exoPlayer = remember(context, extraBanner.video) {

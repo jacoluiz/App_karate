@@ -2,12 +2,9 @@ package br.com.shubudo.repositories
 
 import android.util.Log
 import br.com.shubudo.database.dao.KataDao
-import br.com.shubudo.database.entities.toDefesaPessoal
 import br.com.shubudo.database.entities.toKata
-import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.Kata
 import br.com.shubudo.network.services.KataServices
-import br.com.shubudo.network.services.toDefesaPessoalEntity
 import br.com.shubudo.network.services.toKataEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
