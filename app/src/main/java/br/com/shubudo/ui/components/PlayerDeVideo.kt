@@ -14,22 +14,32 @@ import java.io.File
 
 @Composable
 fun LocalVideoPlayer(
-    videoPath: String?, // Caminho local ou URL do vídeo
+    videoPath: String?, // URL ou caminho absoluto local
     exoPlayer: ExoPlayer,
     modifier: Modifier = Modifier,
     useController: Boolean = false
 ) {
     LaunchedEffect(videoPath) {
         videoPath?.let { path ->
-            // Verifica se é um arquivo local ou uma URL remota
-            if (path.startsWith("http") || File(path).exists()) {
+            val isRemote = path.startsWith("http://") || path.startsWith("https://")
+            val file = File(path)
+            val isLocal = file.exists()
+
+            val finalUri = when {
+                isRemote -> path
+                isLocal -> file.toURI().toString()
+                else -> null
+            }
+
+            if (finalUri != null) {
+                Log.i("LocalVideoPlayer", "Reproduzindo: $finalUri")
                 exoPlayer.playWhenReady = true
                 exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ONE
                 exoPlayer.volume = 0f
-                exoPlayer.setMediaItem(MediaItem.fromUri(path))
+                exoPlayer.setMediaItem(MediaItem.fromUri(finalUri))
                 exoPlayer.prepare()
             } else {
-                Log.e("LocalVideoPlayer", "Arquivo não encontrado: $path")
+                Log.e("LocalVideoPlayer", "Caminho inválido: $path")
             }
         }
     }
@@ -46,4 +56,5 @@ fun LocalVideoPlayer(
         )
     }
 }
+
 
