@@ -20,15 +20,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,14 +46,17 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,9 +64,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.EsqueciMinhaSenhaUiState
 import br.com.shubudo.ui.viewModel.EsqueciMinhaSenhaViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun EsqueciMinhaSenhaView(
@@ -70,9 +79,12 @@ fun EsqueciMinhaSenhaView(
 ) {
     val etapa by viewModel.etapa
     val uiState by viewModel.uiState
+    val showSuccessDialog by viewModel.showSuccessDialog
 
     var mostrarNovaSenha by remember { mutableStateOf(false) }
     var mostrarConfirmarSenha by remember { mutableStateOf(false) }
+    var canResend by remember { mutableStateOf(true) }
+    var resendCountdown by remember { mutableIntStateOf(0) }
 
     // Inicializar email se fornecido
     LaunchedEffect(username) {
@@ -81,13 +93,26 @@ fun EsqueciMinhaSenhaView(
         }
     }
 
-    // Observa mudanças no estado para lidar com sucesso
-    LaunchedEffect(uiState) {
-        if (uiState is EsqueciMinhaSenhaUiState.Success &&
-            (uiState as EsqueciMinhaSenhaUiState.Success).mensagem.contains("sucesso", ignoreCase = true) &&
-            etapa == 3) { // Só navegar se estiver na etapa final
-            onSenhaRedefinida()
+    // Gerencia o countdown para reenvio
+    LaunchedEffect(canResend) {
+        if (!canResend) {
+            resendCountdown = 60
+            while (resendCountdown > 0) {
+                delay(1000)
+                resendCountdown--
+            }
+            canResend = true
         }
+    }
+
+    // Dialog de sucesso
+    if (showSuccessDialog) {
+        SuccessDialog(
+            onDismiss = {
+                viewModel.dismissSuccessDialog()
+                onSenhaRedefinida()
+            }
+        )
     }
 
     Box(
@@ -349,6 +374,39 @@ fun EsqueciMinhaSenhaView(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
+                            // Botão de reenviar código
+                            if (canResend) {
+                                TextButton(
+                                    onClick = {
+                                        canResend = false
+                                        viewModel.reenviarCodigo()
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Refresh,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Text("Reenviar Código")
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = "Reenviar código em ${resendCountdown}s",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
                             OutlinedButton(
                                 onClick = { viewModel.setEtapa(1) },
                                 modifier = Modifier.fillMaxWidth(),
@@ -539,4 +597,83 @@ fun EsqueciMinhaSenhaView(
             }
         }
     }
+}
+
+@Composable
+private fun SuccessDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Ir para Login",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+            }
+        },
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Senha Alterada!",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Sua senha foi alterada com sucesso!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Agora você pode fazer login com sua nova senha.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
 }
