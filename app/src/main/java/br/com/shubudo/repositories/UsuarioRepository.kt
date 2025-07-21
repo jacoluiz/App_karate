@@ -9,23 +9,21 @@ import br.com.shubudo.network.services.UsuarioService
 import br.com.shubudo.network.services.toUsuario
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.ForgotPasswordHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult
+import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException
+import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -38,8 +36,7 @@ import kotlin.coroutines.resumeWithException
 class UsuarioRepository @Inject constructor(
     private val service: UsuarioService,
     private val dao: UsuarioDao,
-    private val cognito: CognitoAuthManager,
-    private val userPool: CognitoUserPool
+    private val cognito: CognitoAuthManager
 ) {
 
     fun getUsuario() = dao.obterUsuarioLogado().map { it?.toUsuario() }
@@ -92,11 +89,48 @@ class UsuarioRepository @Inject constructor(
 
                     override fun onFailure(exception: Exception?) {
                         if (cont.isActive) {
-                            cont.resumeWithException(
-                                exception ?: Exception("Falha desconhecida no login Cognito")
-                            )
+                            // Tratar UserNotConfirmedException de forma especial
+                            when (exception) {
+                                is UserNotConfirmedException -> {
+                                    // Para usuário não confirmado, precisamos verificar se a senha está correta
+                                    // Vamos tentar fazer uma verificação adicional
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
+                                            // Buscar o usuário na API para verificar se existe
+                                            val usuarios = service.getUsuarios().map { it.toUsuario() }
+                                            val usuario = usuarios.find {
+                                                it.email.equals(userInput, true) || it.username.equals(userInput, true)
+                                            }
+
+                                            if (usuario != null) {
+                                                // Usuário existe na API, então é realmente um caso de não confirmado
+                                                if (cont.isActive) {
+                                                    cont.resumeWithException(exception)
+                                                }
+                                            } else {
+                                                // Usuário não existe na API, tratar como credenciais incorretas
+                                                if (cont.isActive) {
+                                                    cont.resumeWithException(NotAuthorizedException("Incorrect username or password"))
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            // Se não conseguir verificar na API, propagar a exceção original
+                                            if (cont.isActive) {
+                                                cont.resumeWithException(exception)
+                                            }
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    // Para outras exceções, propagar normalmente
+                                    cont.resumeWithException(
+                                        exception ?: Exception("Falha desconhecida no login Cognito")
+                                    )
+                                }
+                            }
                         }
                     }
+
 
                     override fun getAuthenticationDetails(
                         authenticationContinuation: AuthenticationContinuation?,

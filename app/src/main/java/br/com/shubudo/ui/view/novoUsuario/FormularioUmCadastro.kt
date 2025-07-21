@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
@@ -54,12 +55,132 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+
+fun applyDateMask(input: TextFieldValue): TextFieldValue {
+    val digits = input.text.filter { it.isDigit() }
+    val limitedDigits = digits.take(8)
+
+    // Validar e corrigir os dígitos conforme são inseridos
+    val validatedDigits = when (limitedDigits.length) {
+        0 -> ""
+        1 -> {
+            // Primeiro dígito do dia: máximo 3
+            if (limitedDigits[0].digitToInt() > 3) "3" else limitedDigits
+        }
+        2 -> {
+            // Dia completo: máximo 31
+            val day = limitedDigits.toInt()
+            when {
+                day == 0 -> "01"
+                day > 31 -> "31"
+                else -> limitedDigits
+            }
+        }
+        3 -> {
+            // Primeiro dígito do mês: máximo 1
+            val day = limitedDigits.substring(0, 2).toInt()
+            val firstMonthDigit = limitedDigits[2].digitToInt()
+            val validDay = when {
+                day == 0 -> "01"
+                day > 31 -> "31"
+                else -> limitedDigits.substring(0, 2)
+            }
+            val validFirstMonthDigit = if (firstMonthDigit > 1) "1" else firstMonthDigit.toString()
+            validDay + validFirstMonthDigit
+        }
+        4 -> {
+            // Mês completo: máximo 12
+            val day = limitedDigits.substring(0, 2).toInt()
+            val month = limitedDigits.substring(2, 4).toInt()
+            val validDay = when {
+                day == 0 -> "01"
+                day > 31 -> "31"
+                else -> limitedDigits.substring(0, 2)
+            }
+            val validMonth = when {
+                month == 0 -> "01"
+                month > 12 -> "12"
+                else -> limitedDigits.substring(2, 4)
+            }
+            validDay + validMonth
+        }
+        else -> {
+            // 5-8 dígitos: validar dia e mês, manter ano
+            val day = limitedDigits.substring(0, 2).toInt()
+            val month = limitedDigits.substring(2, 4).toInt()
+            val year = limitedDigits.substring(4)
+
+            val validDay = when {
+                day == 0 -> "01"
+                day > 31 -> "31"
+                else -> limitedDigits.substring(0, 2)
+            }
+            val validMonth = when {
+                month == 0 -> "01"
+                month > 12 -> "12"
+                else -> limitedDigits.substring(2, 4)
+            }
+            validDay + validMonth + year
+        }
+    }
+
+    val maskedText = when (validatedDigits.length) {
+        0 -> ""
+        1 -> validatedDigits
+        2 -> validatedDigits
+        3 -> "${validatedDigits.substring(0, 2)}/${validatedDigits[2]}"
+        4 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}"
+        5 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits[4]}"
+        6 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 6)}"
+        7 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 7)}"
+        8 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 8)}"
+        else -> validatedDigits.substring(0, 2) + "/" + validatedDigits.substring(2, 4) + "/" + validatedDigits.substring(4, 8)
+    }
+
+    return TextFieldValue(maskedText, TextRange(maskedText.length))
+}
+
+fun isValidDate(dateString: String): Boolean {
+    if (dateString.length != 10) return false
+
+    val parts = dateString.split("/")
+    if (parts.size != 3) return false
+
+    return try {
+        val day = parts[0].toInt()
+        val month = parts[1].toInt()
+        val year = parts[2].toInt()
+
+        // Validações básicas
+        if (day < 1 || day > 31) return false
+        if (month < 1 || month > 12) return false
+        if (year < 1900 || year > 2024) return false
+
+        // Validação específica por mês
+        val daysInMonth = when (month) {
+            1, 3, 5, 7, 8, 10, 12 -> 31
+            4, 6, 9, 11 -> 30
+            2 -> if (isLeapYear(year)) 29 else 28
+            else -> 0
+        }
+
+        day <= daysInMonth
+    } catch (e: NumberFormatException) {
+        false
+    }
+}
+
+fun isLeapYear(year: Int): Boolean {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,10 +201,14 @@ fun PaginaUmCadastro(
     var passwordVisibleConfirmSenha by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
     var showBeltDropdown by remember { mutableStateOf(false) }
+    var dateValue by remember {
+        mutableStateOf(TextFieldValue(novoUsuarioViewModel.idade))
+    }
 
     val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta")
 
     val focusRequesterNome = remember { FocusRequester() }
+    val focusRequesterIdade = remember { FocusRequester() }
     val focusRequesterSenha = remember { FocusRequester() }
     val focusRequesterConfirmarSenha = remember { FocusRequester() }
 
@@ -198,8 +323,30 @@ fun PaginaUmCadastro(
             focusRequester = focusRequesterNome,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(
-                onNext = { focusRequesterSenha.requestFocus() }
+                onNext = { focusRequesterIdade.requestFocus() }
             )
+        )
+
+        // Birth Date Field
+        ModernTextFieldWithDateMask(
+            value = dateValue,
+            onValueChange = { newValue ->
+                dateValue = applyDateMask(newValue)
+                novoUsuarioViewModel.idade = dateValue.text
+            },
+            label = "Data de nascimento",
+            placeholder = "dd/mm/aaaa",
+            leadingIcon = Icons.Default.DateRange,
+            focusRequester = focusRequesterIdade,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusRequesterSenha.requestFocus() }
+            ),
+            helperText = "Formato: 25/12/1990",
+            isError = dateValue.text.isNotEmpty() && !isValidDate(dateValue.text)
         )
 
         // Password Field
@@ -372,6 +519,80 @@ private fun ModernTextField(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions
         )
+    }
+}
+
+@Composable
+private fun ModernTextFieldWithDateMask(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: String,
+    placeholder: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    focusRequester: FocusRequester,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    helperText: String? = null,
+    isError: Boolean = false
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            isError = isError,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                errorBorderColor = MaterialTheme.colorScheme.error
+            ),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
+
+        if (isError) {
+            Text(
+                text = "Data inválida. Verifique o dia, mês e ano.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        } else {
+            helperText?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+        }
     }
 }
 

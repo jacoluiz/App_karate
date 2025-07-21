@@ -160,6 +160,7 @@ fun PaginaDoisCadastro(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SummaryItem("Nome", novoUsuarioViewModel.nome)
+                    SummaryItem("Data de nascimento", novoUsuarioViewModel.idade)
                     SummaryItem("Faixa", novoUsuarioViewModel.faixa)
                     SummaryItem("E-mail", novoUsuarioViewModel.email)
                     SummaryItem("Altura", if (novoUsuarioViewModel.altura.isNotBlank()) "${novoUsuarioViewModel.altura} cm" else "")

@@ -396,6 +396,8 @@ private fun NavigationButtons(
 
 fun validarPaginaUmCompleta(viewModel: NovoUsuarioViewModel): Boolean {
     return viewModel.nome.isNotBlank() &&
+            viewModel.idade.isNotBlank() &&
+            isValidDate(viewModel.idade) &&
             viewModel.faixa.isNotBlank() &&
             viewModel.senha.isNotBlank() &&
             viewModel.confirmarSenha.isNotBlank() &&

@@ -29,6 +29,7 @@ class NovoUsuarioViewModel @Inject constructor(
     var faixa by mutableStateOf("")
     var peso by mutableStateOf("")
     var altura by mutableStateOf("0,00")
+    var idade by mutableStateOf("")
     var senhaAtendeAosRequisitos by mutableStateOf(false)
 
     fun cadastrarUsuario() {
@@ -55,7 +56,7 @@ class NovoUsuarioViewModel @Inject constructor(
                     peso = peso,
                     altura = altura,
                     username = email,
-                    idade = "0",
+                    idade = idade,
                     perfil = "básico"
                 )
 
