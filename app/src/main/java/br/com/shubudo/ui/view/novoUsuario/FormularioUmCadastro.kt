@@ -60,6 +60,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
+import br.com.shubudo.ui.theme.*
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -205,7 +206,7 @@ fun PaginaUmCadastro(
         mutableStateOf(TextFieldValue(novoUsuarioViewModel.idade))
     }
 
-    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta")
+    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre")
 
     val focusRequesterNome = remember { FocusRequester() }
     val focusRequesterIdade = remember { FocusRequester() }
@@ -619,13 +620,15 @@ private fun PasswordRequirement(text: String, isMet: Boolean) {
 
 private fun getBeltColor(belt: String): Color {
     return when (belt) {
-        "Branca" -> Color(0xFF6B7280)
-        "Amarela" -> Color(0xFFF59E0B)
-        "Laranja" -> Color(0xFFEA580C)
-        "Verde" -> Color(0xFF059669)
-        "Roxa" -> Color(0xFF7C3AED)
-        "Marrom" -> Color(0xFF6D3A1A)
-        "Preta" -> Color(0xFF374151)
-        else -> Color(0xFF6366F1)
+        "Branca" -> PrimaryColorBranca
+        "Amarela" -> PrimaryColorAmarela
+        "Laranja" -> PrimaryColorLaranja
+        "Verde" -> PrimaryColorVerde
+        "Roxa" -> PrimaryColorRoxa
+        "Marrom" -> PrimaryColorMarron
+        "Preta" -> PrimaryColorPreta
+        "Mestre" -> PrimaryColorMestre
+        "Grão Mestre" -> PrimaryColorGraoMestre
+        else -> Color(0xFF6366F1) // fallback
     }
 }

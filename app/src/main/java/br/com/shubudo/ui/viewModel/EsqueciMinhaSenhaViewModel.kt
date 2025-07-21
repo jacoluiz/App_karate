@@ -65,13 +65,22 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
 
             override fun onFailure(exception: Exception?) {
                 val errorMessage = when {
-                    exception?.message?.contains("UserNotFoundException", ignoreCase = true) == true ->
+                    exception?.message?.contains(
+                        "UserNotFoundException",
+                        ignoreCase = true
+                    ) == true ->
                         "E-mail não encontrado. Verifique se o e-mail está correto."
 
-                    exception?.message?.contains("LimitExceededException", ignoreCase = true) == true ->
+                    exception?.message?.contains(
+                        "LimitExceededException",
+                        ignoreCase = true
+                    ) == true ->
                         "Muitas tentativas. Tente novamente em alguns minutos."
 
-                    exception?.message?.contains("InvalidParameterException", ignoreCase = true) == true ->
+                    exception?.message?.contains(
+                        "InvalidParameterException",
+                        ignoreCase = true
+                    ) == true ->
                         "E-mail inválido. Verifique o formato do e-mail."
 
                     else -> "Erro ao solicitar redefinição de senha. Tente novamente."
@@ -84,7 +93,8 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
     // Método para reenviar código
     fun reenviarCodigo() {
         if (email.trim().isEmpty()) {
-            _uiState.value = EsqueciMinhaSenhaUiState.Error("Email não encontrado. Reinicie o fluxo.")
+            _uiState.value =
+                EsqueciMinhaSenhaUiState.Error("Email não encontrado. Reinicie o fluxo.")
             setEtapa(1)
             return
         }
@@ -101,14 +111,18 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
             }
 
             override fun getResetCode(continuation: ForgotPasswordContinuation?) {
-                _uiState.value = EsqueciMinhaSenhaUiState.Success("Novo código enviado para seu e-mail!")
+                _uiState.value =
+                    EsqueciMinhaSenhaUiState.Success("Novo código enviado para seu e-mail!")
                 // Limpar código anterior
                 codigo = ""
             }
 
             override fun onFailure(exception: Exception?) {
                 val errorMessage = when {
-                    exception?.message?.contains("LimitExceededException", ignoreCase = true) == true ->
+                    exception?.message?.contains(
+                        "LimitExceededException",
+                        ignoreCase = true
+                    ) == true ->
                         "Muitas tentativas de reenvio. Aguarde alguns minutos."
 
                     else -> "Erro ao reenviar código. Tente novamente."
@@ -117,6 +131,7 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
             }
         })
     }
+
     // Validação local do código (formato e sessão ativa)
     fun validarCodigoLocal(onCodigoValido: () -> Unit) {
         if (codigo.length != 6) {
@@ -126,7 +141,8 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
 
         // Verificar se temos uma sessão ativa de reset
         if (!cognitoAuthManager.hasActiveResetSession()) {
-            _uiState.value = EsqueciMinhaSenhaUiState.Error("Sessão expirada. Solicite um novo código.")
+            _uiState.value =
+                EsqueciMinhaSenhaUiState.Error("Sessão expirada. Solicite um novo código.")
             setEtapa(1)
             return
         }
@@ -137,7 +153,7 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
     }
 
     // Método para confirmar código + nova senha (chamada única ao Cognito)
-    fun confirmarNovaSenha(onSuccess: () -> Unit) {
+    fun confirmarNovaSenha() {
         // Validações locais
         if (codigo.length != 6) {
             _uiState.value = EsqueciMinhaSenhaUiState.Error("Digite um código de 6 dígitos.")
@@ -155,7 +171,8 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
         }
 
         if (novaSenha.length < 8) {
-            _uiState.value = EsqueciMinhaSenhaUiState.Error("A senha deve ter pelo menos 8 caracteres.")
+            _uiState.value =
+                EsqueciMinhaSenhaUiState.Error("A senha deve ter pelo menos 8 caracteres.")
             return
         }
 
@@ -163,7 +180,8 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
         if (!novaSenha.any { it.isUpperCase() } ||
             !novaSenha.any { it.isLowerCase() } ||
             !novaSenha.any { it.isDigit() }) {
-            _uiState.value = EsqueciMinhaSenhaUiState.Error("A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número.")
+            _uiState.value =
+                EsqueciMinhaSenhaUiState.Error("A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número.")
             return
         }
 
@@ -180,8 +198,12 @@ class EsqueciMinhaSenhaViewModel @Inject constructor(
                     _uiState.value = EsqueciMinhaSenhaUiState.Error(errorMessage)
 
                     // Se erro de código, voltar para etapa do código
-                    if (errorMessage.contains("Código de verificação inválido", ignoreCase = true) ||
-                        errorMessage.contains("Código expirado", ignoreCase = true)) {
+                    if (errorMessage.contains(
+                            "Código de verificação inválido",
+                            ignoreCase = true
+                        ) ||
+                        errorMessage.contains("Código expirado", ignoreCase = true)
+                    ) {
                         setEtapa(2)
                         codigo = "" // Limpar código inválido
                     }

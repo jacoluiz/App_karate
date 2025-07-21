@@ -38,10 +38,12 @@ import br.com.shubudo.R
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
+import br.com.shubudo.ui.theme.PrimaryColorLaranja
 import br.com.shubudo.ui.theme.PrimaryColorMarron
 import br.com.shubudo.ui.theme.PrimaryColorMestre
 import br.com.shubudo.ui.theme.PrimaryColorPreta
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
+import br.com.shubudo.ui.theme.PrimaryColorVerde
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
@@ -238,17 +240,13 @@ fun selecionaCorIcone(faixa: String, isDarkTheme: Boolean): Color {
     return when (faixa) {
         "Branca" -> if (isDarkTheme) Color.White else Color.Black
         "Amarela" -> LightPrimaryContainerColorAmarela
-        "Laranja" -> Color(0xFFF46000)
-        "Verde" -> Color(0xFF00800D)
+        "Laranja" -> PrimaryColorLaranja
+        "Verde" -> PrimaryColorVerde
         "Roxa" -> PrimaryColorRoxa
         "Marrom" -> PrimaryColorMarron
-        "Preta" -> PrimaryColorPreta
-        "Preta 1 dan" -> PrimaryColorPreta
-        "Preta 2 dan" -> PrimaryColorPreta
-        "Preta 3 dan" -> PrimaryColorPreta
-        "Preta 4 dan" -> PrimaryColorPreta
-        "Mestre" -> PrimaryColorMestre
-        "Grão Mestre" -> PrimaryColorGraoMestre
+        "Preta", "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan" -> PrimaryColorPreta
+        "Mestre", "Mestre 6 dan", "Mestre 7 dan", "Mestre 8 dan", "Mestre 9 dan" -> PrimaryColorMestre
+        "Grão Mestre", "Grão Mestre 11 dan", "Grão Mestre 12 dan" -> PrimaryColorGraoMestre
         else -> Color(0xFF8A2BE2)
     }
 }

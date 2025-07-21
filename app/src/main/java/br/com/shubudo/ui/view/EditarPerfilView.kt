@@ -349,7 +349,7 @@ fun EditarPerfilContent(
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
-    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta")
+    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre")
 
     // Estado para indicar se a operação de salvar está em andamento
     var isSaving by remember { mutableStateOf(false) }
@@ -890,7 +890,6 @@ private fun BeltSelectionCard(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ActionButtons(
     isSaving: Boolean,

@@ -1,8 +1,6 @@
 package br.com.shubudo.ui.view.esqueciMinhaSenha
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -510,7 +508,7 @@ fun EsqueciMinhaSenhaView(
                             Spacer(modifier = Modifier.height(24.dp))
 
                             Button(
-                                onClick = { viewModel.confirmarNovaSenha { } },
+                                onClick = { viewModel.confirmarNovaSenha() },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(56.dp),

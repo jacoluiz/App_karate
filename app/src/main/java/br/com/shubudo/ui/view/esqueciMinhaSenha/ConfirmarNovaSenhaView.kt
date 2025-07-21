@@ -356,7 +356,7 @@ fun ConfirmarNovaSenhaView(
                             // Botão para alterar senha
                             Button(
                                 onClick = {
-                                    viewModel.confirmarNovaSenha { }
+                                    viewModel.confirmarNovaSenha()
                                 },
                                 enabled = !isLoading && viewModel.novaSenha.isNotBlank() &&
                                         viewModel.novaSenha == viewModel.confirmarSenha,

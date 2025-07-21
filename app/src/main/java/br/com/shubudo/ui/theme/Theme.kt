@@ -249,17 +249,15 @@ fun AppShubudoTheme(
         "Verde" -> if (darkTheme) DarkVerdeColorScheme else LightVerdeColorScheme
         "Roxa" -> if (darkTheme) DarkRoxaColorScheme else LightRoxaColorScheme
         "Marrom" -> if (darkTheme) DarkMarromColorScheme else LightMarromColorScheme
-        "Preta" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
-        "Preta 1 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
-        "Preta 2 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
-        "Preta 3 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
-        "Preta 4 dan" -> if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
-        "Mestre" -> if (darkTheme) DarkMestreColorScheme else LightMestreColorScheme
-        "Grão Mestre" -> if (darkTheme) DarkGraoMestreColorScheme else LightGraoMestreColorScheme
-
-
+        "Preta", "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan" ->
+            if (darkTheme) DarkPretaColorScheme else LightPretaColorScheme
+        "Mestre", "Mestre 6 dan", "Mestre 7 dan", "Mestre 8 dan", "Mestre 9 dan" ->
+            if (darkTheme) DarkMestreColorScheme else LightMestreColorScheme
+        "Grão Mestre", "Grão Mestre 11 dan", "Grão Mestre 12 dan" ->
+            if (darkTheme) DarkGraoMestreColorScheme else LightGraoMestreColorScheme
         else -> if (darkTheme) DarkBrancaColorScheme else LightBrancaColorScheme
     }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
