@@ -1,6 +1,7 @@
 package br.com.shubudo.auth
 
 import android.content.Context
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,4 +20,13 @@ object CognitoModule {
     ): CognitoAuthManager {
         return CognitoAuthManager(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideCognitoUserPool(
+        authManager: CognitoAuthManager
+    ): CognitoUserPool {
+        return authManager.userPool
+    }
 }
+

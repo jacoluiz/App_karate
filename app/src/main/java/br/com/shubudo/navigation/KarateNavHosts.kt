@@ -73,11 +73,21 @@ fun KarateNavHost(
 
         // Tela de Esqueci Minha Senha
         esqueciMinhaSenhaScreen(
-            onSendResetRequest = { navController.popBackStack() },
             onSenhaRedefinida = {
                 navController.navigate("login") {
                     popUpTo("esqueciMinhaSenha") { inclusive = true }
                 }
+            }
+        )
+
+        confirmarNovaSenhaScreen(
+            onSenhaAlterada = {
+                navController.navigate("login") {
+                    popUpTo(confirmarNovaSenhaRoute) { inclusive = true }
+                }
+            },
+            onVoltar = {
+                navController.navigateToEsqueciMinhaSenha()
             }
         )
 

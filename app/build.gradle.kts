@@ -112,6 +112,7 @@ dependencies {
     implementation (libs.accompanist.flowlayout)
     implementation(libs.aws.android.sdk.core)
     implementation(libs.aws.android.sdk.cognitoidentityprovider)
+    implementation(kotlin("reflect"))
 
 }
 

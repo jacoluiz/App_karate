@@ -7,9 +7,9 @@ import br.com.shubudo.model.Usuario
 import br.com.shubudo.model.toUsuarioEntity
 import br.com.shubudo.network.services.UsuarioService
 import br.com.shubudo.network.services.toUsuario
-import br.com.shubudo.network.services.toUsuarioEntity
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails
@@ -38,7 +38,8 @@ import kotlin.coroutines.resumeWithException
 class UsuarioRepository @Inject constructor(
     private val service: UsuarioService,
     private val dao: UsuarioDao,
-    private val cognito: CognitoAuthManager
+    private val cognito: CognitoAuthManager,
+    private val userPool: CognitoUserPool
 ) {
 
     fun getUsuario() = dao.obterUsuarioLogado().map { it?.toUsuario() }
@@ -140,45 +141,9 @@ class UsuarioRepository @Inject constructor(
         }
     }
 
-    @OptIn(InternalCoroutinesApi::class)
-    suspend fun iniciarEsqueciSenha(email: String): Boolean = withContext(Dispatchers.IO) {
-        val user = cognito.userPool.getUser(email.trim())
-
-        suspendCancellableCoroutine { cont ->
-            user.forgotPasswordInBackground(object : ForgotPasswordHandler {
-                override fun onSuccess() {
-                    cont.tryResume(true)?.let { token -> cont.completeResume(token) }
-                }
-
-                override fun getResetCode(continuation: ForgotPasswordContinuation) {
-                    cognito.forgotPasswordContinuation = continuation
-                    cont.tryResume(true)?.let { token -> cont.completeResume(token) }
-                }
-
-                override fun onFailure(exception: Exception) {
-                    cont.tryResume(false)?.let { token -> cont.completeResume(token) }
-                }
-            })
-        }
-    }
-
     suspend fun getCorFaixaLocal(userInput: String): String? = withContext(Dispatchers.IO) {
         val usuario = dao.getUsuarioByEmailOuUsername(userInput.trim())
         return@withContext usuario?.corFaixa
-    }
-
-
-    fun confirmarNovaSenha(codigo: String, novaSenha: String): Boolean {
-        return try {
-            cognito.forgotPasswordContinuation?.apply {
-                setPassword(novaSenha)
-                setVerificationCode(codigo)
-                continueTask()
-            }
-            true
-        } catch (e: Exception) {
-            false
-        }
     }
 
     suspend fun cadastrarUsuario(usuario: Usuario): Usuario? = withContext(Dispatchers.IO) {

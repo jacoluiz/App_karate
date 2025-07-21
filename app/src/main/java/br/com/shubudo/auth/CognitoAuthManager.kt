@@ -5,8 +5,6 @@ import android.util.Log
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.ForgotPasswordHandler
@@ -18,6 +16,7 @@ import com.amazonaws.regions.Regions
 class CognitoAuthManager(context: Context) {
 
     var forgotPasswordContinuation: ForgotPasswordContinuation? = null
+    var currentUsername: String? = null
 
     val userPool = CognitoUserPool(
         context,
@@ -35,13 +34,9 @@ class CognitoAuthManager(context: Context) {
             // Fazer logout primeiro para limpar qualquer sessão anterior
             user.signOut()
 
-            // Criar AuthenticationDetails
-            val authDetails = AuthenticationDetails(username, password, null)
-            Log.d("CognitoAuthManager", "AuthenticationDetails criado")
-
             // Iniciar autenticação
-            user.initiateUserAuthentication(authDetails, handler, true).run()
-            Log.d("CognitoAuthManager", "initiateUserAuthentication chamado")
+            user.getSessionInBackground(handler)
+            Log.d("CognitoAuthManager", "getSessionInBackground chamado")
 
         } catch (e: Exception) {
             Log.e("CognitoAuthManager", "Erro no signIn: ${e.message}", e)
@@ -56,8 +51,70 @@ class CognitoAuthManager(context: Context) {
     }
 
     fun forgotPassword(username: String, handler: ForgotPasswordHandler) {
+        currentUsername = username
         val user = userPool.getUser(username)
-        user.forgotPassword(handler)
+        user.forgotPasswordInBackground(object : ForgotPasswordHandler {
+            override fun onSuccess() {
+                Log.d("CognitoAuthManager", "Senha redefinida diretamente (caso raro)")
+                handler.onSuccess()
+            }
+
+            override fun getResetCode(continuation: ForgotPasswordContinuation?) {
+                forgotPasswordContinuation = continuation
+                Log.d("CognitoAuthManager", "Código de verificação enviado com sucesso")
+                handler.getResetCode(continuation)
+            }
+
+            override fun onFailure(exception: Exception?) {
+                Log.e("CognitoAuthManager", "Erro ao solicitar código: ${exception?.message}", exception)
+                handler.onFailure(exception)
+            }
+        })
+    }
+
+    fun confirmPassword(code: String, novaSenha: String, callback: (Boolean, String?) -> Unit) {
+        try {
+            Log.d("CognitoAuthManager", "Iniciando confirmPassword com código: $code")
+
+            currentUsername?.let { username ->
+                val user = userPool.getUser(username)
+                user.confirmPasswordInBackground(code, novaSenha, object : ForgotPasswordHandler {
+                    override fun onSuccess() {
+                        Log.d("CognitoAuthManager", "Senha alterada com sucesso")
+                        // Limpar dados após sucesso
+                        clearResetSession()
+                        callback(true, null)
+                    }
+
+                    override fun getResetCode(continuation: ForgotPasswordContinuation?) {
+                        // Não usado na confirmação
+                    }
+
+                    override fun onFailure(exception: Exception?) {
+                        Log.e("CognitoAuthManager", "Erro na confirmação: ${exception?.message}", exception)
+                        val errorMessage = when {
+                            exception?.message?.contains("CodeMismatchException", ignoreCase = true) == true ||
+                                    exception?.message?.contains("Invalid verification code", ignoreCase = true) == true ->
+                                "Código de verificação inválido. Tente novamente."
+
+                            exception?.message?.contains("InvalidPasswordException", ignoreCase = true) == true ||
+                                    exception?.message?.contains("password", ignoreCase = true) == true ->
+                                "A senha deve ter pelo menos 8 caracteres, incluindo maiúsculas, minúsculas e números."
+
+                            exception?.message?.contains("ExpiredCodeException", ignoreCase = true) == true ||
+                                    exception?.message?.contains("expired", ignoreCase = true) == true ->
+                                "Código expirado. Solicite um novo código."
+
+                            else -> "Erro ao alterar senha: ${exception?.localizedMessage ?: "Tente novamente"}"
+                        }
+                        callback(false, errorMessage)
+                    }
+                })
+            } ?: callback(false, "Username não encontrado. Reinicie o fluxo.")
+        } catch (e: Exception) {
+            Log.e("CognitoAuthManager", "Erro inesperado: ${e.message}", e)
+            callback(false, "Erro inesperado: ${e.localizedMessage ?: "Tente novamente"}")
+        }
     }
 
     fun reenviarCodigoConfirmacao(email: String, callback: (Boolean, String?) -> Unit) {
@@ -84,5 +141,16 @@ class CognitoAuthManager(context: Context) {
                 callback(false, exception?.message)
             }
         })
+    }
+
+    // Método para validar se temos uma sessão ativa de reset
+    fun hasActiveResetSession(): Boolean {
+        return currentUsername != null
+    }
+
+    // Método para limpar a sessão de reset
+    fun clearResetSession() {
+        forgotPasswordContinuation = null
+        currentUsername = null
     }
 }
