@@ -16,6 +16,10 @@ class ThemeViewModel : ViewModel() {
         _currentFaixa.value = faixa
     }
 
+    fun getCurrentFaixa(): String? {
+        return _currentFaixa.value
+    }
+
     fun getFaixaAtualOuAleatoria(): String {
         return _currentFaixa.value ?: availableFaixas.random()
     }

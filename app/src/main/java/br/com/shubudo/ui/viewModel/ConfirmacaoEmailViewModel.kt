@@ -19,7 +19,7 @@ import javax.inject.Inject
 class ConfirmacaoEmailViewModel @Inject constructor(
     private val cognito: CognitoAuthManager,
     private val usuarioRepository: UsuarioRepository,
-    private val usuarioDao: UsuarioDao // precisa estar disponível via Hilt
+    private val usuarioDao: UsuarioDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ConfirmacaoEmailUiState>(ConfirmacaoEmailUiState.Idle)
@@ -29,7 +29,6 @@ class ConfirmacaoEmailViewModel @Inject constructor(
 
     var email: String? = null
     private var senha: String? = null
-    private var corFaixa: String? = null
 
     fun iniciar(email: String, senha: String) {
         this.email = email
@@ -41,7 +40,8 @@ class ConfirmacaoEmailViewModel @Inject constructor(
         val senha = this.senha
 
         if (email.isNullOrBlank() || senha.isNullOrBlank()) {
-            _uiState.value = ConfirmacaoEmailUiState.Error("Erro interno: credenciais ausentes. Tente novamente.")
+            _uiState.value =
+                ConfirmacaoEmailUiState.Error("Erro interno: credenciais ausentes. Tente novamente.")
             return
         }
 
@@ -61,11 +61,31 @@ class ConfirmacaoEmailViewModel @Inject constructor(
                         Log.d("ConfirmacaoEmail", "Aplicando tema da faixa: ${usuario.corFaixa}")
                         themeViewModel.changeThemeFaixa(usuario.corFaixa)
 
-                        _uiState.value = ConfirmacaoEmailUiState.Success("Conta confirmada e usuário logado com sucesso!")
+                        _uiState.value =
+                            ConfirmacaoEmailUiState.Success("Conta confirmada e usuário logado com sucesso!")
 
                     } catch (e: Exception) {
                         Log.e("ConfirmacaoEmail", "Erro ao fazer login após confirmação", e)
-                        _uiState.value = ConfirmacaoEmailUiState.Error("Erro ao fazer login após confirmação: ${e.message}")
+
+                        // Verifica se é erro de credenciais incorretas
+                        val isCredentialError = e.message?.contains(
+                            "Incorrect username or password",
+                            ignoreCase = true
+                        ) == true ||
+                                e.message?.contains(
+                                    "NotAuthorizedException",
+                                    ignoreCase = true
+                                ) == true ||
+                                e.message?.contains("usuário ou senha", ignoreCase = true) == true
+
+                        if (isCredentialError) {
+                            _uiState.value = ConfirmacaoEmailUiState.LoginFailedAfterConfirmation(
+                                "Email confirmado com sucesso, mas as credenciais estão incorretas. Verifique seu usuário e senha."
+                            )
+                        } else {
+                            _uiState.value =
+                                ConfirmacaoEmailUiState.Error("Erro ao fazer login após confirmação: ${e.message}")
+                        }
                     }
                 }
             } else {
@@ -83,11 +103,16 @@ class ConfirmacaoEmailViewModel @Inject constructor(
         }
     }
 
+    fun resetToIdle() {
+        _uiState.value = ConfirmacaoEmailUiState.Idle
+    }
+
     fun reenviarCodigo() {
         val email = this.email
 
         if (email.isNullOrBlank()) {
-            _uiState.value = ConfirmacaoEmailUiState.Error("Email não disponível para reenviar código.")
+            _uiState.value =
+                ConfirmacaoEmailUiState.Error("Email não disponível para reenviar código.")
             return
         }
 

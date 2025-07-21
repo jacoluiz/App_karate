@@ -16,9 +16,9 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Chal
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler
+import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException
-import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -92,34 +92,8 @@ class UsuarioRepository @Inject constructor(
                             // Tratar UserNotConfirmedException de forma especial
                             when (exception) {
                                 is UserNotConfirmedException -> {
-                                    // Para usuário não confirmado, precisamos verificar se a senha está correta
-                                    // Vamos tentar fazer uma verificação adicional
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        try {
-                                            // Buscar o usuário na API para verificar se existe
-                                            val usuarios = service.getUsuarios().map { it.toUsuario() }
-                                            val usuario = usuarios.find {
-                                                it.email.equals(userInput, true) || it.username.equals(userInput, true)
-                                            }
-
-                                            if (usuario != null) {
-                                                // Usuário existe na API, então é realmente um caso de não confirmado
-                                                if (cont.isActive) {
-                                                    cont.resumeWithException(exception)
-                                                }
-                                            } else {
-                                                // Usuário não existe na API, tratar como credenciais incorretas
-                                                if (cont.isActive) {
-                                                    cont.resumeWithException(NotAuthorizedException("Incorrect username or password"))
-                                                }
-                                            }
-                                        } catch (e: Exception) {
-                                            // Se não conseguir verificar na API, propagar a exceção original
-                                            if (cont.isActive) {
-                                                cont.resumeWithException(exception)
-                                            }
-                                        }
-                                    }
+                                    // Propagar diretamente a exceção UserNotConfirmedException
+                                    cont.resumeWithException(exception)
                                 }
                                 else -> {
                                     // Para outras exceções, propagar normalmente
@@ -130,7 +104,6 @@ class UsuarioRepository @Inject constructor(
                             }
                         }
                     }
-
 
                     override fun getAuthenticationDetails(
                         authenticationContinuation: AuthenticationContinuation?,
@@ -177,7 +150,7 @@ class UsuarioRepository @Inject constructor(
 
     suspend fun getCorFaixaLocal(userInput: String): String? = withContext(Dispatchers.IO) {
         val usuario = dao.getUsuarioByEmailOuUsername(userInput.trim())
-        return@withContext usuario?.corFaixa
+        return@withContext usuario?.corFaixa?.takeIf { it.isNotBlank() }
     }
 
     suspend fun cadastrarUsuario(usuario: Usuario): Usuario? = withContext(Dispatchers.IO) {

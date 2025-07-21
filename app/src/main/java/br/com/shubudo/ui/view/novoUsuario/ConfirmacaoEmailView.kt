@@ -66,6 +66,7 @@ fun ConfirmacaoEmailView(
     email: String,
     senha: String,
     onConfirmado: () -> Unit,
+    onBackToLogin: () -> Unit,
     viewModel: ConfirmacaoEmailViewModel = hiltViewModel(),
     themeViewModel: ThemeViewModel
 ) {
@@ -78,6 +79,8 @@ fun ConfirmacaoEmailView(
     var canResend by remember { mutableStateOf(true) }
     var resendCountdown by remember { mutableIntStateOf(0) }
     var showSuccessDialog by remember { mutableStateOf(false) }
+    var showLoginFailedDialog by remember { mutableStateOf(false) }
+    var loginFailedMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(email, senha) {
         viewModel.iniciar(email, senha)
@@ -105,6 +108,11 @@ fun ConfirmacaoEmailView(
             is ConfirmacaoEmailUiState.Error -> {
                 errorMessage = (uiState as ConfirmacaoEmailUiState.Error).error
                 showError = true
+            }
+
+            is ConfirmacaoEmailUiState.LoginFailedAfterConfirmation -> {
+                loginFailedMessage = (uiState as ConfirmacaoEmailUiState.LoginFailedAfterConfirmation).error
+                showLoginFailedDialog = true
             }
 
             else -> {
@@ -183,7 +191,24 @@ fun ConfirmacaoEmailView(
         SuccessDialog(
             onDismiss = {
                 showSuccessDialog = false
+                // Navegar para a tela principal após sucesso
                 onConfirmado()
+            }
+        )
+    }
+
+    // Dialog de falha no login após confirmação
+    if (showLoginFailedDialog) {
+        LoginFailedDialog(
+            message = loginFailedMessage,
+            onBackToLogin = {
+                showLoginFailedDialog = false
+                viewModel.resetToIdle()
+                onBackToLogin()
+            },
+            onDismiss = {
+                showLoginFailedDialog = false
+                viewModel.resetToIdle()
             }
         )
     }
@@ -480,6 +505,99 @@ private fun SuccessDialog(
 
                 Text(
                     text = "Agora você pode continuar usando o aplicativo.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
+}
+
+@Composable
+private fun LoginFailedDialog(
+    message: String,
+    onBackToLogin: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = onBackToLogin,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Voltar ao Login",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Tentar Novamente",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        },
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Credenciais Incorretas",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Você pode voltar à tela de login para corrigir suas credenciais ou tentar novamente com a mesma senha.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center

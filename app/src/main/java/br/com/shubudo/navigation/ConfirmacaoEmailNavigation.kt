@@ -19,7 +19,8 @@ internal const val confirmacaoEmailFullPath =
 
 fun NavGraphBuilder.confirmacaoEmailScreen(
     themeViewModel: ThemeViewModel,
-    onConfirmado: () -> Unit
+    onConfirmado: () -> Unit,
+    onBackToLogin: () -> Unit
 ) {
     composable(route = confirmacaoEmailFullPath) { backStackEntry ->
         val email = backStackEntry.arguments?.getString(confirmacaoEmailArgument) ?: ""
@@ -29,7 +30,7 @@ fun NavGraphBuilder.confirmacaoEmailScreen(
 
         // Mantém o tema da faixa selecionada durante o cadastro
         LaunchedEffect(corFaixa) {
-            if (corFaixa.isNotBlank()) {
+            if (corFaixa.isNotBlank() && corFaixa != "branca") {
                 themeViewModel.changeThemeFaixa(corFaixa)
             }
         }
@@ -39,6 +40,7 @@ fun NavGraphBuilder.confirmacaoEmailScreen(
             senha = senha,
             viewModel = viewModel,
             onConfirmado = onConfirmado,
+            onBackToLogin = onBackToLogin,
             themeViewModel = themeViewModel
         )
     }

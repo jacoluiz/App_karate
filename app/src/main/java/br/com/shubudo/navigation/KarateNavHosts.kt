@@ -67,7 +67,15 @@ fun KarateNavHost(
         confirmacaoEmailScreen(
             themeViewModel = themeViewModel,
             onConfirmado = {
+                // Navegar para a tela principal após confirmação bem-sucedida
                 navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
+            },
+            onBackToLogin = {
+                // Navegar para login quando há falha nas credenciais
+                navController.navigate(AppDestination.Login.route) {
+                    popUpTo(confirmacaoEmailRoute) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         )
 
