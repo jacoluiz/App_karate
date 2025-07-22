@@ -58,7 +58,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -364,7 +363,17 @@ fun EditarPerfilContent(
     var showAcademiaDialog by remember { mutableStateOf(false) }
     var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
 
-    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre")
+    val faixas = listOf(
+        "Branca",
+        "Amarela",
+        "Laranja",
+        "Verde",
+        "Roxa",
+        "Marrom",
+        "Preta",
+        "Mestre",
+        "Grão Mestre"
+    )
     val academias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres", "Outros")
     val tamanhosFaixa = (1..8).map { "Tamanho $it" }
 
@@ -520,7 +529,6 @@ fun EditarPerfilContent(
                     if (shouldShowDan(currentFaixa)) {
                         DanSelectionCard(
                             currentDan = currentDan,
-                            corFaixa = currentFaixa,
                             onClick = { showDanDialog = true }
                         )
                     }
@@ -600,8 +608,11 @@ fun EditarPerfilContent(
                 currentFaixa = currentFaixa,
                 onFaixaSelected = { faixa ->
                     currentFaixa = faixa
-                    // Reset dan quando muda a faixa
-                    currentDan = 0
+                    currentDan = when (faixa) {
+                        "Mestre" -> 5
+                        "Grão Mestre" -> 10
+                        else -> 0
+                    }
                     themeViewModel.changeThemeFaixa(faixa)
                     showFaixaDialog = false
                 },
@@ -794,7 +805,10 @@ private fun HeightTextField(
         OutlinedTextField(
             value = textFieldValue,
             onValueChange = { newTextFieldValue ->
-                val (maskedValue, cursorPosition) = applyHeightMask(newTextFieldValue.text, textFieldValue.text)
+                val (maskedValue, cursorPosition) = applyHeightMask(
+                    newTextFieldValue.text,
+                    textFieldValue.text
+                )
 
                 // Atualiza o estado local com a nova posição do cursor
                 textFieldValue = newTextFieldValue.copy(
@@ -862,7 +876,8 @@ private fun DateOfBirthField(
     // Verifica se é um valor antigo (apenas número)
     val isOldFormat = value.matches(Regex("^\\d{1,3}$"))
     val displayValue = if (isOldFormat) "" else formatDateForDisplay(value)
-    val placeholderText = if (isOldFormat) "Toque para selecionar data de nascimento" else "Selecione sua data de nascimento"
+    val placeholderText =
+        if (isOldFormat) "Toque para selecionar data de nascimento" else "Selecione sua data de nascimento"
     val borderColor = when {
         !validation.isValid && value.isNotEmpty() && !isOldFormat -> MaterialTheme.colorScheme.error
         isOldFormat -> MaterialTheme.colorScheme.tertiary
@@ -1206,7 +1221,6 @@ private fun DatePickerModal(
 @Composable
 private fun DanSelectionCard(
     currentDan: Int,
-    corFaixa: String,
     onClick: () -> Unit
 ) {
     Card(
@@ -1264,119 +1278,6 @@ private fun DanSelectionCard(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
-        }
-    }
-}
-
-@Composable
-private fun AcademiaSection(
-    academia: String,
-    onAcademiaChange: (String) -> Unit,
-    onShowDialog: () -> Unit
-) {
-    val predefinedAcademias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres")
-    var showCustomField by remember(academia) {
-        mutableStateOf(academia.isNotBlank() && !predefinedAcademias.contains(academia))
-    }
-
-    Column {
-        Text(
-            text = "Academia",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        if (showCustomField) {
-            // Campo de texto personalizado
-            OutlinedTextField(
-                value = academia,
-                onValueChange = onAcademiaChange,
-                placeholder = {
-                    Text(
-                        "Digite o nome da sua academia",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        showCustomField = false
-                        onAcademiaChange("")
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Voltar para seleção",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                ),
-                singleLine = true
-            )
-        } else {
-            // Card de seleção
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onShowDialog() },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                ),
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-
-                        Text(
-                            text = academia.ifBlank { "Selecionar Academia" },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (academia.isBlank())
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
         }
     }
 }
