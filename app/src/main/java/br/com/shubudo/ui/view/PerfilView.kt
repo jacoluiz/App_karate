@@ -335,24 +335,27 @@ private fun PersonalInfoSection(
                         modifier = Modifier.weight(1f)
                     )
                 }
-
-                InfoCard(
-                    icon = Icons.Default.Height,
-                    label = "Altura",
-                    value = "$altura cm",
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
-                if (shouldShowDan(corFaixa)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     InfoCard(
-                        icon = painterResource(id = R.drawable.ic_faixa),
-                        label = "Dan",
-                        value = if (dan > 0) "${dan}º Dan" else "Sem Dan",
-                        modifier = Modifier.fillMaxWidth()
+                        icon = Icons.Default.Height,
+                        label = "Altura",
+                        value = "$altura cm",
+                        modifier = Modifier.weight(1f)
                     )
-                }
 
+                    // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
+                    if (shouldShowDan(corFaixa)) {
+                        InfoCard(
+                            icon = painterResource(id = R.drawable.ic_faixa),
+                            label = "Dan",
+                            value = if (dan > 0) "${dan}º Dan" else "Sem Dan",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
                 // Academia
                 InfoCard(
                     icon = painterResource(id = R.drawable.ic_sequencia_de_combate),
