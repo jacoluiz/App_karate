@@ -20,10 +20,12 @@ data class UsuarioEntity(
     val idade: String,
     val perfil: String = "básico",
     val corFaixa: String,
-    val status: String = "ativo",              // Novo campo
-    val dan: Int = 0,                          // Novo campo
-    val academia: String = "",                 // Novo campo
-    val tamanhoFaixa: String = ""              // Novo campo
+    val status: String = "ativo",
+    val dan: Int = 0,
+    val academia: String = "",
+    val tamanhoFaixa: String = "",
+    val lesaoOuLaudosMedicos: String = "",
+    val registroAKSD: String = ""
 )
 
 fun UsuarioEntity.toUsuario(): Usuario {
@@ -42,7 +44,9 @@ fun UsuarioEntity.toUsuario(): Usuario {
         dan = this.dan,
         academia = this.academia,
         tamanhoFaixa = this.tamanhoFaixa,
-        faixas = null // ou carregue as faixas se necessário
+        faixas = null,
+        lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
+        registroAKSD = this.registroAKSD,
     )
 }
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Height
@@ -86,6 +87,7 @@ fun PerfilView(
                 dan = uiState.dan,
                 academia = uiState.academia,
                 tamanhoFaixa = uiState.tamanhoFaixa,
+                registroAKSD = uiState.registroAKSD,
                 onLogout = onLogout,
                 onEditarPerfil = onEditarPerfil
             )
@@ -131,6 +133,7 @@ private fun PerfilContent(
     dan: Int,
     academia: String,
     tamanhoFaixa: String,
+    registroAKSD: String,
     onLogout: () -> Unit,
     onEditarPerfil: () -> Unit
 ) {
@@ -160,6 +163,7 @@ private fun PerfilContent(
                 dan = dan,
                 academia = academia,
                 tamanhoFaixa = tamanhoFaixa,
+                registroAKSD = registroAKSD,
                 corFaixa = corFaixa
             )
 
@@ -278,6 +282,7 @@ private fun PersonalInfoSection(
     dan: Int,
     academia: String,
     tamanhoFaixa: String,
+    registroAKSD: String,
     corFaixa: String
 ) {
     Card(
@@ -354,6 +359,15 @@ private fun PersonalInfoSection(
                         )
                     }
                 }
+
+                // Registro AKSD
+                InfoCard(
+                    icon = Icons.Default.AssignmentInd,
+                    label = "Registro AKSD",
+                    value = registroAKSD.ifBlank { "Não informado" },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 // Academia
                 InfoCard(
                     icon = painterResource(id = R.drawable.ic_sequencia_de_combate),

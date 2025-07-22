@@ -17,11 +17,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -51,9 +56,11 @@ import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
+import br.com.shubudo.ui.view.OfflineScreen
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.PerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.utils.isInternetAvailable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -69,6 +76,19 @@ class MainActivity : ComponentActivity() {
         SessionManager.inicializar(applicationContext)
 
         setContent {
+            val context = LocalContext.current
+            var isOnline by remember { mutableStateOf<Boolean?>(null) }
+
+            LaunchedEffect(Unit) {
+                isOnline = isInternetAvailable(context)
+            }
+
+            when (isOnline) {
+                null -> { /* carregando */ }
+                false -> OfflineScreen(onRetry = {
+                    isOnline = isInternetAvailable(context)
+                })
+                true -> {
             val themeViewModel: ThemeViewModel = viewModel()
             val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
             val perfilViewModel: PerfilViewModel = viewModel()
@@ -162,7 +182,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
+        }}}
     }
 
     private fun checkAndRequestPermissions() {

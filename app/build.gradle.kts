@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.suggestions)
+    implementation(libs.androidx.foundation.layout.android)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

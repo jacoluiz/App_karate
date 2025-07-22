@@ -88,7 +88,9 @@ class EditarPerfilViewModel @Inject constructor(
         senha: String,
         dan: Int,
         academia: String,
-        tamanhoFaixa: String
+        tamanhoFaixa: String,
+        lesaoOuLaudosMedicos: String,
+        registroAKSD: String
     ) {
         viewModelScope.launch {
             try {
@@ -105,6 +107,8 @@ class EditarPerfilViewModel @Inject constructor(
                     dan = dan,
                     academia = academia,
                     tamanhoFaixa = tamanhoFaixa,
+                    lesaoOuLaudosMedicos = lesaoOuLaudosMedicos,
+                    registroAKSD = registroAKSD,
                     // Caso tenha 'id', lembre-se de passá-lo aqui também
                 )
 

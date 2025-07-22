@@ -97,6 +97,7 @@ import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.utils.DateValidation
 import br.com.shubudo.utils.applyHeightMask
 import br.com.shubudo.utils.formatDateForDisplay
 import br.com.shubudo.utils.getDanOptions
@@ -108,12 +109,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-data class DateValidation(
-    val isValid: Boolean,
-    val message: String,
-    val age: Int? = null
-)
 
 @Composable
 fun EditarPerfilView(
@@ -278,6 +273,8 @@ fun EditarPerfilContent(
     var currentDan by remember { mutableIntStateOf(dan) }
     var currentAcademia by remember { mutableStateOf(academia) }
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
+    var currentLesaoOuLaudosMedicos by remember { mutableStateOf("") }
+    var currentRegistroAKSD by remember { mutableStateOf("") }
 
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
@@ -468,6 +465,24 @@ fun EditarPerfilContent(
                         color = MaterialTheme.colorScheme.primary
                     )
 
+                    // Campo para Registro AKSD
+                    AnimatedTextField(
+                        value = currentRegistroAKSD,
+                        onValueChange = { currentRegistroAKSD = it },
+                        label = "Registro AKSD",
+                        icon = Icons.Default.AccountCircle,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        )
+                    )
+                    Text(
+                        text = "Você não é obrigado a saber esse registro mas, no futuro, converse com o sensei para adiciona-lo aqui. Caso possua a carteirinha shubu-dô, nela contem esse número",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                    )
+
                     // Academia Selection
                     AcademiaSelectionCard(
                         currentAcademia = currentAcademia,
@@ -496,6 +511,30 @@ fun EditarPerfilContent(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                     )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    )
+
+                    Text(
+                        text = "Informações Médicas (Opcional)",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    // Campo para Lesões e Laudos Médicos
+                    AnimatedTextField(
+                        value = currentLesaoOuLaudosMedicos,
+                        onValueChange = { currentLesaoOuLaudosMedicos = it },
+                        label = "Lesões e Laudos Médicos",
+                        icon = Icons.Default.Edit,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Next
+                        ),
+                        maxLines = 5
+                    )
                 }
             }
 
@@ -518,7 +557,9 @@ fun EditarPerfilContent(
                                 senha = "",
                                 dan = currentDan,
                                 academia = currentAcademia,
-                                tamanhoFaixa = currentTamanhoFaixa
+                                tamanhoFaixa = currentTamanhoFaixa,
+                                lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
+                                registroAKSD = currentRegistroAKSD
                             )
                             delay(2000L)
                             onSave()
@@ -655,7 +696,8 @@ private fun AnimatedTextField(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    maxLines: Int = 1
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -692,7 +734,9 @@ private fun AnimatedTextField(
             disabledBorderColor = animatedBorderColor,
             disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-        )
+        ),
+        maxLines = maxLines,
+        minLines = if (maxLines > 1) 3 else 1
     )
 }
 

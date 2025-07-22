@@ -2,7 +2,6 @@ package br.com.shubudo.utils
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import br.com.shubudo.ui.view.DateValidation
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.Period
@@ -10,6 +9,11 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+data class DateValidation(
+    val isValid: Boolean,
+    val message: String,
+    val age: Int? = null
+)
 
 // Função para aplicar máscara de altura no formato x,xx
 fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
