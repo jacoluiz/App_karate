@@ -40,7 +40,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.ControlesVideoPadrao
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.components.ItemDetalheMovimento
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
 
@@ -123,9 +123,9 @@ fun TelaDetalheMovimentoPadrao(
                         .height(240.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    LocalVideoPlayer(
+                    OnlineVideoPlayer(
                         exoPlayer = exoPlayer,
-                        videoPath = movimento.video,
+                        videoUrl = movimento.video,
                         useController = false
                     )
                 }

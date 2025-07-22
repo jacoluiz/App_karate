@@ -58,6 +58,7 @@ import br.com.shubudo.ui.uistate.CadastroUiState
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.utils.isValidDate
 
 @Composable
 fun NovoUsuarioView(
@@ -146,11 +147,10 @@ fun NovoUsuarioView(
                 when (pageIndex) {
                     0 -> PaginaUmCadastro(
                         novoUsuarioViewModel,
-                        dropDownMenuViewModel,
-                        themeViewModel
+                        scrollState
                     )
 
-                    1 -> PaginaDoisCadastro(novoUsuarioViewModel)
+                    1 -> PaginaDoisCadastro(novoUsuarioViewModel, scrollState)
                     2 -> PaginaTresCadastro(novoUsuarioViewModel)
                 }
             }

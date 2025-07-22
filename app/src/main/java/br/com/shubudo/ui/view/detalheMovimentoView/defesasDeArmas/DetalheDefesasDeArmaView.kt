@@ -22,7 +22,7 @@ import br.com.shubudo.model.Armamento
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.ControlesVideoPadrao
 import br.com.shubudo.ui.components.LoadingOverlay
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.viewModel.DetalheArmamentoViewModel
 
 @Composable
@@ -39,7 +39,7 @@ fun TelaDetalheDefesasDeArma(
     }
 
     LaunchedEffect(viewModel, armamento) {
-        viewModel.loadVideo(armamento, context, exoPlayer)
+        viewModel.loadVideo(armamento, exoPlayer)
     }
 
     val scrollState = rememberScrollState()
@@ -104,8 +104,8 @@ fun TelaDetalheDefesasDeArma(
                         .height(240.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    LocalVideoPlayer(
-                        videoPath = viewModel.currentVideoPath.value,
+                    OnlineVideoPlayer(
+                        videoUrl = viewModel.currentVideoUrl.value,
                         exoPlayer = exoPlayer,
                         modifier = Modifier.fillMaxSize(),
                         useController = false

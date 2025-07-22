@@ -69,6 +69,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -96,12 +97,15 @@ import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.utils.applyHeightMask
+import br.com.shubudo.utils.formatDateForDisplay
+import br.com.shubudo.utils.getDanOptions
+import br.com.shubudo.utils.shouldShowDan
+import br.com.shubudo.utils.validateBirthDate
+import br.com.shubudo.utils.validateHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.Period
-import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 
@@ -110,87 +114,6 @@ data class DateValidation(
     val message: String,
     val age: Int? = null
 )
-
-// Função para aplicar máscara de altura no formato x,xx
-private fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
-    // Remove qualquer caractere que não seja dígito ou vírgula
-    val digitsOnly = input.filter { it.isDigit() || it == ',' }
-
-    // Se estiver vazio, retorna vazio
-    if (digitsOnly.isEmpty()) return Pair("", 0)
-
-    // Remove vírgulas duplicadas ou no início
-    val cleanInput = digitsOnly.replace(Regex(",+"), ",").removePrefix(",")
-
-    // Se só tem vírgula, retorna vazio
-    if (cleanInput == ",") return Pair("", 0)
-
-    // Separa por vírgula
-    val parts = cleanInput.split(",")
-
-    val result = when {
-        // Se não tem vírgula e tem 1 dígito
-        parts.size == 1 && parts[0].length <= 1 -> parts[0]
-
-        // Se não tem vírgula e tem mais de 1 dígito, adiciona vírgula automaticamente
-        parts.size == 1 && parts[0].length > 1 -> {
-            val digits = parts[0]
-            if (digits.length >= 3) {
-                // Limita a 3 dígitos e formata como x,xx
-                "${digits[0]},${digits.substring(1, 3)}"
-            } else {
-                "${digits[0]},${digits.substring(1)}"
-            }
-        }
-
-        // Se já tem vírgula
-        parts.size == 2 -> {
-            val beforeComma = parts[0].take(1) // Máximo 1 dígito antes da vírgula
-            val afterComma = parts[1].take(2)  // Máximo 2 dígitos depois da vírgula
-
-            if (beforeComma.isEmpty()) {
-                if (afterComma.isEmpty()) "" else ",${afterComma}"
-            } else {
-                "${beforeComma},${afterComma}"
-            }
-        }
-
-        // Casos com múltiplas vírgulas - pega apenas a primeira parte válida
-        else -> {
-            val firstPart = parts[0].take(1)
-            val secondPart = if (parts.size > 1) parts[1].take(2) else ""
-            if (firstPart.isEmpty()) secondPart else "${firstPart},${secondPart}"
-        }
-    }
-
-    // Calcula a nova posição do cursor
-    val cursorPosition = when {
-        // Se a vírgula foi inserida automaticamente, posiciona o cursor no final
-        result.length > previousValue.length && result.contains(",") && !previousValue.contains(",") -> {
-            result.length
-        }
-        // Caso contrário, posiciona no final
-        else -> result.length
-    }
-
-    return Pair(result, cursorPosition)
-}
-
-// Função para validar altura
-private fun validateHeight(height: String): Boolean {
-    if (height.isEmpty()) return true // Campo vazio é válido (opcional)
-
-    // Regex para validar formato x,xx onde x são dígitos
-    val heightRegex = Regex("^[0-2]$|^[0-2],[0-9]{1,2}$")
-
-    if (!heightRegex.matches(height)) return false
-
-    // Converte para float para validação adicional
-    val heightValue = height.replace(",", ".").toFloatOrNull() ?: return false
-
-    // Valida range realístico (0.5m a 2.5m)
-    return heightValue in 0.5f..2.5f
-}
 
 @Composable
 fun EditarPerfilView(
@@ -352,7 +275,7 @@ fun EditarPerfilContent(
     var currentPeso by remember { mutableStateOf(peso) }
     var currentAltura by remember { mutableStateOf(altura) }
     var currentFaixa by remember { mutableStateOf(corFaixa) }
-    var currentDan by remember { mutableStateOf(dan) }
+    var currentDan by remember { mutableIntStateOf(dan) }
     var currentAcademia by remember { mutableStateOf(academia) }
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
 
@@ -566,6 +489,12 @@ fun EditarPerfilContent(
                     TamanhoFaixaSelectionCard(
                         currentTamanhoFaixa = currentTamanhoFaixa,
                         onClick = { showTamanhoFaixaDialog = true }
+                    )
+                    Text(
+                        text = "Você pode encontrar o número da faixa na etiqueta da faixa. Caso ache sua faixa muito grande fique a vontade para colocar um número menor",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                     )
                 }
             }
@@ -1694,91 +1623,4 @@ private fun TamanhoFaixaSelectionDialog(
         shape = RoundedCornerShape(20.dp),
         properties = DialogProperties()
     )
-}
-
-// Função para validar data de nascimento
-private fun validateBirthDate(dateString: String): DateValidation {
-    if (dateString.isEmpty()) {
-        return DateValidation(false, "Data de nascimento é obrigatória")
-    }
-
-    // Se for apenas um número (idade antiga do banco), considera como válido mas pede para atualizar
-    if (dateString.matches(Regex("^\\d{1,3}$"))) {
-        val age = dateString.toIntOrNull()
-        return if (age != null && age in 5..120) {
-            DateValidation(true, "Idade: $age anos - Atualize para data completa", age)
-        } else {
-            DateValidation(false, "Idade inválida - Digite uma data de nascimento")
-        }
-    }
-
-    return try {
-        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
-        formatter.isLenient = false // Não permite datas inválidas como 31/02/2023
-        val birthDate = formatter.parse(dateString) ?: return DateValidation(false, "Data inválida")
-
-        val birthLocalDate = birthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-        val today = LocalDate.now()
-
-        // Verifica se a data não é futura
-        if (birthLocalDate.isAfter(today)) {
-            return DateValidation(false, "Data não pode ser futura")
-        }
-
-        // Calcula a idade
-        val age = Period.between(birthLocalDate, today).years
-
-        // Verifica limites de idade
-        when {
-            age < 5 -> DateValidation(false, "Idade mínima: 5 anos")
-            age > 120 -> DateValidation(false, "Idade máxima: 120 anos")
-            else -> DateValidation(true, "$age anos", age)
-        }
-    } catch (e: Exception) {
-        DateValidation(false, "Formato de data inválido")
-    }
-}
-
-// Função para verificar se deve mostrar o campo Dan
-fun shouldShowDan(corFaixa: String): Boolean {
-    return corFaixa in listOf("Preta", "Mestre", "Grão Mestre")
-}
-
-// Função para obter as opções de Dan baseado na faixa
-fun getDanOptions(corFaixa: String): List<Int> {
-    return when (corFaixa) {
-        "Preta" -> (0..4).toList()
-        "Mestre" -> (5..9).toList()
-        "Grão Mestre" -> (10..12).toList()
-        else -> emptyList()
-    }
-}
-
-// Função para formatar data para exibição
-private fun formatDateForDisplay(dateString: String): String {
-    if (dateString.isEmpty()) return ""
-
-    // Se for apenas um número (idade), retorna vazio para permitir edição
-    if (dateString.matches(Regex("^\\d{1,3}$"))) {
-        return ""
-    }
-
-    // Se já está no formato dd/MM/yyyy, retorna como está
-    if (dateString.matches(Regex("^\\d{2}/\\d{2}/\\d{4}$"))) {
-        return dateString
-    }
-
-    // Se está no formato ISO (yyyy-MM-dd), converte para dd/MM/yyyy
-    if (dateString.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))) {
-        return try {
-            val inputFormatter = SimpleDateFormat("yyyy-MM-dd", Locale("pt", "BR"))
-            val outputFormatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
-            val date = inputFormatter.parse(dateString)
-            date?.let { outputFormatter.format(it) } ?: dateString
-        } catch (e: Exception) {
-            dateString
-        }
-    }
-
-    return dateString
 }

@@ -1,7 +1,15 @@
 package br.com.shubudo.ui.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +83,7 @@ fun DetalheFaixaView(
                         )
                     }
                 }
-                
+
                 // Conteúdo principal com os drop-downs
                 Surface(
                     modifier = Modifier
@@ -97,12 +105,12 @@ fun DetalheFaixaView(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        
+
                         HorizontalDivider(
                             modifier = Modifier.padding(bottom = 16.dp),
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                         )
-                        
+
                         CardSelecaoTipoConteudo(
                             programacao = uiState.programacao,
                             onNavigateToDetalheMovimento = onNavigateToDetalheMovimento

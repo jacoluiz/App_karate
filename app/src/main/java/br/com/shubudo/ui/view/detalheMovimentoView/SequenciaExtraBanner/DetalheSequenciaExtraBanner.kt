@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.ui.components.ControlesVideoPadrao
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
 import br.com.shubudo.utils.toOrdinarioFeminino
 
@@ -124,11 +124,11 @@ fun TelaDetalheExtraBanner(
                     .height(240.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                LocalVideoPlayer(
+                OnlineVideoPlayer(
                     exoPlayer = exoPlayer,
                     modifier = Modifier.fillMaxSize(),
                     useController = false,
-                    videoPath = extraBanner.video
+                    videoUrl = extraBanner.video
                 )
             }
 

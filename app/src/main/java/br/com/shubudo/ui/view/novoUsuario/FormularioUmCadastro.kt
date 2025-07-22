@@ -41,6 +41,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -51,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,8 +61,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -68,6 +70,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import br.com.shubudo.R
 import br.com.shubudo.ui.theme.PrimaryColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorBranca
@@ -78,168 +81,20 @@ import br.com.shubudo.ui.theme.PrimaryColorMestre
 import br.com.shubudo.ui.theme.PrimaryColorPreta
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.theme.PrimaryColorVerde
-import br.com.shubudo.ui.view.getDanOptions
-import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
-
-fun applyDateMask(input: TextFieldValue): TextFieldValue {
-    val digits = input.text.filter { it.isDigit() }
-    val limitedDigits = digits.take(8)
-
-    // Validar e corrigir os dígitos conforme são inseridos
-    val validatedDigits = when (limitedDigits.length) {
-        0 -> ""
-        1 -> {
-            // Primeiro dígito do dia: máximo 3
-            if (limitedDigits[0].digitToInt() > 3) "3" else limitedDigits
-        }
-
-        2 -> {
-            // Dia completo: máximo 31
-            val day = limitedDigits.toInt()
-            when {
-                day == 0 -> "01"
-                day > 31 -> "31"
-                else -> limitedDigits
-            }
-        }
-
-        3 -> {
-            // Primeiro dígito do mês: máximo 1
-            val day = limitedDigits.substring(0, 2).toInt()
-            val firstMonthDigit = limitedDigits[2].digitToInt()
-            val validDay = when {
-                day == 0 -> "01"
-                day > 31 -> "31"
-                else -> limitedDigits.substring(0, 2)
-            }
-            val validFirstMonthDigit = if (firstMonthDigit > 1) "1" else firstMonthDigit.toString()
-            validDay + validFirstMonthDigit
-        }
-
-        4 -> {
-            // Mês completo: máximo 12
-            val day = limitedDigits.substring(0, 2).toInt()
-            val month = limitedDigits.substring(2, 4).toInt()
-            val validDay = when {
-                day == 0 -> "01"
-                day > 31 -> "31"
-                else -> limitedDigits.substring(0, 2)
-            }
-            val validMonth = when {
-                month == 0 -> "01"
-                month > 12 -> "12"
-                else -> limitedDigits.substring(2, 4)
-            }
-            validDay + validMonth
-        }
-
-        else -> {
-            // 5-8 dígitos: validar dia e mês, manter ano
-            val day = limitedDigits.substring(0, 2).toInt()
-            val month = limitedDigits.substring(2, 4).toInt()
-            val year = limitedDigits.substring(4)
-
-            val validDay = when {
-                day == 0 -> "01"
-                day > 31 -> "31"
-                else -> limitedDigits.substring(0, 2)
-            }
-            val validMonth = when {
-                month == 0 -> "01"
-                month > 12 -> "12"
-                else -> limitedDigits.substring(2, 4)
-            }
-            validDay + validMonth + year
-        }
-    }
-
-    val maskedText = when (validatedDigits.length) {
-        0 -> ""
-        1 -> validatedDigits
-        2 -> validatedDigits
-        3 -> "${validatedDigits.substring(0, 2)}/${validatedDigits[2]}"
-        4 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}"
-        5 -> "${validatedDigits.substring(0, 2)}/${
-            validatedDigits.substring(
-                2,
-                4
-            )
-        }/${validatedDigits[4]}"
-
-        6 -> "${validatedDigits.substring(0, 2)}/${
-            validatedDigits.substring(
-                2,
-                4
-            )
-        }/${validatedDigits.substring(4, 6)}"
-
-        7 -> "${validatedDigits.substring(0, 2)}/${
-            validatedDigits.substring(
-                2,
-                4
-            )
-        }/${validatedDigits.substring(4, 7)}"
-
-        8 -> "${validatedDigits.substring(0, 2)}/${
-            validatedDigits.substring(
-                2,
-                4
-            )
-        }/${validatedDigits.substring(4, 8)}"
-
-        else -> validatedDigits.substring(0, 2) + "/" + validatedDigits.substring(
-            2,
-            4
-        ) + "/" + validatedDigits.substring(4, 8)
-    }
-
-    return TextFieldValue(maskedText, TextRange(maskedText.length))
-}
-
-fun isValidDate(dateString: String): Boolean {
-    if (dateString.length != 10) return false
-
-    val parts = dateString.split("/")
-    if (parts.size != 3) return false
-
-    return try {
-        val day = parts[0].toInt()
-        val month = parts[1].toInt()
-        val year = parts[2].toInt()
-
-        // Validações básicas
-        if (day < 1 || day > 31) return false
-        if (month < 1 || month > 12) return false
-        if (year < 1900 || year > 2024) return false
-
-        // Validação específica por mês
-        val daysInMonth = when (month) {
-            1, 3, 5, 7, 8, 10, 12 -> 31
-            4, 6, 9, 11 -> 30
-            2 -> if (isLeapYear(year)) 29 else 28
-            else -> 0
-        }
-
-        day <= daysInMonth
-    } catch (e: NumberFormatException) {
-        false
-    }
-}
-
-fun isLeapYear(year: Int): Boolean {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
-}
+import br.com.shubudo.utils.applyDateMask
+import br.com.shubudo.utils.getDanOptions
+import br.com.shubudo.utils.isValidDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaginaUmCadastro(
     novoUsuarioViewModel: NovoUsuarioViewModel,
-    dropDownMenuViewModel: DropDownMenuViewModel,
-    themeViewModel: ThemeViewModel
+    scrollState: androidx.compose.foundation.ScrollState
 ) {
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
 
     val oitoCaracteres = novoUsuarioViewModel.senha.length >= 8
     val contemNumero = novoUsuarioViewModel.senha.any { it.isDigit() }
@@ -275,6 +130,7 @@ fun PaginaUmCadastro(
     val focusRequesterAcademia = remember { FocusRequester() }
     val focusRequesterSenha = remember { FocusRequester() }
     val focusRequesterConfirmarSenha = remember { FocusRequester() }
+    var hasTypedConfirmPassword by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -323,7 +179,7 @@ fun PaginaUmCadastro(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor(MenuAnchorType.PrimaryEditable, enabled = true),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -459,7 +315,17 @@ fun PaginaUmCadastro(
             keyboardActions = KeyboardActions(
                 onNext = { focusRequesterConfirmarSenha.requestFocus() }
             ),
-            onFocusChanged = { isPasswordFocused = it }
+            onFocusChanged = { isFocused ->
+                isPasswordFocused = isFocused
+                if (isFocused) {
+                    coroutineScope.launch {
+                        kotlinx.coroutines.delay(500) // dá tempo do teclado abrir
+                        scrollState.animateScrollTo(
+                            with(density) { 1000.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
         )
 
         // Password Requirements
@@ -498,7 +364,20 @@ fun PaginaUmCadastro(
         // Confirm Password Field
         ModernTextField(
             value = novoUsuarioViewModel.confirmarSenha,
-            onValueChange = { novoUsuarioViewModel.confirmarSenha = it },
+            onValueChange = { newValue ->
+                novoUsuarioViewModel.confirmarSenha = newValue
+
+                if (newValue.length == 1 && !hasTypedConfirmPassword) {
+                    hasTypedConfirmPassword = true
+                    coroutineScope.launch {
+                        kotlinx.coroutines.delay(150) // espera o aviso aparecer
+                        scrollState.animateScrollTo(
+                            with(density) { 1000.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
+            ,
             label = "Confirmar senha",
             placeholder = "Confirme sua senha",
             leadingIcon = Icons.Default.Lock,
@@ -512,7 +391,17 @@ fun PaginaUmCadastro(
             ),
             keyboardActions = KeyboardActions(
                 onDone = { focusManager.clearFocus() }
-            )
+            ),
+            onFocusChanged = { isFocused ->
+                if (isFocused) {
+                    coroutineScope.launch {
+                        // Scroll inicial quando o campo recebe foco
+                        scrollState.animateScrollTo(
+                            with(density) { 600.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
         )
 
         // Password Match Validation

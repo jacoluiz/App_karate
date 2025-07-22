@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -32,44 +31,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import br.com.shubudo.R
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
-
-fun applyShiftedMask(input: TextFieldValue): TextFieldValue {
-    val digits = input.text.filter { it.isDigit() }
-    val limitedDigits = digits.takeLast(3)
-
-    val maskedText = when (limitedDigits.length) {
-        1 -> "0,0${limitedDigits[0]}"
-        2 -> "0,$limitedDigits"
-        3 -> "${limitedDigits[0]},${limitedDigits.substring(1)}"
-        else -> "0,00"
-    }
-
-    return TextFieldValue(maskedText, TextRange(maskedText.length))
-}
+import br.com.shubudo.utils.applyShiftedMask
 
 @Composable
 fun PaginaDoisCadastro(
-    novoUsuarioViewModel: NovoUsuarioViewModel
+    novoUsuarioViewModel: NovoUsuarioViewModel,
+    scrollState: androidx.compose.foundation.ScrollState
 ) {
     val focusRequesterEmail = remember { FocusRequester() }
     val focusRequesterAltura = remember { FocusRequester() }
     val focusRequesterPeso = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
 
     var alturaValue by remember {
         mutableStateOf(TextFieldValue(novoUsuarioViewModel.altura.ifBlank { "0,00" }))
@@ -113,7 +105,16 @@ fun PaginaDoisCadastro(
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusRequesterAltura.requestFocus() }
-            )
+            ),
+            onFocusChanged = { isFocused ->
+                if (isFocused) {
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(
+                            with(density) { 200.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
         )
 
         // Height Field
@@ -135,7 +136,16 @@ fun PaginaDoisCadastro(
             keyboardActions = KeyboardActions(
                 onNext = { focusRequesterPeso.requestFocus() }
             ),
-            helperText = "Formato: 1,75 para 175cm"
+            helperText = "Formato: 1,75 para 175cm",
+            onFocusChanged = { isFocused ->
+                if (isFocused) {
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(
+                            with(density) { 300.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
         )
 
         // Weight Field
@@ -156,7 +166,16 @@ fun PaginaDoisCadastro(
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.clearFocus() }
-            )
+            ),
+            onFocusChanged = { isFocused ->
+                if (isFocused) {
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(
+                            with(density) { 400.dp.toPx().toInt() }
+                        )
+                    }
+                }
+            }
         )
 
         // Tamanho da Faixa
@@ -168,6 +187,12 @@ fun PaginaDoisCadastro(
             value = novoUsuarioViewModel.tamanhoFaixa.ifBlank { "Selecionar Tamanho" },
             icon = R.drawable.ic_faixa,
             onClick = { showTamanhoFaixaDialog = true }
+        )
+        Text(
+            text = "Você pode encontrar o número da faixa na etiqueta da faixa. Caso ache sua faixa muito grande fique a vontade para colocar um número menor",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
 
         // Validation Message
@@ -207,6 +232,7 @@ fun PaginaDoisCadastro(
                 onDismiss = { showTamanhoFaixaDialog = false }
             )
         }
+
     }
 }
 
@@ -293,7 +319,8 @@ private fun ModernTextField(
     focusRequester: FocusRequester,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    helperText: String? = null
+    helperText: String? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
     Column {
         Text(
@@ -333,7 +360,8 @@ private fun ModernTextField(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester),
+                .focusRequester(focusRequester)
+                .onFocusChanged { onFocusChanged?.invoke(it.isFocused) },
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -365,7 +393,8 @@ private fun ModernTextFieldWithMask(
     focusRequester: FocusRequester,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    helperText: String? = null
+    helperText: String? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
     Column {
         Text(
@@ -405,7 +434,8 @@ private fun ModernTextFieldWithMask(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester),
+                .focusRequester(focusRequester)
+                .onFocusChanged { onFocusChanged?.invoke(it.isFocused) },
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -424,38 +454,6 @@ private fun ModernTextFieldWithMask(
             )
         }
     }
-}
-
-@Composable
-private fun SummaryItem(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "$label:",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier.weight(1f)
-        )
-
-        Text(
-            text = value.ifBlank { "-" },
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Medium
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f)
-        )
-    }
-
-    HorizontalDivider(
-        modifier = Modifier.padding(vertical = 4.dp),
-        thickness = 0.5.dp,
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-    )
 }
 
 @Composable

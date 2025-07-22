@@ -50,10 +50,8 @@ import androidx.compose.ui.unit.sp
 import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.PerfilUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
-import java.time.LocalDate
-import java.time.Period
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import br.com.shubudo.utils.calcularIdade
+import br.com.shubudo.utils.shouldShowDan
 
 @Composable
 fun PerfilView(
@@ -406,6 +404,7 @@ private fun InfoCard(
                         modifier = Modifier.size(24.dp)
                     )
                 }
+
                 is androidx.compose.ui.graphics.painter.Painter -> {
                     Icon(
                         painter = icon,
@@ -508,13 +507,4 @@ private fun ActionButtonsSection(
     }
 }
 
-fun calcularIdade(dataNascimento: String): Int {
-    return try {
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale("pt", "BR"))
-        val nascimento = LocalDate.parse(dataNascimento, formatter)
-        val hoje = LocalDate.now()
-        Period.between(nascimento, hoje).years
-    } catch (e: Exception) {
-        -1 // idade inválida
-    }
-}
+

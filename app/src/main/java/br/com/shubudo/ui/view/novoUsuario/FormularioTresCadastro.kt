@@ -1,30 +1,22 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
-import br.com.shubudo.R
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 
 @Composable
@@ -86,15 +78,26 @@ fun PaginaTresCadastro(
                     SummaryItem("Faixa", novoUsuarioViewModel.faixa)
 
                     if (shouldShowDan(novoUsuarioViewModel.faixa)) {
-                        val danText = if (novoUsuarioViewModel.dan == 0) "Sem Dan" else "${novoUsuarioViewModel.dan}º Dan"
+                        val danText =
+                            if (novoUsuarioViewModel.dan == 0) "Sem Dan" else "${novoUsuarioViewModel.dan}º Dan"
                         SummaryItem("Dan", danText)
                     }
 
-                    SummaryItem("Academia", novoUsuarioViewModel.academia.ifBlank { "Não informado" })
+                    SummaryItem(
+                        "Academia",
+                        novoUsuarioViewModel.academia.ifBlank { "Não informado" })
                     SummaryItem("E-mail", novoUsuarioViewModel.email)
-                    SummaryItem("Altura", if (novoUsuarioViewModel.altura.isNotBlank()) "${novoUsuarioViewModel.altura} cm" else "")
-                    SummaryItem("Peso", if (novoUsuarioViewModel.peso.isNotBlank()) "${novoUsuarioViewModel.peso} kg" else "")
-                    SummaryItem("Tamanho da Faixa", novoUsuarioViewModel.tamanhoFaixa.ifBlank { "Não informado" })
+                    SummaryItem(
+                        "Altura",
+                        if (novoUsuarioViewModel.altura.isNotBlank()) "${novoUsuarioViewModel.altura} cm" else ""
+                    )
+                    SummaryItem(
+                        "Peso",
+                        if (novoUsuarioViewModel.peso.isNotBlank()) "${novoUsuarioViewModel.peso} kg" else ""
+                    )
+                    SummaryItem(
+                        "Tamanho da Faixa",
+                        novoUsuarioViewModel.tamanhoFaixa.ifBlank { "Não informado" })
                 }
             }
         }

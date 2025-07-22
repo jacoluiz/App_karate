@@ -165,6 +165,8 @@ fun LoginView(
                 .padding(0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(48.dp))
+
             // Logo e Header
             HeaderSection(
                 logoScale = logoScale,

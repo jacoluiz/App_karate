@@ -10,36 +10,25 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import java.io.File
 
 @Composable
-fun LocalVideoPlayer(
-    videoPath: String?, // URL ou caminho absoluto local
+fun OnlineVideoPlayer(
+    videoUrl: String?, // apenas URLs HTTP/HTTPS
     exoPlayer: ExoPlayer,
     modifier: Modifier = Modifier,
     useController: Boolean = false
 ) {
-    LaunchedEffect(videoPath) {
-        videoPath?.let { path ->
-            val isRemote = path.startsWith("http://") || path.startsWith("https://")
-            val file = File(path)
-            val isLocal = file.exists()
-
-            val finalUri = when {
-                isRemote -> path
-                isLocal -> file.toURI().toString()
-                else -> null
-            }
-
-            if (finalUri != null) {
-                Log.i("LocalVideoPlayer", "Reproduzindo: $finalUri")
+    LaunchedEffect(videoUrl) {
+        videoUrl?.let { url ->
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                Log.i("OnlineVideoPlayer", "Reproduzindo: $url")
+                exoPlayer.setMediaItem(MediaItem.fromUri(url))
                 exoPlayer.playWhenReady = true
                 exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ONE
                 exoPlayer.volume = 0f
-                exoPlayer.setMediaItem(MediaItem.fromUri(finalUri))
                 exoPlayer.prepare()
             } else {
-                Log.e("LocalVideoPlayer", "Caminho inválido: $path")
+                Log.e("OnlineVideoPlayer", "URL inválida: $url")
             }
         }
     }

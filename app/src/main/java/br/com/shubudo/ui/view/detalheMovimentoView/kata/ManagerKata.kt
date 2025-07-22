@@ -41,7 +41,6 @@ fun TelaKataManager(
 
         if (kata != null) {
             TelaDetalheKata(
-                faixa = uiState.faixa,
                 viewModel = viewModel,
                 kata = kata,
                 onBackNavigationClick = { selectedKata = null }
