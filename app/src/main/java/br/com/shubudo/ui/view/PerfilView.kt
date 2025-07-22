@@ -85,10 +85,15 @@ fun PerfilView(
                 idade = uiState.idade,
                 peso = uiState.peso,
                 altura = uiState.altura,
+                dan = uiState.dan,
+                academia = uiState.academia,
+                tamanhoFaixa = uiState.tamanhoFaixa,
                 onLogout = onLogout,
                 onEditarPerfil = onEditarPerfil
             )
         }
+
+        is PerfilUiState.Error -> TODO()
     }
 }
 
@@ -125,6 +130,9 @@ private fun PerfilContent(
     idade: String,
     peso: String,
     altura: String,
+    dan: Int,
+    academia: String,
+    tamanhoFaixa: String,
     onLogout: () -> Unit,
     onEditarPerfil: () -> Unit
 ) {
@@ -150,7 +158,11 @@ private fun PerfilContent(
                 email = email,
                 idade = idade,
                 peso = peso,
-                altura = altura
+                altura = altura,
+                dan = dan,
+                academia = academia,
+                tamanhoFaixa = tamanhoFaixa,
+                corFaixa = corFaixa
             )
 
             // Botões de ação
@@ -264,7 +276,11 @@ private fun PersonalInfoSection(
     email: String,
     idade: String,
     peso: String,
-    altura: String
+    altura: String,
+    dan: Int,
+    academia: String,
+    tamanhoFaixa: String,
+    corFaixa: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -326,6 +342,32 @@ private fun PersonalInfoSection(
                     value = "$altura cm",
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
+                if (shouldShowDan(corFaixa)) {
+                    InfoCard(
+                        icon = painterResource(id = R.drawable.ic_faixa),
+                        label = "Dan",
+                        value = if (dan > 0) "${dan}º Dan" else "Sem Dan",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                // Academia
+                InfoCard(
+                    icon = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                    label = "Academia",
+                    value = academia.ifBlank { "Não informado" },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Tamanho da Faixa
+                InfoCard(
+                    icon = painterResource(id = R.drawable.ic_faixa),
+                    label = "Tamanho da Faixa",
+                    value = if (tamanhoFaixa.isNotBlank()) "Tamanho $tamanhoFaixa" else "Não informado",
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -333,7 +375,7 @@ private fun PersonalInfoSection(
 
 @Composable
 private fun InfoCard(
-    icon: ImageVector,
+    icon: Any, // Pode ser ImageVector ou Painter
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -352,12 +394,24 @@ private fun InfoCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            when (icon) {
+                is ImageVector -> {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                is androidx.compose.ui.graphics.painter.Painter -> {
+                    Icon(
+                        painter = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier.weight(1f)

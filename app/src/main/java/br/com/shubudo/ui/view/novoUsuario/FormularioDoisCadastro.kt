@@ -1,18 +1,43 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -20,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.R
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 
 fun applyShiftedMask(input: TextFieldValue): TextFieldValue {
@@ -126,54 +152,31 @@ fun PaginaDoisCadastro(
             focusRequester = focusRequesterPeso,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus() }
+                onNext = { focusManager.clearFocus() }
             )
         )
 
-        // Summary Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Resumo do cadastro",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+        // Tamanho da Faixa
+        var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
+        val tamanhosFaixa = (1..8).map { "Tamanho $it" }
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    SummaryItem("Nome", novoUsuarioViewModel.nome)
-                    SummaryItem("Data de nascimento", novoUsuarioViewModel.idade)
-                    SummaryItem("Faixa", novoUsuarioViewModel.faixa)
-                    SummaryItem("E-mail", novoUsuarioViewModel.email)
-                    SummaryItem("Altura", if (novoUsuarioViewModel.altura.isNotBlank()) "${novoUsuarioViewModel.altura} cm" else "")
-                    SummaryItem("Peso", if (novoUsuarioViewModel.peso.isNotBlank()) "${novoUsuarioViewModel.peso} kg" else "")
-                }
-            }
-        }
+        SelectionCard(
+            label = "Tamanho da Faixa",
+            value = novoUsuarioViewModel.tamanhoFaixa.ifBlank { "Selecionar Tamanho" },
+            icon = R.drawable.ic_faixa,
+            onClick = { showTamanhoFaixaDialog = true }
+        )
 
         // Validation Message
         if (novoUsuarioViewModel.email.isBlank() ||
             novoUsuarioViewModel.altura.isBlank() ||
             novoUsuarioViewModel.altura == "0,00" ||
-            novoUsuarioViewModel.peso.isBlank()) {
+            novoUsuarioViewModel.peso.isBlank() ||
+            novoUsuarioViewModel.tamanhoFaixa.isBlank()
+        ) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -191,7 +194,92 @@ fun PaginaDoisCadastro(
                 )
             }
         }
+
+        // Tamanho Faixa Selection Dialog
+        if (showTamanhoFaixaDialog) {
+            TamanhoFaixaSelectionDialog(
+                tamanhos = tamanhosFaixa,
+                currentTamanho = novoUsuarioViewModel.tamanhoFaixa,
+                onTamanhoSelected = { tamanho ->
+                    novoUsuarioViewModel.tamanhoFaixa = tamanho
+                    showTamanhoFaixaDialog = false
+                },
+                onDismiss = { showTamanhoFaixaDialog = false }
+            )
+        }
     }
+}
+
+@Composable
+private fun SelectionCard(
+    label: String,
+    value: String,
+    icon: Int,
+    onClick: () -> Unit
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick() },
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            ),
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (value.contains("Selecionar"))
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+// Função para verificar se deve mostrar o campo Dan
+fun shouldShowDan(corFaixa: String): Boolean {
+    return corFaixa in listOf("Preta", "Mestre", "Grão Mestre")
 }
 
 @Composable
@@ -367,5 +455,85 @@ private fun SummaryItem(label: String, value: String) {
         modifier = Modifier.padding(vertical = 4.dp),
         thickness = 0.5.dp,
         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    )
+}
+
+@Composable
+private fun TamanhoFaixaSelectionDialog(
+    tamanhos: List<String>,
+    currentTamanho: String,
+    onTamanhoSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione o Tamanho da Faixa",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(tamanhos.size) { index ->
+                    val tamanho = tamanhos[index]
+                    val isSelected = tamanho == currentTamanho
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onTamanhoSelected(tamanho) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (isSelected) BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ) else null
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = tamanho,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
     )
 }

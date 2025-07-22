@@ -7,13 +7,18 @@ data class Usuario(
     val nome: String,
     val username: String,
     val email: String,
-    val senha: String = "",// A senha armazenada deve ser criptografada
+    val senha: String = "", // A senha armazenada deve ser criptografada
     val peso: String,
     val altura: String,
     val idade: String,
     val perfil: String = "básico", // Valor padrão
     val corFaixa: String,
-    val faixas: List<Faixa>? = null // Lista de faixas associadas ao usuário
+    val faixas: List<Faixa>? = null, // Lista de faixas associadas ao usuário
+    val status: String = "ativo",         // Novo campo
+    val dan: Int = 0,                     // Novo campo
+    val academia: String = "",            // Novo campo
+    val tamanhoFaixa: String = "",        // Novo campo
+    // academia pode conter o nome customizado quando "Outros" for selecionado
 )
 
 fun Usuario.toUsuarioEntity(): UsuarioEntity? {
@@ -28,7 +33,11 @@ fun Usuario.toUsuarioEntity(): UsuarioEntity? {
             altura = this.altura,
             username = this.username,
             idade = this.idade,
-            perfil = this.perfil
+            perfil = this.perfil,
+            status = this.status,
+            dan = this.dan,
+            academia = this.academia,
+            tamanhoFaixa = this.tamanhoFaixa
         )
     }
 }

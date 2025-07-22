@@ -66,7 +66,10 @@ class PerfilViewModel @Inject constructor(
                 corFaixa = usuario.corFaixa,
                 idade = usuario.idade,
                 peso = usuario.peso,
-                altura = usuario.altura
+                altura = usuario.altura,
+                dan = usuario.dan,
+                academia = usuario.academia,
+                tamanhoFaixa = usuario.tamanhoFaixa
             )
         }
     }

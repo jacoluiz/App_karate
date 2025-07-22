@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.viewModel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -30,6 +31,9 @@ class NovoUsuarioViewModel @Inject constructor(
     var peso by mutableStateOf("")
     var altura by mutableStateOf("0,00")
     var idade by mutableStateOf("")
+    var dan by mutableIntStateOf(0)
+    var academia by mutableStateOf("") // Pode conter nome customizado quando "Outros"
+    var tamanhoFaixa by mutableStateOf("")
     var senhaAtendeAosRequisitos by mutableStateOf(false)
 
     fun cadastrarUsuario() {
@@ -57,7 +61,10 @@ class NovoUsuarioViewModel @Inject constructor(
                     altura = altura,
                     username = email,
                     idade = idade,
-                    perfil = "básico"
+                    perfil = "básico",
+                    dan = dan,
+                    academia = academia,
+                    tamanhoFaixa = tamanhoFaixa
                 )
 
                 val resultado = usuarioRepository.cadastrarUsuario(usuario)

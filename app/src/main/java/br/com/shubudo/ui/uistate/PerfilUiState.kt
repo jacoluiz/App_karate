@@ -16,6 +16,12 @@ sealed class PerfilUiState {
         val corFaixa: String = "",
         val idade: String = "",
         val peso: String = "",
-        val altura: String = ""
+        val altura: String = "",
+        val dan: Int = 0,
+        val academia: String = "",
+        val tamanhoFaixa: String = ""
     ) : PerfilUiState()
+
+    // Estado de erro
+    data class Error(val message: String) : PerfilUiState()
 }

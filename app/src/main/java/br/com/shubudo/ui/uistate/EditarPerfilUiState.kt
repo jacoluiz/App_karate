@@ -12,9 +12,12 @@ sealed class EditarPerfilUiState {
         val nome: String = "",
         val username: String = "",
         val email: String = "",
-        var corFaixa: String = "",
+        val corFaixa: String = "",
         val idade: String = "",
         val peso: String = "",
-        val altura: String = ""
+        val altura: String = "",
+        val dan: Int = 0,
+        val academia: String = "",
+        val tamanhoFaixa: String = ""
     ) : EditarPerfilUiState()
 }

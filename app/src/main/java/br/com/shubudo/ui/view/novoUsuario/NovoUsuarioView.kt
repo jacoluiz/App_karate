@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,14 +62,15 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 @Composable
 fun NovoUsuarioView(
     themeViewModel: ThemeViewModel,
-    username: String,
     dropDownMenuViewModel: DropDownMenuViewModel,
     novoUsuarioViewModel: NovoUsuarioViewModel = hiltViewModel(),
     onNavigateToLogin: (String, String, String) -> Unit,
 ) {
     val uiState by novoUsuarioViewModel.uiState.collectAsState()
-    var isPaginaDois by remember { mutableStateOf(false) }
-    val currentPage = if (isPaginaDois) 2 else 1
+    var currentPageIndex by remember { mutableIntStateOf(0) }
+    val currentPage = currentPageIndex + 1
+    val totalPages = 3
+    val scrollState = rememberScrollState()
 
     var showDialog by remember { mutableStateOf(false) }
     var dialogMessage by remember { mutableStateOf("") }
@@ -102,10 +104,15 @@ fun NovoUsuarioView(
         }
     }
 
+    // Scroll para o topo quando muda de página
+    LaunchedEffect(currentPageIndex) {
+        scrollState.animateScrollTo(0)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .imePadding()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -124,9 +131,9 @@ fun NovoUsuarioView(
             elevation = CardDefaults.cardElevation(6.dp)
         ) {
             AnimatedContent(
-                targetState = isPaginaDois,
+                targetState = currentPageIndex,
                 transitionSpec = {
-                    if (targetState) {
+                    if (targetState > initialState) {
                         slideInHorizontally { it } + fadeIn() togetherWith
                                 slideOutHorizontally { -it } + fadeOut()
                     } else {
@@ -135,11 +142,16 @@ fun NovoUsuarioView(
                     }
                 },
                 label = "CadastroAnimation"
-            ) { target ->
-                if (target) {
-                    PaginaDoisCadastro(novoUsuarioViewModel)
-                } else {
-                    PaginaUmCadastro(novoUsuarioViewModel, dropDownMenuViewModel, themeViewModel)
+            ) { pageIndex ->
+                when (pageIndex) {
+                    0 -> PaginaUmCadastro(
+                        novoUsuarioViewModel,
+                        dropDownMenuViewModel,
+                        themeViewModel
+                    )
+
+                    1 -> PaginaDoisCadastro(novoUsuarioViewModel)
+                    2 -> PaginaTresCadastro(novoUsuarioViewModel)
                 }
             }
         }
@@ -148,19 +160,26 @@ fun NovoUsuarioView(
 
         NavigationButtons(
             currentPage = currentPage,
+            totalPages = totalPages,
             isLoading = isLoading,
-            onPrevious = { isPaginaDois = false },
-            onNext = {
-                if (isPaginaDois) {
-                    novoUsuarioViewModel.cadastrarUsuario()
-                } else {
-                    isPaginaDois = true
+            onPrevious = {
+                if (currentPageIndex > 0) {
+                    currentPageIndex--
                 }
             },
-            isNextEnabled = if (isPaginaDois)
-                validarPaginaDoisCompleta(novoUsuarioViewModel)
-            else
-                validarPaginaUmCompleta(novoUsuarioViewModel)
+            onNext = {
+                if (currentPage == totalPages) {
+                    novoUsuarioViewModel.cadastrarUsuario()
+                } else {
+                    currentPageIndex++
+                }
+            },
+            isNextEnabled = when (currentPage) {
+                1 -> validarPaginaUmCompleta(novoUsuarioViewModel)
+                2 -> validarPaginaDoisCompleta(novoUsuarioViewModel)
+                3 -> validarPaginaTresCompleta(novoUsuarioViewModel)
+                else -> false
+            }
         )
 
         if (showDialog) {
@@ -169,7 +188,11 @@ fun NovoUsuarioView(
                     userName = novoUsuarioViewModel.nome,
                     onDismiss = {
                         showDialog = false
-                        onNavigateToLogin(novoUsuarioViewModel.email, novoUsuarioViewModel.senha, novoUsuarioViewModel.faixa)
+                        onNavigateToLogin(
+                            novoUsuarioViewModel.email,
+                            novoUsuarioViewModel.senha,
+                            novoUsuarioViewModel.faixa
+                        )
                     }
                 )
             } else {
@@ -227,9 +250,10 @@ private fun HeaderSection() {
 
 @Composable
 private fun ProgressIndicator(currentPage: Int) {
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Step 1
         ProgressStep(
@@ -242,7 +266,7 @@ private fun ProgressIndicator(currentPage: Int) {
         // Connector
         Box(
             modifier = Modifier
-                .width(48.dp)
+                .width(32.dp)
                 .height(2.dp)
                 .background(
                     color = if (currentPage > 1)
@@ -258,6 +282,28 @@ private fun ProgressIndicator(currentPage: Int) {
             stepNumber = 2,
             title = "Informações Físicas",
             isActive = currentPage == 2,
+            isCompleted = currentPage > 2
+        )
+
+        // Connector
+        Box(
+            modifier = Modifier
+                .width(32.dp)
+                .height(2.dp)
+                .background(
+                    color = if (currentPage > 2)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(1.dp)
+                )
+        )
+
+        // Step 3
+        ProgressStep(
+            stepNumber = 3,
+            title = "Confirmação",
+            isActive = currentPage == 3,
             isCompleted = false
         )
     }
@@ -325,6 +371,7 @@ private fun ProgressStep(
 @Composable
 private fun NavigationButtons(
     currentPage: Int,
+    totalPages: Int,
     isLoading: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
@@ -335,7 +382,7 @@ private fun NavigationButtons(
         verticalAlignment = Alignment.CenterVertically
     ) {
         AnimatedVisibility(
-            visible = currentPage == 2,
+            visible = currentPage > 1,
             enter = slideInHorizontally { -it } + fadeIn(),
             exit = slideOutHorizontally { -it } + fadeOut()
         ) {
@@ -371,7 +418,7 @@ private fun NavigationButtons(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Mostra loading indicator quando está carregando e é a página 2
-                if (isLoading && currentPage == 2) {
+                if (isLoading && currentPage == totalPages) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -381,7 +428,7 @@ private fun NavigationButtons(
 
                 Text(
                     text = when {
-                        currentPage == 1 -> "Próximo"
+                        currentPage < totalPages -> "Próximo"
                         isLoading -> "Finalizando..."
                         else -> "Finalizar"
                     },
@@ -399,6 +446,7 @@ fun validarPaginaUmCompleta(viewModel: NovoUsuarioViewModel): Boolean {
             viewModel.idade.isNotBlank() &&
             isValidDate(viewModel.idade) &&
             viewModel.faixa.isNotBlank() &&
+            viewModel.academia.isNotBlank() &&
             viewModel.senha.isNotBlank() &&
             viewModel.confirmarSenha.isNotBlank() &&
             viewModel.senha == viewModel.confirmarSenha &&
@@ -409,7 +457,12 @@ fun validarPaginaDoisCompleta(viewModel: NovoUsuarioViewModel): Boolean {
     return viewModel.email.isNotBlank() &&
             viewModel.altura.isNotBlank() &&
             viewModel.altura != "0,00" &&
-            viewModel.peso.isNotBlank()
+            viewModel.peso.isNotBlank() &&
+            viewModel.tamanhoFaixa.isNotBlank()
+}
+
+fun validarPaginaTresCompleta(viewModel: NovoUsuarioViewModel): Boolean {
+    return true // Página de confirmação sempre válida
 }
 
 @Composable

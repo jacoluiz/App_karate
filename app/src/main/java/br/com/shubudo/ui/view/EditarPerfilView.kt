@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -57,6 +58,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -65,6 +67,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,9 +83,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -226,7 +231,10 @@ fun EditarPerfilView(
                     editarPerfilViewModel = editarPerfilViewModel,
                     themeViewModel = themeViewModel,
                     onSave = onSave,
-                    onCancelar = onCancelar
+                    onCancelar = onCancelar,
+                    dan = uiState.dan,
+                    academia = uiState.academia,
+                    tamanhoFaixa = uiState.tamanhoFaixa
                 )
             }
         }
@@ -320,7 +328,6 @@ private fun EmptyState() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarPerfilContent(
     nome: String,
@@ -330,6 +337,9 @@ fun EditarPerfilContent(
     peso: String,
     altura: String,
     corFaixa: String,
+    dan: Int,
+    academia: String,
+    tamanhoFaixa: String,
     editarPerfilViewModel: EditarPerfilViewModel,
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
@@ -343,11 +353,20 @@ fun EditarPerfilContent(
     var currentPeso by remember { mutableStateOf(peso) }
     var currentAltura by remember { mutableStateOf(altura) }
     var currentFaixa by remember { mutableStateOf(corFaixa) }
+    var currentDan by remember { mutableStateOf(dan) }
+    var currentAcademia by remember { mutableStateOf(academia) }
+    var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
 
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showDanDialog by remember { mutableStateOf(false) }
+    var showAcademiaDialog by remember { mutableStateOf(false) }
+    var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
+
     val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre")
+    val academias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres", "Outros")
+    val tamanhosFaixa = (1..8).map { "Tamanho $it" }
 
     // Estado para indicar se a operação de salvar está em andamento
     var isSaving by remember { mutableStateOf(false) }
@@ -496,6 +515,50 @@ fun EditarPerfilContent(
                         currentFaixa = currentFaixa,
                         onClick = { showFaixaDialog = true }
                     )
+
+                    // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
+                    if (shouldShowDan(currentFaixa)) {
+                        DanSelectionCard(
+                            currentDan = currentDan,
+                            corFaixa = currentFaixa,
+                            onClick = { showDanDialog = true }
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    )
+
+                    Text(
+                        text = "Academia e Equipamentos",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    // Academia Selection
+                    AcademiaSelectionCard(
+                        currentAcademia = currentAcademia,
+                        onClick = { showAcademiaDialog = true }
+                    )
+
+                    // Campo para "Outros" academia
+                    if (currentAcademia == "Outros") {
+                        AnimatedTextField(
+                            value = currentAcademia,
+                            onValueChange = { currentAcademia = it },
+                            label = "Nome da Academia",
+                            icon = Icons.Default.Edit,
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+                        )
+                    }
+
+                    // Tamanho da Faixa
+                    TamanhoFaixaSelectionCard(
+                        currentTamanhoFaixa = currentTamanhoFaixa,
+                        onClick = { showTamanhoFaixaDialog = true }
+                    )
                 }
             }
 
@@ -515,7 +578,10 @@ fun EditarPerfilContent(
                                 idade = currentDataNascimento,
                                 peso = currentPeso,
                                 altura = currentAltura,
-                                senha = ""
+                                senha = "",
+                                dan = currentDan,
+                                academia = currentAcademia,
+                                tamanhoFaixa = currentTamanhoFaixa
                             )
                             delay(2000L)
                             onSave()
@@ -534,6 +600,8 @@ fun EditarPerfilContent(
                 currentFaixa = currentFaixa,
                 onFaixaSelected = { faixa ->
                     currentFaixa = faixa
+                    // Reset dan quando muda a faixa
+                    currentDan = 0
                     themeViewModel.changeThemeFaixa(faixa)
                     showFaixaDialog = false
                 },
@@ -549,6 +617,45 @@ fun EditarPerfilContent(
                     showDatePicker = false
                 },
                 onDismiss = { showDatePicker = false }
+            )
+        }
+
+        // Dan Selection Dialog
+        if (showDanDialog) {
+            DanSelectionDialog(
+                danOptions = getDanOptions(currentFaixa),
+                currentDan = currentDan,
+                onDanSelected = { dan ->
+                    currentDan = dan
+                    showDanDialog = false
+                },
+                onDismiss = { showDanDialog = false }
+            )
+        }
+
+        // Academia Selection Dialog
+        if (showAcademiaDialog) {
+            AcademiaSelectionDialog(
+                academias = academias,
+                currentAcademia = currentAcademia,
+                onAcademiaSelected = { academia ->
+                    currentAcademia = academia
+                    showAcademiaDialog = false
+                },
+                onDismiss = { showAcademiaDialog = false }
+            )
+        }
+
+        // Tamanho Faixa Selection Dialog
+        if (showTamanhoFaixaDialog) {
+            TamanhoFaixaSelectionDialog(
+                tamanhos = tamanhosFaixa,
+                currentTamanho = currentTamanhoFaixa,
+                onTamanhoSelected = { tamanho ->
+                    currentTamanhoFaixa = tamanho
+                    showTamanhoFaixaDialog = false
+                },
+                onDismiss = { showTamanhoFaixaDialog = false }
             )
         }
     }
@@ -657,7 +764,7 @@ private fun HeightTextField(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(value)) }
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(value)) }
     val isValid = validateHeight(value)
 
     val animatedBorderColor by animateColorAsState(
@@ -677,7 +784,7 @@ private fun HeightTextField(
     }
 
     // Atualiza o TextFieldValue quando o value externo muda
-    androidx.compose.runtime.LaunchedEffect(value) {
+    LaunchedEffect(value) {
         if (textFieldValue.text != value) {
             textFieldValue = textFieldValue.copy(text = value)
         }
@@ -692,7 +799,7 @@ private fun HeightTextField(
                 // Atualiza o estado local com a nova posição do cursor
                 textFieldValue = newTextFieldValue.copy(
                     text = maskedValue,
-                    selection = androidx.compose.ui.text.TextRange(cursorPosition)
+                    selection = TextRange(cursorPosition)
                 )
 
                 // Notifica a mudança para o componente pai
@@ -1096,6 +1203,598 @@ private fun DatePickerModal(
     }
 }
 
+@Composable
+private fun DanSelectionCard(
+    currentDan: Int,
+    corFaixa: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_faixa),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Column {
+                    Text(
+                        text = "Dan",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = when {
+                            currentDan > 0 -> "${currentDan}º Dan"
+                            currentDan == 0 -> "Sem Dan"
+                            else -> "Selecionar Dan"
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AcademiaSection(
+    academia: String,
+    onAcademiaChange: (String) -> Unit,
+    onShowDialog: () -> Unit
+) {
+    val predefinedAcademias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres")
+    var showCustomField by remember(academia) {
+        mutableStateOf(academia.isNotBlank() && !predefinedAcademias.contains(academia))
+    }
+
+    Column {
+        Text(
+            text = "Academia",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        if (showCustomField) {
+            // Campo de texto personalizado
+            OutlinedTextField(
+                value = academia,
+                onValueChange = onAcademiaChange,
+                placeholder = {
+                    Text(
+                        "Digite o nome da sua academia",
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        showCustomField = false
+                        onAcademiaChange("")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Voltar para seleção",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                ),
+                singleLine = true
+            )
+        } else {
+            // Card de seleção
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onShowDialog() },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = academia.ifBlank { "Selecionar Academia" },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (academia.isBlank())
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AcademiaSelectionCard(
+    currentAcademia: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Column {
+                    Text(
+                        text = "Academia",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = currentAcademia.ifBlank { "Selecionar Academia" },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TamanhoFaixaSelectionCard(
+    currentTamanhoFaixa: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_faixa),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Column {
+                    Text(
+                        text = "Tamanho da Faixa",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = currentTamanhoFaixa.ifBlank { "Selecionar Tamanho" },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DanSelectionDialog(
+    danOptions: List<Int>,
+    currentDan: Int,
+    onDanSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione seu Dan",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(danOptions.size) { index ->
+                    val dan = danOptions[index]
+                    val isSelected = dan == currentDan
+                    val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onDanSelected(dan) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (isSelected) BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ) else null
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = danText,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        properties = DialogProperties()
+    )
+}
+
+@Composable
+private fun AcademiaSelectionDialog(
+    academias: List<String>,
+    currentAcademia: String,
+    onAcademiaSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var showCustomField by remember { mutableStateOf(false) }
+    var customAcademia by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione sua Academia",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            if (showCustomField) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = customAcademia,
+                        onValueChange = { customAcademia = it },
+                        label = { Text("Nome da Academia") },
+                        placeholder = { Text("Digite o nome da sua academia") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TextButton(
+                            onClick = {
+                                showCustomField = false
+                                customAcademia = ""
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Voltar")
+                        }
+
+                        Button(
+                            onClick = {
+                                if (customAcademia.isNotBlank()) {
+                                    onAcademiaSelected(customAcademia)
+                                }
+                            },
+                            enabled = customAcademia.isNotBlank(),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Confirmar")
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(academias.size) { index ->
+                        val academia = academias[index]
+                        val isSelected = academia == currentAcademia
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    Log.d("Tag", "Acdamia clicada $academia")
+                                    if (academia == "Outros") {
+                                        showCustomField = true
+                                    } else {
+                                        onAcademiaSelected(academia)
+                                    }
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected)
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                else MaterialTheme.colorScheme.surface
+                            ),
+                            border = if (isSelected) BorderStroke(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            ) else null
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+
+                                Text(
+                                    text = academia,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            if (!showCustomField) {
+                TextButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
+}
+
+@Composable
+private fun TamanhoFaixaSelectionDialog(
+    tamanhos: List<String>,
+    currentTamanho: String,
+    onTamanhoSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione o Tamanho da Faixa",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(tamanhos.size) { index ->
+                    val tamanho = tamanhos[index]
+                    val isSelected = tamanho == currentTamanho
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onTamanhoSelected(tamanho) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (isSelected) BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ) else null
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = tamanho,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        properties = DialogProperties()
+    )
+}
+
 // Função para validar data de nascimento
 private fun validateBirthDate(dateString: String): DateValidation {
     if (dateString.isEmpty()) {
@@ -1136,6 +1835,21 @@ private fun validateBirthDate(dateString: String): DateValidation {
         }
     } catch (e: Exception) {
         DateValidation(false, "Formato de data inválido")
+    }
+}
+
+// Função para verificar se deve mostrar o campo Dan
+fun shouldShowDan(corFaixa: String): Boolean {
+    return corFaixa in listOf("Preta", "Mestre", "Grão Mestre")
+}
+
+// Função para obter as opções de Dan baseado na faixa
+fun getDanOptions(corFaixa: String): List<Int> {
+    return when (corFaixa) {
+        "Preta" -> (0..4).toList()
+        "Mestre" -> (5..9).toList()
+        "Grão Mestre" -> (10..12).toList()
+        else -> emptyList()
     }
 }
 

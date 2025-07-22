@@ -24,7 +24,11 @@ data class UsuarioResponse(
     val altura: String?,
     val idade: String?,
     val perfil: String,
-    val corFaixa: String
+    val corFaixa: String,
+    val status: String?,
+    val dan: Int?,
+    val academia: String?,
+    val tamanhoFaixa: String?,
 )
 
 fun UsuarioResponse.toUsuario(): Usuario {
@@ -38,7 +42,11 @@ fun UsuarioResponse.toUsuario(): Usuario {
         altura = altura ?: "",
         idade = idade ?: "",
         perfil = perfil ?: "Básico",
-        corFaixa = corFaixa ?: "Sem faixa"
+        corFaixa = corFaixa ?: "Sem faixa",
+        status = status ?: "ativo",
+        dan = dan ?: 0,
+        academia = academia ?: "",
+        tamanhoFaixa = tamanhoFaixa ?: ""
     )
 }
 
@@ -54,7 +62,11 @@ fun UsuarioResponse.toUsuarioEntity(): UsuarioEntity {
         altura = altura ?: "",
         idade = idade ?: "",
         perfil = perfil ?: "Básico",
-        corFaixa = corFaixa ?: "Sem faixa"
+        corFaixa = corFaixa ?: "Sem faixa",
+        status = status ?: "ativo",
+        dan = dan ?: 0,
+        academia = academia ?: "",
+        tamanhoFaixa = tamanhoFaixa ?: ""
     )
 }
 

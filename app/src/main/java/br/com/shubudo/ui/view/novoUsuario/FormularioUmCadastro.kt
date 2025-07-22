@@ -5,7 +5,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +15,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -26,6 +31,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -37,7 +44,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,16 +60,25 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
-import br.com.shubudo.ui.theme.*
+import br.com.shubudo.ui.theme.PrimaryColorAmarela
+import br.com.shubudo.ui.theme.PrimaryColorBranca
+import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
+import br.com.shubudo.ui.theme.PrimaryColorLaranja
+import br.com.shubudo.ui.theme.PrimaryColorMarron
+import br.com.shubudo.ui.theme.PrimaryColorMestre
+import br.com.shubudo.ui.theme.PrimaryColorPreta
+import br.com.shubudo.ui.theme.PrimaryColorRoxa
+import br.com.shubudo.ui.theme.PrimaryColorVerde
+import br.com.shubudo.ui.view.getDanOptions
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
@@ -76,6 +94,7 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
             // Primeiro dígito do dia: máximo 3
             if (limitedDigits[0].digitToInt() > 3) "3" else limitedDigits
         }
+
         2 -> {
             // Dia completo: máximo 31
             val day = limitedDigits.toInt()
@@ -85,6 +104,7 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
                 else -> limitedDigits
             }
         }
+
         3 -> {
             // Primeiro dígito do mês: máximo 1
             val day = limitedDigits.substring(0, 2).toInt()
@@ -97,6 +117,7 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
             val validFirstMonthDigit = if (firstMonthDigit > 1) "1" else firstMonthDigit.toString()
             validDay + validFirstMonthDigit
         }
+
         4 -> {
             // Mês completo: máximo 12
             val day = limitedDigits.substring(0, 2).toInt()
@@ -113,6 +134,7 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
             }
             validDay + validMonth
         }
+
         else -> {
             // 5-8 dígitos: validar dia e mês, manter ano
             val day = limitedDigits.substring(0, 2).toInt()
@@ -139,11 +161,38 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
         2 -> validatedDigits
         3 -> "${validatedDigits.substring(0, 2)}/${validatedDigits[2]}"
         4 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}"
-        5 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits[4]}"
-        6 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 6)}"
-        7 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 7)}"
-        8 -> "${validatedDigits.substring(0, 2)}/${validatedDigits.substring(2, 4)}/${validatedDigits.substring(4, 8)}"
-        else -> validatedDigits.substring(0, 2) + "/" + validatedDigits.substring(2, 4) + "/" + validatedDigits.substring(4, 8)
+        5 -> "${validatedDigits.substring(0, 2)}/${
+            validatedDigits.substring(
+                2,
+                4
+            )
+        }/${validatedDigits[4]}"
+
+        6 -> "${validatedDigits.substring(0, 2)}/${
+            validatedDigits.substring(
+                2,
+                4
+            )
+        }/${validatedDigits.substring(4, 6)}"
+
+        7 -> "${validatedDigits.substring(0, 2)}/${
+            validatedDigits.substring(
+                2,
+                4
+            )
+        }/${validatedDigits.substring(4, 7)}"
+
+        8 -> "${validatedDigits.substring(0, 2)}/${
+            validatedDigits.substring(
+                2,
+                4
+            )
+        }/${validatedDigits.substring(4, 8)}"
+
+        else -> validatedDigits.substring(0, 2) + "/" + validatedDigits.substring(
+            2,
+            4
+        ) + "/" + validatedDigits.substring(4, 8)
     }
 
     return TextFieldValue(maskedText, TextRange(maskedText.length))
@@ -202,14 +251,28 @@ fun PaginaUmCadastro(
     var passwordVisibleConfirmSenha by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
     var showBeltDropdown by remember { mutableStateOf(false) }
+    var showDanDialog by remember { mutableStateOf(false) }
+    var showAcademiaDialog by remember { mutableStateOf(false) }
     var dateValue by remember {
         mutableStateOf(TextFieldValue(novoUsuarioViewModel.idade))
     }
 
-    val faixas = listOf("Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre")
+    val faixas = listOf(
+        "Branca",
+        "Amarela",
+        "Laranja",
+        "Verde",
+        "Roxa",
+        "Marrom",
+        "Preta",
+        "Mestre",
+        "Grão Mestre"
+    )
+    val academias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres", "Outros")
 
     val focusRequesterNome = remember { FocusRequester() }
     val focusRequesterIdade = remember { FocusRequester() }
+    val focusRequesterAcademia = remember { FocusRequester() }
     val focusRequesterSenha = remember { FocusRequester() }
     val focusRequesterConfirmarSenha = remember { FocusRequester() }
 
@@ -306,12 +369,33 @@ fun PaginaUmCadastro(
                             onClick = {
                                 novoUsuarioViewModel.faixa = faixa
                                 showBeltDropdown = false
+                                // Define Dan automático baseado na faixa
+                                novoUsuarioViewModel.dan = when (faixa) {
+                                    "Mestre" -> 5
+                                    "Grão Mestre" -> 10
+                                    else -> 0
+                                }
                                 // O tema será aplicado pelo LaunchedEffect no NovoUsuarioView
                             }
                         )
                     }
                 }
             }
+        }
+
+        // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
+        if (shouldShowDan(novoUsuarioViewModel.faixa)) {
+            val danDisplayText = when (novoUsuarioViewModel.dan) {
+                0 -> "Sem Dan"
+                else -> "${novoUsuarioViewModel.dan}º Dan"
+            }
+
+            SelectionCard(
+                label = "Dan",
+                value = danDisplayText,
+                icon = R.drawable.ic_faixa,
+                onClick = { showDanDialog = true }
+            )
         }
 
         // Name Field
@@ -344,10 +428,17 @@ fun PaginaUmCadastro(
                 imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusRequesterSenha.requestFocus() }
+                onNext = { focusRequesterAcademia.requestFocus() }
             ),
             helperText = "Formato: 25/12/1990",
             isError = dateValue.text.isNotEmpty() && !isValidDate(dateValue.text)
+        )
+
+        // Academia Selection
+        AcademiaSection(
+            academia = novoUsuarioViewModel.academia,
+            onAcademiaChange = { novoUsuarioViewModel.academia = it },
+            onShowDialog = { showAcademiaDialog = true }
         )
 
         // Password Field
@@ -448,6 +539,224 @@ fun PaginaUmCadastro(
                     text = if (passwordsMatch) "Senhas conferem" else "As senhas não conferem",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (passwordsMatch) Color(0xFF059669) else Color(0xFFDC2626)
+                )
+            }
+        }
+    }
+
+    // Dan Selection Dialog
+    if (showDanDialog) {
+        DanSelectionDialog(
+            danOptions = getDanOptions(novoUsuarioViewModel.faixa),
+            currentDan = novoUsuarioViewModel.dan,
+            onDanSelected = { dan ->
+                novoUsuarioViewModel.dan = dan
+                showDanDialog = false
+            },
+            onDismiss = { showDanDialog = false }
+        )
+    }
+
+    // Academia Selection Dialog
+    if (showAcademiaDialog) {
+        AcademiaSelectionDialog(
+            academias = academias,
+            currentAcademia = novoUsuarioViewModel.academia,
+            onAcademiaSelected = { academia ->
+                novoUsuarioViewModel.academia = academia
+                showAcademiaDialog = false
+            },
+            onDismiss = { showAcademiaDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun AcademiaSection(
+    academia: String,
+    onAcademiaChange: (String) -> Unit,
+    onShowDialog: () -> Unit
+) {
+    var showCustomField by remember {
+        mutableStateOf(
+            academia.isNotBlank() && !listOf(
+                "CDL Team Boa Vista",
+                "CDL Team Av. Das Torres"
+            ).contains(academia)
+        )
+    }
+
+    Column {
+        Text(
+            text = "Academia",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        if (showCustomField) {
+            // Campo de texto personalizado
+            OutlinedTextField(
+                value = academia,
+                onValueChange = onAcademiaChange,
+                placeholder = {
+                    Text(
+                        "Digite o nome da sua academia",
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        showCustomField = false
+                        onAcademiaChange("")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Voltar para seleção",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                ),
+                singleLine = true
+            )
+        } else {
+            // Card de seleção
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onShowDialog() },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = academia.ifBlank { "Selecionar Academia" },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (academia.isBlank())
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+    }
+
+    // Atualiza o estado quando a academia muda externamente
+    LaunchedEffect(academia) {
+        showCustomField = academia.isNotBlank() && !listOf(
+            "CDL Team Boa Vista",
+            "CDL Team Av. Das Torres"
+        ).contains(academia)
+    }
+}
+
+@Composable
+private fun SelectionCard(
+    label: String,
+    value: String,
+    icon: Int,
+    onClick: () -> Unit
+) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick() },
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            ),
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (value.contains("Selecionar"))
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         }
@@ -631,4 +940,219 @@ private fun getBeltColor(belt: String): Color {
         "Grão Mestre" -> PrimaryColorGraoMestre
         else -> Color(0xFF6366F1) // fallback
     }
+}
+
+@Composable
+private fun DanSelectionDialog(
+    danOptions: List<Int>,
+    currentDan: Int,
+    onDanSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione seu Dan",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(danOptions.size) { index ->
+                    val dan = danOptions[index]
+                    val isSelected = dan == currentDan
+                    val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onDanSelected(dan) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (isSelected) BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ) else null
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = danText,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
+}
+
+@Composable
+private fun AcademiaSelectionDialog(
+    academias: List<String>,
+    currentAcademia: String,
+    onAcademiaSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var showCustomField by remember { mutableStateOf(false) }
+    var customAcademia by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Selecione sua Academia",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            if (showCustomField) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = customAcademia,
+                        onValueChange = { customAcademia = it },
+                        label = { Text("Nome da Academia") },
+                        placeholder = { Text("Digite o nome da sua academia") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TextButton(
+                            onClick = {
+                                showCustomField = false
+                                customAcademia = ""
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Voltar")
+                        }
+
+                        Button(
+                            onClick = {
+                                if (customAcademia.isNotBlank()) {
+                                    onAcademiaSelected(customAcademia)
+                                }
+                            },
+                            enabled = customAcademia.isNotBlank(),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Confirmar")
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(academias.size) { index ->
+                        val academia = academias[index]
+                        val isSelected = academia == currentAcademia
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (academia == "Outros") {
+                                        showCustomField = true
+                                    } else {
+                                        onAcademiaSelected(academia)
+                                    }
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected)
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                else MaterialTheme.colorScheme.surface
+                            ),
+                            border = if (isSelected) BorderStroke(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            ) else null
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+
+                                Text(
+                                    text = academia,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            if (!showCustomField) {
+                TextButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
+    )
 }
