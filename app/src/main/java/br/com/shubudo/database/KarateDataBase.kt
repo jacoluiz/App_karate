@@ -12,6 +12,7 @@ import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
 import br.com.shubudo.database.dao.ProjecaoDao
 import br.com.shubudo.database.dao.SequenciaDeCombateDao
+import br.com.shubudo.database.dao.TecnicaChaoDao
 import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.database.entities.ArmamentoEntity
 import br.com.shubudo.database.entities.DefesaArmaEntity
@@ -23,11 +24,12 @@ import br.com.shubudo.database.entities.KataEntity
 import br.com.shubudo.database.entities.MovimentoEntity
 import br.com.shubudo.database.entities.ProjecaoEntity
 import br.com.shubudo.database.entities.SequenciaDeCombateEntity
+import br.com.shubudo.database.entities.TecnicaChaoEntity
 import br.com.shubudo.database.entities.UsuarioEntity
 
 @Database(
-    version = 7,
-    entities = [DefesaPessoalEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class, UsuarioEntity::class, ProjecaoEntity::class, DefesaPessoalExtraBannerEntity::class, ArmamentoEntity::class, DefesaArmaEntity::class, EventoEntity::class]
+    version = 9,
+    entities = [DefesaPessoalEntity::class, TecnicaChaoEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class, UsuarioEntity::class, ProjecaoEntity::class, DefesaPessoalExtraBannerEntity::class, ArmamentoEntity::class, DefesaArmaEntity::class, EventoEntity::class]
 )
 abstract class KarateDatabase : RoomDatabase() {
     abstract fun defesaPessoalDao(): DefesaPessoalDao
@@ -41,4 +43,5 @@ abstract class KarateDatabase : RoomDatabase() {
     abstract fun armamentoDao(): ArmamentoDao
     abstract fun defesasDeArmasDao(): DefesaArmaDao
     abstract fun eventoDao(): EventoDao
+    abstract fun tecnicaChaoDao(): TecnicaChaoDao
 }

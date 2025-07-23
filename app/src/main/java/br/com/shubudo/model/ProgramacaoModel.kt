@@ -1,7 +1,6 @@
 package br.com.shubudo.model
 
 data class Programacao(
-//    val id: String,
     val faixa: Faixa,
     val ataquesDeMao: List<Movimento>,
     val chutes: List<Movimento>,
@@ -12,6 +11,7 @@ data class Programacao(
     val defesaExtraBanner: List<DefesaPessoalExtraBanner>,
     val projecoes : List<Projecao>,
     val armamento: List<Armamento>,
-    val defesasDeArma: List<Armamento>
+    val defesasDeArma: List<Armamento>,
+    val tecnicasDeChao: List<TecnicaChao>
 ) {
 }

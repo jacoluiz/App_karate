@@ -1,5 +1,6 @@
 package br.com.shubudo.repositories
 
+import br.com.shubudo.model.Armamento
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Faixa
@@ -8,7 +9,7 @@ import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.Programacao
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.model.SequenciaDeCombate
-import br.com.shubudo.model.Armamento
+import br.com.shubudo.model.TecnicaChao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -25,13 +26,12 @@ class ProgramacaoRepository @Inject constructor(
     private val projecaoRepository: ProjecoesRepository,
     private val defesaPessoalExtraBannerRepository: DefesaPessoalExtraBannerRepository,
     private val armamentoRepository: ArmamentoRepository,
-    private val defesaArmaRepository: DefesaDeArmaRepository // Novo repositório para defesas de armas
+    private val defesaArmaRepository: DefesaDeArmaRepository,
+    private val tecnicaChaoRepository: TecnicaChaoRepository
 ) {
     suspend fun findMovimentoByFaixaETipo(faixa: String, tipo: String): Flow<List<Movimento>> {
         val faixaResult = faixaRepository.findByNome(faixa).firstOrNull()
-        if (faixaResult == null) {
-            return flow { emit(emptyList()) } // Retorna uma lista vazia se não encontrar a faixa
-        }
+            ?: return flow { emit(emptyList()) }
         return when (tipo) {
             "Ataques de Mão" -> findAtaquesDeMaoByFaixa(faixaResult)
             "Chutes" -> findChutesByFaixa(faixaResult)
@@ -49,7 +49,7 @@ class ProgramacaoRepository @Inject constructor(
         return findProgramacaoByFaixa(faixa)
     }
 
-    suspend fun findProgramacaoByFaixa(faixa: Faixa): Flow<Programacao> {
+    private suspend fun findProgramacaoByFaixa(faixa: Faixa): Flow<Programacao> {
         val defesasPessoais = findDefesasPessoaisByFaixa(faixa).first()
         val katas = findKatasByFaixa(faixa).first()
         val ataquesDeMao = findAtaquesDeMaoByFaixa(faixa).first()
@@ -59,7 +59,8 @@ class ProgramacaoRepository @Inject constructor(
         val defesaPessoalExtraBanner = findDefesaPessoalExtraBannerByFaixa(faixa).first()
         val projecao = findProjecoesByFaixa(faixa).first()
         val armamentos = findArmamentosByFaixa(faixa).first()
-        val defesasDeArma = findDefesasDeArmasByFaixa(faixa).first() // Nova chamada
+        val defesasDeArma = findDefesasDeArmasByFaixa(faixa).first()
+        val tecnicasDeChao = findTecnicasDeChaoByFaixa(faixa).first()
 
         val programacao = Programacao(
             faixa = faixa,
@@ -72,20 +73,21 @@ class ProgramacaoRepository @Inject constructor(
             projecoes = projecao,
             defesaExtraBanner = defesaPessoalExtraBanner,
             armamento = armamentos,
-            defesasDeArma = defesasDeArma // Atribuição das defesas de arma
+            defesasDeArma = defesasDeArma,
+            tecnicasDeChao = tecnicasDeChao
         )
         return flow { emit(programacao) }
     }
 
-    suspend fun findAtaquesDeMaoByFaixa(faixa: Faixa): Flow<List<Movimento>> {
+    private suspend fun findAtaquesDeMaoByFaixa(faixa: Faixa): Flow<List<Movimento>> {
         return movimentoRepository.findMovimentoByFaixa(faixa._id, "Ataque de mão")
     }
 
-    suspend fun findChutesByFaixa(faixa: Faixa): Flow<List<Movimento>> {
+    private suspend fun findChutesByFaixa(faixa: Faixa): Flow<List<Movimento>> {
         return movimentoRepository.findMovimentoByFaixa(faixa._id, "Chute")
     }
 
-    suspend fun findDefesasByFaixa(faixa: Faixa): Flow<List<Movimento>> {
+    private suspend fun findDefesasByFaixa(faixa: Faixa): Flow<List<Movimento>> {
         return movimentoRepository.findMovimentoByFaixa(faixa._id, "Defesa")
     }
 
@@ -151,5 +153,14 @@ class ProgramacaoRepository @Inject constructor(
         val faixaId = faixa?._id ?: idFaixa
         ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
         return defesaArmaRepository.findByFaixa(faixaId)
+    }
+
+    suspend fun findTecnicasDeChaoByFaixa(
+        faixa: Faixa? = null,
+        idFaixa: String? = null
+    ): Flow<List<TecnicaChao>> {
+        val faixaId = faixa?._id ?: idFaixa
+        ?: throw IllegalArgumentException("É necessário fornecer uma Faixa ou um idFaixa")
+        return tecnicaChaoRepository.findByFaixa(faixaId)
     }
 }

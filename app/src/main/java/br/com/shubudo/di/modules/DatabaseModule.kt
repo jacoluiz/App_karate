@@ -13,6 +13,7 @@ import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
 import br.com.shubudo.database.dao.ProjecaoDao
 import br.com.shubudo.database.dao.SequenciaDeCombateDao
+import br.com.shubudo.database.dao.TecnicaChaoDao
 import br.com.shubudo.database.dao.UsuarioDao
 import dagger.Module
 import dagger.Provides
@@ -90,5 +91,10 @@ class DatabaseModule {
     @Provides
     fun provideDeEventoDao(db: KarateDatabase): EventoDao {
         return db.eventoDao()
+    }
+
+    @Provides
+    fun provideTecnicaChaoDao(db: KarateDatabase): TecnicaChaoDao {
+        return db.tecnicaChaoDao()
     }
 }
