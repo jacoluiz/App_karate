@@ -44,7 +44,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.R
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.ui.components.ControlesVideoPadrao
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 
 @Composable
 fun TelaDetalheProjecao(
@@ -54,7 +54,7 @@ fun TelaDetalheProjecao(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
 
     val exoPlayer = remember(context, projecao.video) {
         createExoPlayer(context, projecao.video)
@@ -122,11 +122,11 @@ fun TelaDetalheProjecao(
                     .height(240.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                LocalVideoPlayer(
+                OnlineVideoPlayer(
                     exoPlayer = exoPlayer,
                     modifier = Modifier.fillMaxSize(),
                     useController = false,
-                    videoPath = projecao.video
+                    videoUrl = projecao.video
                 )
             }
 

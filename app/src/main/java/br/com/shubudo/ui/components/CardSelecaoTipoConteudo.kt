@@ -2,9 +2,7 @@ package br.com.shubudo.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cyclone
@@ -15,7 +13,6 @@ import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +72,10 @@ sealed class Conteudo(
         texto = "Defesas de armas",
     )
 
+    object TecnicasDeChao : Conteudo(
+        texto = "Técnicas de chão",
+    )
+
 }
 
 @Composable
@@ -83,7 +84,7 @@ fun CardSelecaoTipoConteudo(
     onNavigateToDetalheMovimento: (String, String) -> Unit,
 ) {
     var itens: List<Conteudo> = preencherLista(programacao)
-    
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -117,41 +118,41 @@ fun CardSelecaoTipoConteudo(
 @Composable
 fun preencherLista(p: Programacao): List<Conteudo> {
     val itensTemp: MutableList<Conteudo> = mutableListOf()
-    
+
     if (p.ataquesDeMao.isNotEmpty()) {
         Conteudo.AtaquesDeMao.icon = ImageVector.vectorResource(id = R.drawable.ic_ataque_de_mao)
         itensTemp.add(Conteudo.AtaquesDeMao)
     }
-    
+
     if (p.chutes.isNotEmpty()) {
         itensTemp.add(Conteudo.Chutes)
     }
-    
+
     if (p.defesas.isNotEmpty()) {
         itensTemp.add(Conteudo.Defesas)
     }
-    
+
     if (p.defesaPessoal.isNotEmpty()) {
         Conteudo.DefesaPessoal.icon = ImageVector.vectorResource(id = R.drawable.ic_defesa_pessoal)
         itensTemp.add(Conteudo.DefesaPessoal)
     }
-    
+
     if (p.katas.isNotEmpty()) {
         itensTemp.add(Conteudo.Katas)
     }
-    
+
     if (p.sequenciaDeCombate.isNotEmpty()) {
         Conteudo.SequenciaDeCombate.icon =
             ImageVector.vectorResource(id = R.drawable.ic_sequencia_de_combate)
         itensTemp.add(Conteudo.SequenciaDeCombate)
     }
-    
+
     if (p.defesaExtraBanner.isNotEmpty()) {
         Conteudo.DefesaExtraBanner.icon =
             ImageVector.vectorResource(id = R.drawable.ic_defesa_pessoal)
         itensTemp.add(Conteudo.DefesaExtraBanner)
     }
-    
+
     if (p.projecoes.isNotEmpty()) {
         Conteudo.Projecao.icon = ImageVector.vectorResource(id = R.drawable.ic_projecoes)
         itensTemp.add(Conteudo.Projecao)
@@ -165,6 +166,11 @@ fun preencherLista(p: Programacao): List<Conteudo> {
     if (p.defesasDeArma.isNotEmpty()) {
         Conteudo.DefesasDeArma.icon = ImageVector.vectorResource(id = R.drawable.ic_defesas_de_armas)
         itensTemp.add(Conteudo.DefesasDeArma)
+    }
+
+    if (p.tecnicasDeChao.isNotEmpty()) {
+        Conteudo.TecnicasDeChao.icon = ImageVector.vectorResource(id = R.drawable.ic_tecnicas_de_chao)
+        itensTemp.add(Conteudo.TecnicasDeChao)
     }
 
     return itensTemp

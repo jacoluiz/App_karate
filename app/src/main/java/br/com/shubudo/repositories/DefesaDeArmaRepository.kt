@@ -19,25 +19,6 @@ class DefesaDeArmaRepository @Inject constructor(
     private val dao: DefesaArmaDao            // DAO específico para defesas de armas
 ) {
 
-    suspend fun findAll(): Flow<List<Armamento>> {
-        // Busca os dados na API e salva localmente
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getDefesasArmas()
-                // Converte a resposta para entidades compatíveis com o modelo Armamento
-                val entities = response.map { it.toArmamentoEntity() }
-                // Salva os dados no banco local (pode incluir lógica para remover dados antigos, se necessário)
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("DefesaArmaRepository", "findAll: falha ao conectar na API", e)
-            }
-        }
-        // Retorna os dados salvos, convertendo as entidades para o modelo de domínio Armamento
-        return dao.getDefesasArmas().map { entityList ->
-            entityList.map { it.toArmamento() }
-        }
-    }
-
     // Função para buscar defesas de armas filtradas por faixa (por id da faixa)
     suspend fun findByFaixa(faixaId: String): Flow<List<Armamento>> {
         CoroutineScope(coroutineContext).launch {

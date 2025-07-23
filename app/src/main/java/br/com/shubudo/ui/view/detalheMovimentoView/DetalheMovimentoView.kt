@@ -14,8 +14,10 @@ import br.com.shubudo.ui.view.detalheMovimentoView.defesaPessoal.TelaDefesaPesso
 import br.com.shubudo.ui.view.detalheMovimentoView.defesasDeArmas.TelaDefesaDeArmaManager
 import br.com.shubudo.ui.view.detalheMovimentoView.kata.TelaKataManager
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.TelaProjecaoManager
+import br.com.shubudo.ui.view.detalheMovimentoView.tecnicasDeChao.TelaTecnicasDeChaoManager
 import br.com.shubudo.ui.viewModel.DetalheArmamentoViewModel
 import br.com.shubudo.ui.viewModel.KataViewModel
+import br.com.shubudo.ui.viewModel.TecnicaChaoViewModel
 
 @Composable
 fun DetalheMovimentoView(
@@ -47,6 +49,9 @@ fun DetalheMovimentoView(
             } else if (uiState.defesasDeArma.isNotEmpty()) {
                 val viewModel: DetalheArmamentoViewModel = viewModel()
                 TelaDefesaDeArmaManager(uiState, viewModel, onBackNavigationClick)
+            } else if (uiState.tecnicasDeChao.isNotEmpty()) {
+                val viewModel: TecnicaChaoViewModel = viewModel()
+                TelaTecnicasDeChaoManager(uiState, viewModel, onBackNavigationClick)
             }
         }
 

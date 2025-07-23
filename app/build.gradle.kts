@@ -13,8 +13,8 @@ android {
         applicationId = "br.com.shubudo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 18
-        versionName = "2.2"
+        versionCode = 19
+        versionName = "2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.suggestions)
     implementation(libs.androidx.foundation.layout.android)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
@@ -110,7 +112,9 @@ dependencies {
     implementation (libs.core)
 
     implementation (libs.accompanist.flowlayout)
-
+    implementation(libs.aws.android.sdk.core)
+    implementation(libs.aws.android.sdk.cognitoidentityprovider)
+    implementation(kotlin("reflect"))
 
 }
 

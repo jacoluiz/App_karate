@@ -52,13 +52,12 @@ import androidx.media3.exoplayer.ExoPlayer
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Orientacao
 import br.com.shubudo.ui.components.LoadingOverlay
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.viewModel.KataViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun TelaDetalheKata(
-    faixa: String,
     viewModel: KataViewModel,
     kata: Kata,
     onBackNavigationClick: () -> Unit
@@ -95,10 +94,11 @@ fun TelaDetalheKata(
     }
 
     LaunchedEffect(viewModel, kata) {
-        viewModel.loadVideos(kata, context, exoPlayer)
+        viewModel.loadVideos(kata, exoPlayer)
     }
 
-    val videoPath = viewModel.localFilePaths.value[viewModel.currentVideo.value?.orientacao]
+    val videoUrl = viewModel.currentVideo.value?.url
+
     var currentMovementIndex by remember { mutableIntStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
@@ -140,8 +140,8 @@ fun TelaDetalheKata(
                         .height(240.dp)
                         .background(Color(0xFF121212))
                 ) {
-                    LocalVideoPlayer(
-                        videoPath = videoPath,
+                    OnlineVideoPlayer(
+                        videoUrl = videoUrl,
                         exoPlayer = exoPlayer,
                         modifier = Modifier.fillMaxSize(),
                         useController = false

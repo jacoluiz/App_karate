@@ -6,14 +6,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -25,7 +22,7 @@ import br.com.shubudo.model.Armamento
 import br.com.shubudo.ui.components.BotaoVoltar
 import br.com.shubudo.ui.components.ControlesVideoPadrao
 import br.com.shubudo.ui.components.LoadingOverlay
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.viewModel.DetalheArmamentoViewModel
 
 @Composable
@@ -42,7 +39,7 @@ fun TelaDetalheDefesasDeArma(
     }
 
     LaunchedEffect(viewModel, armamento) {
-        viewModel.loadVideo(armamento, context, exoPlayer)
+        viewModel.loadVideo(armamento, exoPlayer)
     }
 
     val scrollState = rememberScrollState()
@@ -107,8 +104,8 @@ fun TelaDetalheDefesasDeArma(
                         .height(240.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    LocalVideoPlayer(
-                        videoPath = viewModel.currentVideoPath.value,
+                    OnlineVideoPlayer(
+                        videoUrl = viewModel.currentVideoUrl.value,
                         exoPlayer = exoPlayer,
                         modifier = Modifier.fillMaxSize(),
                         useController = false

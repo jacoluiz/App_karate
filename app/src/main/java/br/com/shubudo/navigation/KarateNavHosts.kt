@@ -4,8 +4,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
@@ -14,12 +14,12 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 
 @Composable
 fun KarateNavHost(
-    navController: androidx.navigation.NavHostController = rememberNavController(),
+    navController: NavHostController = rememberNavController(),
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
-    NavHost(        
-        navController = navController, 
+    NavHost(
+        navController = navController,
         startDestination = AppDestination.Evento.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
@@ -37,6 +37,9 @@ fun KarateNavHost(
             },
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
+            },
+            onNavigateToConfirmEmail = { email, senha, corFaixa ->
+                navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
             }
         )
 
@@ -51,20 +54,49 @@ fun KarateNavHost(
         // Tela de Perfil
         perfilScreen(
             themeViewModel = themeViewModel,
-            onLogout = {
-                navController.navigate("login") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+            onLogoutNavegacao = {
+                navController.navigate(AppDestination.Login.route) {
+                    popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onEditarPerfil = { navController.navigateToEditarPerfil() }
         )
 
+        // Tela de Confirmação de E-mail
+        confirmacaoEmailScreen(
+            themeViewModel = themeViewModel,
+            onConfirmado = {
+                // Navegar para a tela principal após confirmação bem-sucedida
+                navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
+            },
+            onBackToLogin = {
+                // Navegar para login quando há falha nas credenciais
+                navController.navigate(AppDestination.Login.route) {
+                    popUpTo(confirmacaoEmailRoute) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        )
+
         // Tela de Esqueci Minha Senha
         esqueciMinhaSenhaScreen(
-            onSendResetRequest = { navController.popBackStack() }
+            onSenhaRedefinida = {
+                navController.navigate("login") {
+                    popUpTo("esqueciMinhaSenha") { inclusive = true }
+                }
+            }
+        )
+
+        confirmarNovaSenhaScreen(
+            onSenhaAlterada = {
+                navController.navigate("login") {
+                    popUpTo(confirmarNovaSenhaRoute) { inclusive = true }
+                }
+            },
+            onVoltar = {
+                navController.navigateToEsqueciMinhaSenha()
+            }
         )
 
         // Tela de Programação
@@ -89,7 +121,9 @@ fun KarateNavHost(
         novoUsuarioScreen(
             themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
-            onNavigateToLogin = { navController.popBackStack() }
+            onNavigateToLogin = { email, senha, corFaixa ->
+                navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
+            }
         )
 
         // Tela de Editar Perfil
@@ -117,10 +151,10 @@ fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
         }
 
         BottomAppBarItem.Perfil -> {
-            navigateToPerfil(navOptions {
+            navigate(perfilRoute) {
+                popUpTo(perfilRoute) { inclusive = true }
                 launchSingleTop = true
-                popUpTo(perfilRoute)
-            })
+            }
         }
 
         BottomAppBarItem.Eventos -> {

@@ -7,11 +7,7 @@ import br.com.shubudo.model.Faixa
 import br.com.shubudo.network.services.FaixasServices
 import br.com.shubudo.network.services.toFaixaEntity
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.net.ConnectException

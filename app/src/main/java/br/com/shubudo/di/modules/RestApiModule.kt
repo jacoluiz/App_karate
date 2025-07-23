@@ -103,4 +103,9 @@ object RestApiModule {
     @Singleton
     fun provideEventoService(retrofit: Retrofit): EventoService =
         retrofit.create(EventoService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTecnicaChaoService(retrofit: Retrofit): TecnicaChaoService =
+        retrofit.create(TecnicaChaoService::class.java)
 }

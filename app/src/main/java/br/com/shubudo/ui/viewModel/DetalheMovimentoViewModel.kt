@@ -9,6 +9,7 @@ import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.model.SequenciaDeCombate
+import br.com.shubudo.model.TecnicaChao
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.repositories.ProgramacaoRepository
@@ -50,6 +51,7 @@ class DetalheMovimentoViewModel @Inject constructor(
                 var defesaExtraBanner = emptyList<DefesaPessoalExtraBanner>()
                 var armamento = emptyList<Armamento>()
                 var defesasDeArma = emptyList<Armamento>()
+                var tecnicasDeChao = emptyList<TecnicaChao>()
                 when (movimento) {
                     "Katas" -> {
                         kata = repository.findKatasByFaixa(
@@ -86,6 +88,11 @@ class DetalheMovimentoViewModel @Inject constructor(
                             idFaixa = repository.findFaixaByCor(faixa).first()._id
                         ).first()
                     }
+                    "Técnicas de chão" -> {
+                        tecnicasDeChao = repository.findTecnicasDeChaoByFaixa(
+                            idFaixa = repository.findFaixaByCor(faixa).first()._id
+                        ).first()
+                    }
                 }
                 val movimentoList = repository.findMovimentoByFaixaETipo(faixa, movimento).first()
 
@@ -99,7 +106,8 @@ class DetalheMovimentoViewModel @Inject constructor(
                         projecao = projecao.sortedBy { it.ordem },
                         sequenciaExtraBanner = defesaExtraBanner.sortedBy { it.numeroOrdem },
                         armamento = armamento.sortedBy { it.numeroOrdem },
-                        defesasDeArma = defesasDeArma.sortedBy { it.numeroOrdem }
+                        defesasDeArma = defesasDeArma.sortedBy { it.numeroOrdem },
+                        tecnicasDeChao = tecnicasDeChao.sortedBy { it.ordem }
                     )
                 }
             }

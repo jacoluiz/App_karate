@@ -2,12 +2,9 @@ package br.com.shubudo.repositories
 
 import android.util.Log
 import br.com.shubudo.database.dao.SequenciaDeCombateDao
-import br.com.shubudo.database.entities.toDefesaPessoal
 import br.com.shubudo.database.entities.toSequenciaDeCombate
-import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.SequenciaDeCombate
 import br.com.shubudo.network.services.SequenciaDeCombateService
-import br.com.shubudo.network.services.toDefesaPessoalEntity
 import br.com.shubudo.network.services.toSequenciaDeCombateEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -21,22 +18,6 @@ class SequenciaDeCombateRepository @Inject constructor(
     private val dao: SequenciaDeCombateDao,
     private val service: SequenciaDeCombateService
 ) {
-    suspend fun findAll(): Flow<List<SequenciaDeCombate>> {
-        CoroutineScope(coroutineContext).launch {
-            try {
-                val response = service.getSequenciaDeCombate()
-                val entities = response.map { it.toSequenciaDeCombateEntity() }
-                dao.saveAll(*entities.toTypedArray())
-            } catch (e: ConnectException) {
-                Log.e("SequenciaDeCombateRepository", "findAll: falha ao conectar na API", e)
-            }
-        }
-
-        return dao.getSequenciaDeCombate().map { entities ->
-            entities.map { it.toSequenciaDeCombate() }
-        }
-    }
-
     suspend fun findByFaixa(faixa: String): Flow<List<SequenciaDeCombate>> {
         CoroutineScope(coroutineContext).launch {
             try {

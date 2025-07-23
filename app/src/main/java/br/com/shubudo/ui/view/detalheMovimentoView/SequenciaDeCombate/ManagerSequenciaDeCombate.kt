@@ -12,11 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.SequenciaDeCombate
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
-import br.com.shubudo.ui.view.detalheMovimentoView.MovimentosPadrao.TelaDetalheMovimentoPadrao
-import br.com.shubudo.ui.view.detalheMovimentoView.MovimentosPadrao.TelaListaMovimentoPadrao
 
 @Composable
 fun TelaSequenciaDeCombateManager(
@@ -40,9 +37,8 @@ fun TelaSequenciaDeCombateManager(
         }, label = ""
     ) { sequenciaDeCombate ->
         if (sequenciaDeCombate != null) {
-            TelaDetalheSequenciaDeCombate ( faixa = uiState.faixa,
+            TelaDetalheSequenciaDeCombate (sequenciaDeCombate = sequenciaDeCombate,
 
-                sequenciaDeCombate = sequenciaDeCombate,
                 onBackNavigationClick = { selectedMoviento = null }
             )
         } else {

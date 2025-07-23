@@ -15,21 +15,27 @@ import br.com.shubudo.ui.viewModel.ThemeViewModel
 internal const val perfilRoute = "perfil"
 
 fun NavGraphBuilder.perfilScreen(
-    onLogout: () -> Unit,
+    onLogoutNavegacao: () -> Unit, // callback que navega para Login após logout
     onEditarPerfil: () -> Unit,
     themeViewModel: ThemeViewModel
 ) {
     composable(perfilRoute) {
         val viewModel = hiltViewModel<PerfilViewModel>()
         val uiState by viewModel.uiState.collectAsState()
+
         PerfilView(
             uiState = uiState,
+            themeViewModel = themeViewModel,
             onEditarPerfil = { onEditarPerfil() },
-            onLogout = { onLogout() },
-            themeViewModel = themeViewModel
+            onLogout = {
+                viewModel.logout {
+                    onLogoutNavegacao() // após deletar usuário, navega
+                }
+            }
         )
     }
 }
+
 
 fun NavController.navigateToPerfil(
     navOptions: NavOptions? = null

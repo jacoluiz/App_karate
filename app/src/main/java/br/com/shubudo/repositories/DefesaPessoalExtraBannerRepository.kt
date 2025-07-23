@@ -3,7 +3,6 @@ package br.com.shubudo.repositories
 import android.util.Log
 import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
 import br.com.shubudo.database.entities.toDefesaPessoalExtraBanner
-import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.model.DefesaPessoalExtraBanner
 import br.com.shubudo.network.services.DefesaPessoalExtraBannerServices
 import br.com.shubudo.network.services.toDefesaPessoalExtraBannerEntity
@@ -20,7 +19,7 @@ class DefesaPessoalExtraBannerRepository @Inject constructor(
     private val extraBannerDao: DefesaPessoalExtraBannerDao
 ) {
 
-    suspend fun findAll(): Flow<List<DefesaPessoalExtraBanner>> {
+    private suspend fun findAll(): Flow<List<DefesaPessoalExtraBanner>> {
         CoroutineScope(coroutineContext).launch {
             try {
                 val response = extraBannerService.getDefesasPessoaisExtraBanner()

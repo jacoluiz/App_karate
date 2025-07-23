@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
 import br.com.shubudo.model.DefesaPessoal
-import br.com.shubudo.model.Faixa
 import br.com.shubudo.model.Movimento
 
 @Entity(tableName = "DefesasPessoais")

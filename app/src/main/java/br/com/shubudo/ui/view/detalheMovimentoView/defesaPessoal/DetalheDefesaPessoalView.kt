@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -43,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.model.DefesaPessoal
 import br.com.shubudo.ui.components.ControlesVideoPadrao
-import br.com.shubudo.ui.components.LocalVideoPlayer
+import br.com.shubudo.ui.components.OnlineVideoPlayer
 import br.com.shubudo.ui.view.detalheMovimentoView.projecao.createExoPlayer
 import br.com.shubudo.utils.toOrdinarioFeminino
 
@@ -55,7 +54,7 @@ fun TelaDetalheDefesaPessoal(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    var isPlaying by remember { mutableStateOf(false) }
+    var isPlaying by remember { mutableStateOf(true) }
 
     // Inicializa o ExoPlayer com o vídeo da defesa pessoal
     val exoPlayer = remember(context, defesaPessoal.video) {
@@ -145,11 +144,11 @@ fun TelaDetalheDefesaPessoal(
                     .height(240.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                LocalVideoPlayer(
+                OnlineVideoPlayer(
                     exoPlayer = exoPlayer,
                     modifier = Modifier.fillMaxSize(),
                     useController = false,
-                    videoPath = defesaPessoal.video
+                    videoUrl = defesaPessoal.video
                 )
             }
 

@@ -2,6 +2,7 @@
 accompanistFlowlayout = "0.30.1"
 accompanistInsets = "0.26.3-beta"
 agp = "8.5.0"
+awsAndroidSdkCognitoidentityprovider = "2.22.6"
 coilCompose = "2.1.0"
 converterGson = "2.11.0"
 core = "12.0.0"
@@ -37,6 +38,7 @@ media3Exoplayer = "1.4.1"
 media3Ui = "1.4.1"
 youtubeAndroidPlayerApi = "1.2.2"
 foundationLayoutAndroid = "1.7.0"
+suggestions = "1.0.0"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
@@ -50,6 +52,8 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+aws-android-sdk-cognitoidentityprovider = { module = "com.amazonaws:aws-android-sdk-cognitoidentityprovider", version.ref = "awsAndroidSdkCognitoidentityprovider" }
+aws-android-sdk-core = { module = "com.amazonaws:aws-android-sdk-core", version.ref = "awsAndroidSdkCognitoidentityprovider" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
@@ -87,6 +91,7 @@ androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplaye
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Ui" }
 youtube-android-player-api = { module = "com.google.android.youtube:youtube-android-player-api", version.ref = "youtubeAndroidPlayerApi" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
+suggestions = { group = "com.google.assistant.appactions", name = "suggestions", version.ref = "suggestions" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

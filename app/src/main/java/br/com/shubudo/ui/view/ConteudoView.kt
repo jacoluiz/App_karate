@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,13 +36,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
+import br.com.shubudo.ui.theme.PrimaryColorLaranja
 import br.com.shubudo.ui.theme.PrimaryColorMarron
 import br.com.shubudo.ui.theme.PrimaryColorMestre
 import br.com.shubudo.ui.theme.PrimaryColorPreta
 import br.com.shubudo.ui.theme.PrimaryColorRoxa
+import br.com.shubudo.ui.theme.PrimaryColorVerde
 import br.com.shubudo.ui.uistate.ProgramacaoUiState
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
@@ -77,6 +81,10 @@ fun ProgramacaoView(
         }
 
         is ProgramacaoUiState.Success -> {
+            LaunchedEffect(Unit) {
+                SessionManager.usuarioLogado?.corFaixa?.let { themeViewModel.changeThemeFaixa(it) }
+            }
+
             Column(modifier = Modifier.fillMaxSize()) {
                 // Cabeçalho com fundo gradiente
                 Box(
@@ -93,8 +101,7 @@ fun ProgramacaoView(
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                         )
                         .padding(vertical = 24.dp, horizontal = 16.dp)
-                )
-                {
+                ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -145,7 +152,6 @@ fun ProgramacaoView(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-                        // Grid de faixas
                         val availableFaixas = uiState.faixas.sortedBy { it.ordem }
 
                         LazyVerticalGrid(
@@ -198,7 +204,6 @@ fun FaixaCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Faixa icon
             val iconPainter = if (faixa == "Branca" && !isDarkTheme) {
                 painterResource(id = R.drawable.ic_faixa_outline)
             } else {
@@ -238,17 +243,13 @@ fun selecionaCorIcone(faixa: String, isDarkTheme: Boolean): Color {
     return when (faixa) {
         "Branca" -> if (isDarkTheme) Color.White else Color.Black
         "Amarela" -> LightPrimaryContainerColorAmarela
-        "Laranja" -> Color(0xFFF46000)
-        "Verde" -> Color(0xFF00800D)
+        "Laranja" -> PrimaryColorLaranja
+        "Verde" -> PrimaryColorVerde
         "Roxa" -> PrimaryColorRoxa
         "Marrom" -> PrimaryColorMarron
-        "Preta" -> PrimaryColorPreta
-        "Preta 1 dan" -> PrimaryColorPreta
-        "Preta 2 dan" -> PrimaryColorPreta
-        "Preta 3 dan" -> PrimaryColorPreta
-        "Preta 4 dan" -> PrimaryColorPreta
-        "Mestre" -> PrimaryColorMestre
-        "Grão Mestre" -> PrimaryColorGraoMestre
+        "Preta", "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan" -> PrimaryColorPreta
+        "Mestre", "Mestre 6 dan", "Mestre 7 dan", "Mestre 8 dan", "Mestre 9 dan" -> PrimaryColorMestre
+        "Grão Mestre", "Grão Mestre 11 dan", "Grão Mestre 12 dan" -> PrimaryColorGraoMestre
         else -> Color(0xFF8A2BE2)
     }
 }

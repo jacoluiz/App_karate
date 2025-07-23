@@ -19,19 +19,34 @@ data class UsuarioEntity(
     val altura: String,
     val idade: String,
     val perfil: String = "básico",
-    val corFaixa: String
+    val corFaixa: String,
+    val status: String = "ativo",
+    val dan: Int = 0,
+    val academia: String = "",
+    val tamanhoFaixa: String = "",
+    val lesaoOuLaudosMedicos: String = "",
+    val registroAKSD: String = ""
 )
 
-// Conversão de UsuarioEntity para Usuario
-fun UsuarioEntity.toUsuario() = Usuario(
-    _id = _id,
-    nome = nome,
-    username = username,
-    email = email,
-    senha = senha,
-    peso = peso,
-    altura = altura,
-    idade = idade,
-    perfil = perfil,
-    corFaixa = corFaixa
-)
+fun UsuarioEntity.toUsuario(): Usuario {
+    return Usuario(
+        _id = this._id,
+        nome = this.nome,
+        username = this.username,
+        email = this.email,
+        senha = this.senha,
+        peso = this.peso,
+        altura = this.altura,
+        idade = this.idade,
+        perfil = this.perfil,
+        corFaixa = this.corFaixa,
+        status = this.status,
+        dan = this.dan,
+        academia = this.academia,
+        tamanhoFaixa = this.tamanhoFaixa,
+        faixas = null,
+        lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
+        registroAKSD = this.registroAKSD,
+    )
+}
+

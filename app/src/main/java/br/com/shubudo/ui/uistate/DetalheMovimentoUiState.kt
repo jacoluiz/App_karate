@@ -7,6 +7,7 @@ import br.com.shubudo.model.Kata
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.Projecao
 import br.com.shubudo.model.SequenciaDeCombate
+import br.com.shubudo.model.TecnicaChao
 
 sealed class DetalheMovimentoUiState {
 
@@ -21,9 +22,10 @@ sealed class DetalheMovimentoUiState {
         val projecao: List<Projecao>,
         val faixa: String,
         val armamento: List<Armamento>,
-        val defesasDeArma: List<Armamento>
+        val defesasDeArma: List<Armamento>,
+        val tecnicasDeChao: List<TecnicaChao>
 
-        ) : DetalheMovimentoUiState()
+    ) : DetalheMovimentoUiState()
 
     object Empty : DetalheMovimentoUiState()
 }

@@ -3,10 +3,10 @@ package br.com.shubudo.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Branca
-val LightPrimaryColorBranca = Color(0xFFB0B0AE)
+val LightPrimaryColorBranca = Color(0xFF6B7280)
 val LightPrimaryContainerColorBranca = Color(0xFFD9D9D9)
 
-val PrimaryColorBranca = Color(0xFFD9D9D9)
+val PrimaryColorBranca = Color(0xFF6B7280)
 val PrimaryContainerColorBranca = Color(0xFFD9D9D9)
 
 val SecondaryColorBranca = Color(0xFFFFFFFF)
