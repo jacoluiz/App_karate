@@ -28,7 +28,7 @@ import br.com.shubudo.database.entities.TecnicaChaoEntity
 import br.com.shubudo.database.entities.UsuarioEntity
 
 @Database(
-    version = 9,
+    version = 1,
     entities = [DefesaPessoalEntity::class, TecnicaChaoEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class, UsuarioEntity::class, ProjecaoEntity::class, DefesaPessoalExtraBannerEntity::class, ArmamentoEntity::class, DefesaArmaEntity::class, EventoEntity::class]
 )
 abstract class KarateDatabase : RoomDatabase() {

@@ -31,7 +31,7 @@ fun NavGraphBuilder.eventoDetalheScreen(
         // Load the event when the screen is first displayed
         LaunchedEffect(eventoId) {
             if (eventoId != null) {
-                viewModel.loadEvento(eventoId)
+                viewModel.carregaEvento(eventoId)
             }
         }
 
@@ -41,6 +41,7 @@ fun NavGraphBuilder.eventoDetalheScreen(
         uiState.evento?.let { evento ->
             EventoDetalheView(
                 evento = evento,
+                viewModel = viewModel,
                 onBackClick = onBackClick
             )
         }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "67d49bb1d9884963392441075eacb5b5",
+    "identityHash": "9471ee70a3e46ff60f70e7cc855a015f",
     "entities": [
       {
         "tableName": "DefesasPessoais",
@@ -628,7 +628,7 @@
       },
       {
         "tableName": "Evento",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataInicio` TEXT NOT NULL, `local` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataInicio` TEXT NOT NULL, `local` TEXT NOT NULL, `confirmados` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -659,6 +659,12 @@
             "columnName": "local",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "confirmados",
+            "columnName": "confirmados",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -674,7 +680,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '67d49bb1d9884963392441075eacb5b5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9471ee70a3e46ff60f70e7cc855a015f')"
     ]
   }
 }

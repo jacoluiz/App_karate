@@ -4,6 +4,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -14,6 +15,14 @@ data class DateValidation(
     val message: String,
     val age: Int? = null
 )
+
+fun String.toLocalDateTimeOrNull(): LocalDateTime? {
+    return try {
+        LocalDateTime.parse(this, DateTimeFormatter.ISO_DATE_TIME)
+    } catch (e: Exception) {
+        null
+    }
+}
 
 // Função para aplicar máscara de altura no formato x,xx
 fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
