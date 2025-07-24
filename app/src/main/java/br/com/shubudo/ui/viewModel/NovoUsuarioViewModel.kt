@@ -77,6 +77,7 @@ class NovoUsuarioViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
+
                 val mensagemErro = when {
                     e.message?.contains("User already exists", ignoreCase = true) == true -> {
                         "Esse e-mail já está em uso. Use outro ou finalize o cadastro anterior."

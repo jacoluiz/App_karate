@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
-import br.com.shubudo.utils.getFcmToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +69,9 @@ class EditarPerfilViewModel @Inject constructor(
                 altura = usuario.altura,
                 dan = usuario.dan,
                 academia = usuario.academia,
-                tamanhoFaixa = usuario.tamanhoFaixa
+                tamanhoFaixa = usuario.tamanhoFaixa,
+                lesaoOuLaudosMedicos = usuario.lesaoOuLaudosMedicos,
+                registroAKSD = usuario.registroAKSD
             )
         }
     }

@@ -86,17 +86,6 @@ fun KarateNavHost(
             }
         )
 
-        confirmarNovaSenhaScreen(
-            onSenhaAlterada = {
-                navController.navigate("login") {
-                    popUpTo(confirmarNovaSenhaRoute) { inclusive = true }
-                }
-            },
-            onVoltar = {
-                navController.navigateToEsqueciMinhaSenha()
-            }
-        )
-
         // Tela de Programação
         programacaoScreen(
             onNavigateToDetalheFaixa = { navController.navigateToDetalheFaixa(it) },

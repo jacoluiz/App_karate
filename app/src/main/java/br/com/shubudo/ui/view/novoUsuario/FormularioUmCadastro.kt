@@ -72,6 +72,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import br.com.shubudo.R
+import br.com.shubudo.ui.components.PasswordRequirement
 import br.com.shubudo.ui.theme.PrimaryColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorBranca
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
@@ -85,6 +86,8 @@ import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.utils.applyDateMask
 import br.com.shubudo.utils.getDanOptions
 import br.com.shubudo.utils.isValidDate
+import br.com.shubudo.utils.senhaAtendeAosRequisitos
+import br.com.shubudo.utils.validarRequisitosSenha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,11 +99,8 @@ fun PaginaUmCadastro(
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    val oitoCaracteres = novoUsuarioViewModel.senha.length >= 8
-    val contemNumero = novoUsuarioViewModel.senha.any { it.isDigit() }
-    val contemCaracterEspecial = novoUsuarioViewModel.senha.any { !it.isLetterOrDigit() }
-    novoUsuarioViewModel.senhaAtendeAosRequisitos =
-        oitoCaracteres && contemNumero && contemCaracterEspecial
+    val requisitos = validarRequisitosSenha(novoUsuarioViewModel.senha)
+    val mostrarRequisitos = novoUsuarioViewModel.senha.isNotBlank() && !senhaAtendeAosRequisitos(novoUsuarioViewModel.senha)
 
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordVisibleConfirmSenha by remember { mutableStateOf(false) }
@@ -330,8 +330,7 @@ fun PaginaUmCadastro(
 
         // Password Requirements
         AnimatedVisibility(
-            visible = (isPasswordFocused || novoUsuarioViewModel.senha.isNotEmpty()) &&
-                    (!oitoCaracteres || !contemNumero || !contemCaracterEspecial),
+            visible = mostrarRequisitos,
             enter = slideInVertically() + fadeIn(),
             exit = slideOutVertically() + fadeOut()
         ) {
@@ -354,9 +353,9 @@ fun PaginaUmCadastro(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    PasswordRequirement("Pelo menos 8 caracteres", oitoCaracteres)
-                    PasswordRequirement("Contém número", contemNumero)
-                    PasswordRequirement("Contém caracter especial", contemCaracterEspecial)
+                    requisitos.forEach { (descricao, atendido) ->
+                        PasswordRequirement(text = descricao, isMet = atendido)
+                    }
                 }
             }
         }
@@ -404,10 +403,7 @@ fun PaginaUmCadastro(
             }
         )
 
-        // Password Match Validation
-        val passwordsMatch = novoUsuarioViewModel.senha == novoUsuarioViewModel.confirmarSenha &&
-                novoUsuarioViewModel.confirmarSenha.isNotEmpty()
-
+        // Confirm Password Validation
         AnimatedVisibility(
             visible = novoUsuarioViewModel.confirmarSenha.isNotEmpty(),
             enter = slideInVertically() + fadeIn(),
@@ -418,16 +414,16 @@ fun PaginaUmCadastro(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    imageVector = if (passwordsMatch) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                    imageVector = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Icons.Default.CheckCircle else Icons.Default.Cancel,
                     contentDescription = null,
-                    tint = if (passwordsMatch) Color(0xFF059669) else Color(0xFFDC2626),
+                    tint = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(0xFF059669) else Color(0xFFDC2626),
                     modifier = Modifier.size(20.dp)
                 )
 
                 Text(
-                    text = if (passwordsMatch) "Senhas conferem" else "As senhas não conferem",
+                    text = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) "Senhas conferem" else "As senhas não conferem",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (passwordsMatch) Color(0xFF059669) else Color(0xFFDC2626)
+                    color = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(0xFF059669) else Color(0xFFDC2626)
                 )
             }
         }
@@ -653,7 +649,7 @@ private fun SelectionCard(
 }
 
 @Composable
-private fun ModernTextField(
+fun ModernTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -792,27 +788,6 @@ private fun ModernTextFieldWithDateMask(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PasswordRequirement(text: String, isMet: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Icon(
-            imageVector = if (isMet) Icons.Default.CheckCircle else Icons.Default.Cancel,
-            contentDescription = null,
-            tint = if (isMet) Color(0xFF059669) else Color(0xFFDC2626),
-            modifier = Modifier.size(16.dp)
-        )
-
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (isMet) Color(0xFF059669) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
     }
 }
 

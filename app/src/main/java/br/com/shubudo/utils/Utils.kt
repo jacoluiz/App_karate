@@ -385,3 +385,16 @@ fun getFcmToken(context: Context): String? {
     val sharedPref = context.getSharedPreferences("fcm_prefs", Context.MODE_PRIVATE)
     return sharedPref.getString("fcm_token", null)
 }
+
+fun validarRequisitosSenha(senha: String): Map<String, Boolean> {
+    val requisitos = mutableMapOf<String, Boolean>()
+    requisitos["Contém letra maiúscula"] = senha.any { it.isUpperCase() }
+    requisitos["Pelo menos 8 caracteres"] = senha.length >= 8
+    requisitos["Contém número"] = senha.any { it.isDigit() }
+    requisitos["Contém caracter especial"] = senha.any { !it.isLetterOrDigit() }
+    return requisitos
+}
+
+fun senhaAtendeAosRequisitos(senha: String): Boolean {
+    return validarRequisitosSenha(senha).all { it.value }
+}

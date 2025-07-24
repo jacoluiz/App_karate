@@ -138,23 +138,31 @@ fun EditarPerfilView(
             }
 
             is EditarPerfilUiState.Success -> {
-                EditarPerfilContent(
-                    nome = uiState.nome,
-                    username = uiState.username,
-                    email = uiState.email,
-                    dataNascimento = uiState.idade,
-                    peso = uiState.peso,
-                    altura = uiState.altura,
-                    corFaixa = uiState.corFaixa,
-                    editarPerfilViewModel = editarPerfilViewModel,
-                    themeViewModel = themeViewModel,
-                    onSave = onSave,
-                    onCancelar = onCancelar,
-                    dan = uiState.dan,
-                    academia = uiState.academia,
-                    tamanhoFaixa = uiState.tamanhoFaixa
-                )
+                val lesoes = uiState.lesaoOuLaudosMedicos
+                val registro = uiState.registroAKSD
+
+                if (lesoes != null && registro != null) {
+                    EditarPerfilContent(
+                        nome = uiState.nome,
+                        username = uiState.username,
+                        email = uiState.email,
+                        dataNascimento = uiState.idade,
+                        peso = uiState.peso,
+                        altura = uiState.altura,
+                        corFaixa = uiState.corFaixa,
+                        editarPerfilViewModel = editarPerfilViewModel,
+                        themeViewModel = themeViewModel,
+                        onSave = onSave,
+                        onCancelar = onCancelar,
+                        dan = uiState.dan,
+                        academia = uiState.academia,
+                        tamanhoFaixa = uiState.tamanhoFaixa,
+                        lesoesOuLaudosMedicos = lesoes,
+                        registroAKSD = registro
+                    )
+                }
             }
+
         }
     }
 }
@@ -259,6 +267,8 @@ fun EditarPerfilContent(
     academia: String,
     tamanhoFaixa: String,
     editarPerfilViewModel: EditarPerfilViewModel,
+    lesoesOuLaudosMedicos: String,
+    registroAKSD: String ,
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
     onCancelar: () -> Unit
@@ -274,8 +284,8 @@ fun EditarPerfilContent(
     var currentDan by remember { mutableIntStateOf(dan) }
     var currentAcademia by remember { mutableStateOf(academia) }
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
-    var currentLesaoOuLaudosMedicos by remember { mutableStateOf("") }
-    var currentRegistroAKSD by remember { mutableStateOf("") }
+    var currentLesaoOuLaudosMedicos by remember { mutableStateOf(lesoesOuLaudosMedicos) }
+    var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
     val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
