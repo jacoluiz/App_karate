@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Evento
-import br.com.shubudo.ui.components.LoadingOverlay
+import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -101,217 +101,209 @@ fun EventosView(
     onAddEventoClick: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-    
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+
+
+    LoadingWrapper(
+        isLoading = uiState is EventosUiState.Loading,
+        loadingText = "Carregando eventos do karate..."
     ) {
-    when (uiState) {
-        is EventosUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                )
-                LoadingOverlay(true) {}
-            }
-        }
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            when (uiState) {
+                is EventosUiState.Loading -> {
 
-        is EventosUiState.Success, is EventosUiState.Empty -> {
-            val futuros = mutableListOf<Evento>()
-            val passados = mutableListOf<Evento>()
-
-            if (uiState is EventosUiState.Success) {
-                uiState.eventosAgrupados.values.flatten().forEach { evento ->
-                    if (evento.dataInicio.isPastEvent()) passados.add(evento) else futuros.add(
-                        evento
-                    )
                 }
-            }
 
-            val filteredFuturos = futuros.filter {
-                it.titulo.contains(searchQuery.text, ignoreCase = true) ||
-                        it.descricao.contains(searchQuery.text, ignoreCase = true)
-            }
-            val filteredPassados = passados.filter {
-                it.titulo.contains(searchQuery.text, ignoreCase = true) ||
-                        it.descricao.contains(searchQuery.text, ignoreCase = true)
-            }
+                is EventosUiState.Success, is EventosUiState.Empty -> {
+                    val futuros = mutableListOf<Evento>()
+                    val passados = mutableListOf<Evento>()
 
-            Column(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Eventos do karate",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Fique por dentro de todas as atividades",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                            textAlign = TextAlign.Center
-                        )
+                    if (uiState is EventosUiState.Success) {
+                        uiState.eventosAgrupados.values.flatten().forEach { evento ->
+                            if (evento.dataInicio.isPastEvent()) passados.add(evento) else futuros.add(
+                                evento
+                            )
+                        }
                     }
-                }
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = {
-                                Text(
-                                    "Buscar eventos...",
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Buscar",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                            ),
-                            singleLine = true
-                        )
+                    val filteredFuturos = futuros.filter {
+                        it.titulo.contains(searchQuery.text, ignoreCase = true) ||
+                                it.descricao.contains(searchQuery.text, ignoreCase = true)
+                    }
+                    val filteredPassados = passados.filter {
+                        it.titulo.contains(searchQuery.text, ignoreCase = true) ||
+                                it.descricao.contains(searchQuery.text, ignoreCase = true)
+                    }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        IconButton(
-                            onClick = onReload,
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Box(
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        bottomStart = 32.dp,
+                                        bottomEnd = 32.dp
+                                    )
+                                )
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Recarregar eventos",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Eventos do karate",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Fique por dentro de todas as atividades",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
-                    }
-                }
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (filteredFuturos.isNotEmpty()) {
-                        item {
-                            SectionHeader(
-                                title = "Próximos Eventos",
-                                subtitle = "${filteredFuturos.size} evento${if (filteredFuturos.size != 1) "s" else ""}",
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        items(filteredFuturos) { evento ->
-                            EventoItem(
-                                evento = evento,
-                                isPast = false,
-                                onClick = { onEventClick(evento._id) })
-                        }
-                    }
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    placeholder = {
+                                        Text(
+                                            "Buscar eventos...",
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Buscar",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                            alpha = 0.5f
+                                        )
+                                    ),
+                                    singleLine = true
+                                )
 
-                    if (filteredPassados.isNotEmpty()) {
-                        item {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            SectionHeader(
-                                title = "Eventos Anteriores",
-                                subtitle = "${filteredPassados.size} evento${if (filteredPassados.size != 1) "s" else ""}",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                        items(filteredPassados) { evento ->
-                            EventoItem(
-                                evento = evento,
-                                isPast = true,
-                                onClick = { onEventClick(evento._id) })
-                        }
-                    }
-                }
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                if (SessionManager.usuarioLogado?.perfil?.equals(
-                        "adm",
-                        ignoreCase = true
-                    ) == true
-                ) {
-                    FloatingActionButton(
-                        onClick = onAddEventoClick,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(16.dp),
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Adicionar Evento",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+                                IconButton(
+                                    onClick = onReload,
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = "Recarregar eventos",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            if (filteredFuturos.isNotEmpty()) {
+                                item {
+                                    SectionHeader(
+                                        title = "Próximos Eventos",
+                                        subtitle = "${filteredFuturos.size} evento${if (filteredFuturos.size != 1) "s" else ""}",
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                items(filteredFuturos) { evento ->
+                                    EventoItem(
+                                        evento = evento,
+                                        isPast = false,
+                                        onClick = { onEventClick(evento._id) })
+                                }
+                            }
+
+                            if (filteredPassados.isNotEmpty()) {
+                                item {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    SectionHeader(
+                                        title = "Eventos Anteriores",
+                                        subtitle = "${filteredPassados.size} evento${if (filteredPassados.size != 1) "s" else ""}",
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                                items(filteredPassados) { evento ->
+                                    EventoItem(
+                                        evento = evento,
+                                        isPast = true,
+                                        onClick = { onEventClick(evento._id) })
+                                }
+                            }
+                        }
+
+                        if (SessionManager.usuarioLogado?.perfil?.equals(
+                                "adm",
+                                ignoreCase = true
+                            ) == true
+                        ) {
+                            FloatingActionButton(
+                                onClick = onAddEventoClick,
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .padding(16.dp),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Adicionar Evento",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-    }
     }
 }
 

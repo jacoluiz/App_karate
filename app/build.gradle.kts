@@ -86,7 +86,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended.v143)
 
-    implementation (libs.vvalidator)
+    implementation(libs.vvalidator)
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.core.ktx)
@@ -110,14 +110,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation (libs.core)
+    implementation(libs.core)
 
-    implementation (libs.accompanist.flowlayout)
+    implementation(libs.accompanist.flowlayout)
     implementation(libs.aws.android.sdk.core)
     implementation(libs.aws.android.sdk.cognitoidentityprovider)
     implementation(kotlin("reflect"))
     implementation(libs.firebase.messaging.v2341)
-
 }
 
 // Allow references to generated code

@@ -2,6 +2,11 @@ package br.com.shubudo.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,13 +21,59 @@ fun KarateNavHost(
     dropDownMenuViewModel: DropDownMenuViewModel,
     themeViewModel: ThemeViewModel
 ) {
+
     NavHost(
         navController = navController,
         startDestination = AppDestination.Recursos.route,
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
-        popEnterTransition = { EnterTransition.None },
-        popExitTransition = { ExitTransition.None }
+        enterTransition = {
+            when (targetState.destination.route) {
+                AppDestination.Recursos.route -> slideInHorizontally(
+                    initialOffsetX = { -it }, // entra pela esquerda
+                    animationSpec = tween(300)
+                ) + fadeIn()
+                else -> slideInHorizontally(
+                    initialOffsetX = { it }, // entra pela direita
+                    animationSpec = tween(300)
+                ) + fadeIn()
+            }
+        },
+        exitTransition = {
+            when (initialState.destination.route) {
+                AppDestination.Recursos.route -> slideOutHorizontally(
+                    targetOffsetX = { -it }, // sai pela esquerda
+                    animationSpec = tween(300)
+                ) + fadeOut()
+                else -> slideOutHorizontally(
+                    targetOffsetX = { it }, // sai pela direita
+                    animationSpec = tween(300)
+                ) + fadeOut()
+            }
+        },
+        popEnterTransition = {
+            when (targetState.destination.route) {
+                AppDestination.Recursos.route -> slideInHorizontally(
+                    initialOffsetX = { it }, // volta da direita
+                    animationSpec = tween(300)
+                ) + fadeIn()
+                else -> slideInHorizontally(
+                    initialOffsetX = { -it }, // volta da esquerda
+                    animationSpec = tween(300)
+                ) + fadeIn()
+            }
+        },
+        popExitTransition = {
+            when (initialState.destination.route) {
+                AppDestination.Recursos.route -> slideOutHorizontally(
+                    targetOffsetX = { it }, // sai pela direita
+                    animationSpec = tween(300)
+                ) + fadeOut()
+                else -> slideOutHorizontally(
+                    targetOffsetX = { -it }, // sai pela esquerda
+                    animationSpec = tween(300)
+                ) + fadeOut()
+            }
+        }
+
     ) {
         // Tela de Login
         loginScreen(

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.ui.components.CardSelecaoTipoConteudo
 import br.com.shubudo.ui.components.LoadingOverlay
+import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.DetalheFaixaUiState
 
 @Composable
@@ -33,12 +34,10 @@ fun DetalheFaixaView(
 ) {
     when (uiState) {
         is DetalheFaixaUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingOverlay(isLoading = true) {}
-            }
+            LoadingWrapper(
+                isLoading = true,
+                loadingText = "Carregando conteudo do karate..."
+            ) {}
         }
 
         is DetalheFaixaUiState.Success -> {

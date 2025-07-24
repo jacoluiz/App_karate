@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager
-import br.com.shubudo.ui.components.LoadingOverlay
+import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.theme.LightPrimaryContainerColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
 import br.com.shubudo.ui.theme.PrimaryColorLaranja
@@ -55,120 +55,120 @@ fun ProgramacaoView(
     onClickFaixa: (String) -> Unit,
     themeViewModel: ThemeViewModel
 ) {
-    when (uiState) {
-        is ProgramacaoUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingOverlay(true) {}
-            }
-        }
-
-        is ProgramacaoUiState.Empty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Calma jovem, ainda não temos nada por aqui!",
-                    modifier = Modifier.padding(horizontal = 32.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-
-        is ProgramacaoUiState.Success -> {
-            LaunchedEffect(Unit) {
-                SessionManager.usuarioLogado?.corFaixa?.let { themeViewModel.changeThemeFaixa(it) }
+    LoadingWrapper(
+        isLoading = uiState is ProgramacaoUiState.Loading,
+        loadingText = "Carregando conteúdo do karate..."
+    ) {
+        when (uiState) {
+            is ProgramacaoUiState.Loading -> {
+                // O loading será mostrado pelo LoadingWrapper
             }
 
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho com fundo gradiente
+            is ProgramacaoUiState.Empty -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                        .padding(vertical = 24.dp, horizontal = 16.dp)
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.School,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Conteúdo do Karate",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Explore o conteúdo de cada faixa e aprimore suas técnicas",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
+                    Text(
+                        text = "Calma jovem, ainda não temos nada por aqui!",
+                        modifier = Modifier.padding(horizontal = 32.dp),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+
+            is ProgramacaoUiState.Success -> {
+                LaunchedEffect(Unit) {
+                    SessionManager.usuarioLogado?.corFaixa?.let { themeViewModel.changeThemeFaixa(it) }
                 }
 
-                // Conteúdo principal com grid de faixas
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .offset(y = (-20).dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Cabeçalho com fundo gradiente
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .wrapContentHeight()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                            )
+                            .padding(vertical = 24.dp, horizontal = 16.dp)
                     ) {
-                        Text(
-                            text = "Selecione uma faixa",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        val availableFaixas = uiState.faixas.sortedBy { it.ordem }
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            items(availableFaixas) { faixa ->
-                                FaixaCard(
-                                    faixa = faixa.faixa,
-                                    onClick = {
-                                        themeViewModel.changeThemeFaixa(faixa.faixa)
-                                        onClickFaixa(faixa.faixa)
-                                    },
-                                    isDarkTheme = isSystemInDarkTheme()
-                                )
+                            Icon(
+                                imageVector = Icons.Default.School,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Conteúdo do Karate",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Explore o conteúdo de cada faixa e aprimore suas técnicas",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+
+                    // Conteúdo principal com grid de faixas
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .offset(y = (-20).dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Selecione uma faixa",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+
+                            val availableFaixas = uiState.faixas.sortedBy { it.ordem }
+
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(availableFaixas) { faixa ->
+                                    FaixaCard(
+                                        faixa = faixa.faixa,
+                                        onClick = {
+                                            themeViewModel.changeThemeFaixa(faixa.faixa)
+                                            onClickFaixa(faixa.faixa)
+                                        },
+                                        isDarkTheme = isSystemInDarkTheme()
+                                    )
+                                }
                             }
                         }
                     }

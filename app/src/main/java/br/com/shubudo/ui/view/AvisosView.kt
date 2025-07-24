@@ -60,7 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Aviso
-import br.com.shubudo.ui.components.LoadingOverlay
+import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.viewModel.AvisosViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
@@ -79,7 +79,6 @@ fun AvisosView(
             onNavigateToEditarAviso(avisoId)
         }
     }
-
     if (usuarioLogado == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -98,12 +97,10 @@ fun AvisosView(
 
     when (uiState) {
         is AvisosUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingOverlay(true) {}
-            }
+            LoadingWrapper(
+                isLoading = true,
+                loadingText = "Carregando conteudo do karate..."
+            ) {}
         }
 
         is AvisosUiState.Empty -> {

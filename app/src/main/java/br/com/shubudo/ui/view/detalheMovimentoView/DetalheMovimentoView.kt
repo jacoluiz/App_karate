@@ -5,6 +5,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.shubudo.ui.components.LoadingOverlay
+import br.com.shubudo.ui.components.LoadingWrapper
+import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.uistate.DetalheMovimentoUiState
 import br.com.shubudo.ui.view.detalheMovimentoView.MovimentosPadrao.TelaMovimentoPadraoManager
 import br.com.shubudo.ui.view.detalheMovimentoView.SequenciaDeCombate.TelaSequenciaDeCombateManager
@@ -26,7 +28,10 @@ fun DetalheMovimentoView(
 
     when (uiState) {
         is DetalheMovimentoUiState.Loading -> {
-            LoadingOverlay(true) { }
+            LoadingWrapper(
+                isLoading = true,
+                loadingText = "Carregando avisos do karate..."
+            ) {}
         }
 
         is DetalheMovimentoUiState.Success -> {
