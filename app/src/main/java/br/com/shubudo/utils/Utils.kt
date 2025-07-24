@@ -1,9 +1,12 @@
 package br.com.shubudo.utils
 
+import android.content.Context
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -14,6 +17,27 @@ data class DateValidation(
     val message: String,
     val age: Int? = null
 )
+
+fun String.toLocalDateTimeOrNull(): LocalDateTime? {
+    return try {
+        LocalDateTime.parse(this, DateTimeFormatter.ISO_DATE_TIME)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun formatarDataHoraLocal(isoDate: String): String {
+    return try {
+        val instant = Instant.parse(isoDate)
+        val zonaBrasil = ZoneId.of("America/Sao_Paulo")
+        val dateTime = instant.atZone(zonaBrasil)
+
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", Locale("pt", "BR"))
+        dateTime.format(formatter)
+    } catch (e: Exception) {
+        isoDate // retorna como veio caso dê erro
+    }
+}
 
 // Função para aplicar máscara de altura no formato x,xx
 fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
@@ -355,4 +379,23 @@ fun formatDateForDisplay(dateString: String): String {
     }
 
     return dateString
+}
+
+fun getFcmToken(context: Context): String? {
+    val sharedPref = context.getSharedPreferences("fcm_prefs", Context.MODE_PRIVATE)
+    return sharedPref.getString("fcm_token", null)
+}
+
+fun validarRequisitosSenha(senha: String): Map<String, Boolean> {
+    val requisitos = mutableMapOf<String, Boolean>()
+    requisitos["Contém letra maiúscula"] = senha.any { it.isUpperCase() }
+    requisitos["Contém letra minúscula"] = senha.any { it.isLowerCase() }
+    requisitos["Pelo menos 8 caracteres"] = senha.length >= 8
+    requisitos["Contém número"] = senha.any { it.isDigit() }
+    requisitos["Contém caracter especial"] = senha.any { !it.isLetterOrDigit() }
+    return requisitos
+}
+
+fun senhaAtendeAosRequisitos(senha: String): Boolean {
+    return validarRequisitosSenha(senha).all { it.value }
 }

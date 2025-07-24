@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +37,7 @@ class NovoUsuarioViewModel @Inject constructor(
     var tamanhoFaixa by mutableStateOf("")
     var senhaAtendeAosRequisitos by mutableStateOf(false)
 
-    fun cadastrarUsuario() {
+    fun cadastrarUsuario(context: Context) {
 
         viewModelScope.launch {
             _uiState.value = CadastroUiState.Loading
@@ -55,7 +56,6 @@ class NovoUsuarioViewModel @Inject constructor(
                 val usuario = Usuario(
                     nome = nome,
                     email = email,
-                    senha = senha,
                     corFaixa = faixa,
                     peso = peso,
                     altura = altura,
@@ -67,7 +67,7 @@ class NovoUsuarioViewModel @Inject constructor(
                     tamanhoFaixa = tamanhoFaixa
                 )
 
-                val resultado = usuarioRepository.cadastrarUsuario(usuario)
+                val resultado = usuarioRepository.cadastrarUsuario(context, usuario, senha)
 
                 if (resultado != null) {
                     _uiState.value = CadastroUiState.Success("Usuário cadastrado com sucesso!")
@@ -77,6 +77,7 @@ class NovoUsuarioViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
+
                 val mensagemErro = when {
                     e.message?.contains("User already exists", ignoreCase = true) == true -> {
                         "Esse e-mail já está em uso. Use outro ou finalize o cadastro anterior."

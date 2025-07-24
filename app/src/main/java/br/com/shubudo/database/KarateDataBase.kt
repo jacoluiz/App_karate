@@ -3,6 +3,7 @@ package br.com.shubudo.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import br.com.shubudo.database.dao.ArmamentoDao
+import br.com.shubudo.database.dao.AvisoDao
 import br.com.shubudo.database.dao.DefesaArmaDao
 import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
@@ -15,6 +16,7 @@ import br.com.shubudo.database.dao.SequenciaDeCombateDao
 import br.com.shubudo.database.dao.TecnicaChaoDao
 import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.database.entities.ArmamentoEntity
+import br.com.shubudo.database.entities.AvisoEntity
 import br.com.shubudo.database.entities.DefesaArmaEntity
 import br.com.shubudo.database.entities.DefesaPessoalEntity
 import br.com.shubudo.database.entities.DefesaPessoalExtraBannerEntity
@@ -28,8 +30,8 @@ import br.com.shubudo.database.entities.TecnicaChaoEntity
 import br.com.shubudo.database.entities.UsuarioEntity
 
 @Database(
-    version = 9,
-    entities = [DefesaPessoalEntity::class, TecnicaChaoEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class, UsuarioEntity::class, ProjecaoEntity::class, DefesaPessoalExtraBannerEntity::class, ArmamentoEntity::class, DefesaArmaEntity::class, EventoEntity::class]
+    version = 4,
+    entities = [AvisoEntity::class, DefesaPessoalEntity::class, TecnicaChaoEntity::class, FaixaEntity::class, KataEntity::class, MovimentoEntity::class, SequenciaDeCombateEntity::class, UsuarioEntity::class, ProjecaoEntity::class, DefesaPessoalExtraBannerEntity::class, ArmamentoEntity::class, DefesaArmaEntity::class, EventoEntity::class]
 )
 abstract class KarateDatabase : RoomDatabase() {
     abstract fun defesaPessoalDao(): DefesaPessoalDao
@@ -44,4 +46,5 @@ abstract class KarateDatabase : RoomDatabase() {
     abstract fun defesasDeArmasDao(): DefesaArmaDao
     abstract fun eventoDao(): EventoDao
     abstract fun tecnicaChaoDao(): TecnicaChaoDao
+    abstract fun AvisoDao(): AvisoDao
 }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6a70c9d903ddbe94485c7ae5bf9925c7",
+    "identityHash": "9471ee70a3e46ff60f70e7cc855a015f",
     "entities": [
       {
         "tableName": "DefesasPessoais",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -29,6 +29,68 @@
           {
             "fieldPath": "movimentos",
             "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "TecnicasChao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `observacao` TEXT NOT NULL, `faixa` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordem",
+            "columnName": "ordem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observacao",
+            "columnName": "observacao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -138,7 +200,7 @@
       },
       {
         "tableName": "Movimento",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `tipoMovimento` TEXT NOT NULL, `base` TEXT NOT NULL, `nome` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `descricao` TEXT NOT NULL, `observacao` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `tipoMovimento` TEXT NOT NULL, `base` TEXT NOT NULL, `nome` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `descricao` TEXT NOT NULL, `observacao` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -187,6 +249,12 @@
             "columnName": "observacao",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -200,7 +268,7 @@
       },
       {
         "tableName": "SequenciaDeCombate",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -225,6 +293,12 @@
             "columnName": "movimentos",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -238,7 +312,7 @@
       },
       {
         "tableName": "Usuario",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `username` TEXT NOT NULL, `email` TEXT NOT NULL, `senha` TEXT NOT NULL, `peso` TEXT NOT NULL, `altura` TEXT NOT NULL, `idade` TEXT NOT NULL, `perfil` TEXT NOT NULL, `corFaixa` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `username` TEXT NOT NULL, `email` TEXT NOT NULL, `senha` TEXT NOT NULL, `peso` TEXT NOT NULL, `altura` TEXT NOT NULL, `idade` TEXT NOT NULL, `perfil` TEXT NOT NULL, `corFaixa` TEXT NOT NULL, `status` TEXT NOT NULL, `dan` INTEGER NOT NULL, `academia` TEXT NOT NULL, `tamanhoFaixa` TEXT NOT NULL, `lesaoOuLaudosMedicos` TEXT NOT NULL, `registroAKSD` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -299,6 +373,298 @@
             "columnName": "corFaixa",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dan",
+            "columnName": "dan",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "academia",
+            "columnName": "academia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tamanhoFaixa",
+            "columnName": "tamanhoFaixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lesaoOuLaudosMedicos",
+            "columnName": "lesaoOuLaudosMedicos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registroAKSD",
+            "columnName": "registroAKSD",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "projecoes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `nomeJapones` TEXT NOT NULL, `descricao` TEXT NOT NULL, `observacao` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `faixa` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nomeJapones",
+            "columnName": "nomeJapones",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observacao",
+            "columnName": "observacao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordem",
+            "columnName": "ordem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "defesas_pessoais_extra_banner",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numeroOrdem",
+            "columnName": "numeroOrdem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movimentos",
+            "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Armamento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `arma` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arma",
+            "columnName": "arma",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numeroOrdem",
+            "columnName": "numeroOrdem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movimentos",
+            "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "DefesasArmas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `arma` TEXT NOT NULL, `faixa` TEXT NOT NULL, `numeroOrdem` INTEGER NOT NULL, `movimentos` TEXT NOT NULL, `video` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arma",
+            "columnName": "arma",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faixa",
+            "columnName": "faixa",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numeroOrdem",
+            "columnName": "numeroOrdem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movimentos",
+            "columnName": "movimentos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Evento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataInicio` TEXT NOT NULL, `local` TEXT NOT NULL, `confirmados` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataInicio",
+            "columnName": "dataInicio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "local",
+            "columnName": "local",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confirmados",
+            "columnName": "confirmados",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -314,7 +680,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6a70c9d903ddbe94485c7ae5bf9925c7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9471ee70a3e46ff60f70e7cc855a015f')"
     ]
   }
 }

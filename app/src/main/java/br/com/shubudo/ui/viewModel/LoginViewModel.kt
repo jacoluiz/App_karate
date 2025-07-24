@@ -1,6 +1,8 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
@@ -23,7 +25,7 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    fun login(username: String, password: String, themeViewModel: ThemeViewModel) {
+    fun login(context : Context,username: String, password: String, themeViewModel: ThemeViewModel) {
         if (username.isBlank() || password.isBlank()) {
             _uiState.value = LoginUiState.Error("Usuário e senha são obrigatórios.")
             return
@@ -33,7 +35,7 @@ class LoginViewModel @Inject constructor(
             _uiState.value = LoginUiState.Loading
 
             try {
-                val result = repository.login(username.trim(), password)
+                val result = repository.login(context, username.trim(), password)
 
                 if (result == null) {
                     _uiState.value = LoginUiState.Error("Usuário ou senha inválidos.")

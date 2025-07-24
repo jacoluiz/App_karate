@@ -4,6 +4,7 @@ data class Evento(
     val _id: String,
     val titulo: String,
     val descricao: String,
-    val dataInicio: String, // formato ISO
-    val local: String
+    val dataInicio: String,
+    val local: String,
+    val confirmados: List<String> = emptyList()
 )

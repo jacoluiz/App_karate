@@ -82,6 +82,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -137,23 +138,31 @@ fun EditarPerfilView(
             }
 
             is EditarPerfilUiState.Success -> {
-                EditarPerfilContent(
-                    nome = uiState.nome,
-                    username = uiState.username,
-                    email = uiState.email,
-                    dataNascimento = uiState.idade,
-                    peso = uiState.peso,
-                    altura = uiState.altura,
-                    corFaixa = uiState.corFaixa,
-                    editarPerfilViewModel = editarPerfilViewModel,
-                    themeViewModel = themeViewModel,
-                    onSave = onSave,
-                    onCancelar = onCancelar,
-                    dan = uiState.dan,
-                    academia = uiState.academia,
-                    tamanhoFaixa = uiState.tamanhoFaixa
-                )
+                val lesoes = uiState.lesaoOuLaudosMedicos
+                val registro = uiState.registroAKSD
+
+                if (lesoes != null && registro != null) {
+                    EditarPerfilContent(
+                        nome = uiState.nome,
+                        username = uiState.username,
+                        email = uiState.email,
+                        dataNascimento = uiState.idade,
+                        peso = uiState.peso,
+                        altura = uiState.altura,
+                        corFaixa = uiState.corFaixa,
+                        editarPerfilViewModel = editarPerfilViewModel,
+                        themeViewModel = themeViewModel,
+                        onSave = onSave,
+                        onCancelar = onCancelar,
+                        dan = uiState.dan,
+                        academia = uiState.academia,
+                        tamanhoFaixa = uiState.tamanhoFaixa,
+                        lesoesOuLaudosMedicos = lesoes,
+                        registroAKSD = registro
+                    )
+                }
             }
+
         }
     }
 }
@@ -258,6 +267,8 @@ fun EditarPerfilContent(
     academia: String,
     tamanhoFaixa: String,
     editarPerfilViewModel: EditarPerfilViewModel,
+    lesoesOuLaudosMedicos: String,
+    registroAKSD: String ,
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
     onCancelar: () -> Unit
@@ -273,8 +284,9 @@ fun EditarPerfilContent(
     var currentDan by remember { mutableIntStateOf(dan) }
     var currentAcademia by remember { mutableStateOf(academia) }
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
-    var currentLesaoOuLaudosMedicos by remember { mutableStateOf("") }
-    var currentRegistroAKSD by remember { mutableStateOf("") }
+    var currentLesaoOuLaudosMedicos by remember { mutableStateOf(lesoesOuLaudosMedicos) }
+    var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
+    val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
@@ -554,12 +566,12 @@ fun EditarPerfilContent(
                                 idade = currentDataNascimento,
                                 peso = currentPeso,
                                 altura = currentAltura,
-                                senha = "",
                                 dan = currentDan,
                                 academia = currentAcademia,
                                 tamanhoFaixa = currentTamanhoFaixa,
                                 lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
-                                registroAKSD = currentRegistroAKSD
+                                registroAKSD = currentRegistroAKSD,
+                                context = context
                             )
                             delay(2000L)
                             onSave()

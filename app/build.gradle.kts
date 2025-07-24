@@ -4,6 +4,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp") version ("1.8.10-1.0.9")
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 android {
     namespace = "br.com.shubudo"
@@ -13,8 +14,8 @@ android {
         applicationId = "br.com.shubudo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 19
-        versionName = "2.3"
+        versionCode = 21
+        versionName = "2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -115,6 +116,7 @@ dependencies {
     implementation(libs.aws.android.sdk.core)
     implementation(libs.aws.android.sdk.cognitoidentityprovider)
     implementation(kotlin("reflect"))
+    implementation(libs.firebase.messaging.v2341)
 
 }
 

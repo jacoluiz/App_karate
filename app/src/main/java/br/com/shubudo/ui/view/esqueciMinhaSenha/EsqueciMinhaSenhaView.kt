@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.view.esqueciMinhaSenha
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -64,8 +65,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.ui.components.PasswordRequirement
 import br.com.shubudo.ui.uistate.EsqueciMinhaSenhaUiState
 import br.com.shubudo.ui.viewModel.EsqueciMinhaSenhaViewModel
+import br.com.shubudo.utils.senhaAtendeAosRequisitos
+import br.com.shubudo.utils.validarRequisitosSenha
 import kotlinx.coroutines.delay
 
 @Composable
@@ -83,6 +87,10 @@ fun EsqueciMinhaSenhaView(
     var mostrarConfirmarSenha by remember { mutableStateOf(false) }
     var canResend by remember { mutableStateOf(true) }
     var resendCountdown by remember { mutableIntStateOf(0) }
+    val requisitos = validarRequisitosSenha(viewModel.novaSenha)
+    val mostrarRequisitos =
+        viewModel.novaSenha.isNotBlank() && !senhaAtendeAosRequisitos(viewModel.novaSenha)
+
 
     // Inicializar email se fornecido
     LaunchedEffect(username) {
@@ -454,6 +462,39 @@ fun EsqueciMinhaSenhaView(
                                 )
                             )
 
+                            // Exibe requisitos da senha
+                            AnimatedVisibility(
+                                visible = mostrarRequisitos,
+                                enter = slideInVertically() + fadeIn(),
+                                exit = slideOutVertically() + fadeOut()
+                            ) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                            alpha = 0.5f
+                                        )
+                                    )
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Requisitos da senha:",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        requisitos.forEach { (descricao, atendido) ->
+                                            PasswordRequirement(text = descricao, isMet = atendido)
+                                        }
+                                    }
+                                }
+                            }
+
                             Spacer(modifier = Modifier.height(16.dp))
 
                             OutlinedTextField(
@@ -515,7 +556,8 @@ fun EsqueciMinhaSenhaView(
                                 enabled = !uiState.let { it is EsqueciMinhaSenhaUiState.Loading } &&
                                         viewModel.novaSenha.isNotBlank() &&
                                         viewModel.confirmarSenha.isNotBlank() &&
-                                        viewModel.novaSenha == viewModel.confirmarSenha,
+                                        viewModel.novaSenha == viewModel.confirmarSenha &&
+                                        senhaAtendeAosRequisitos(viewModel.novaSenha),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 if (uiState is EsqueciMinhaSenhaUiState.Loading) {

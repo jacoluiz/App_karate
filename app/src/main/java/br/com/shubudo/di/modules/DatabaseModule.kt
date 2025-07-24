@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import br.com.shubudo.database.KarateDatabase
 import br.com.shubudo.database.dao.ArmamentoDao
+import br.com.shubudo.database.dao.AvisoDao
 import br.com.shubudo.database.dao.DefesaArmaDao
 import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
@@ -96,5 +97,10 @@ class DatabaseModule {
     @Provides
     fun provideTecnicaChaoDao(db: KarateDatabase): TecnicaChaoDao {
         return db.tecnicaChaoDao()
+    }
+
+    @Provides
+    fun provideAvisoDao(db: KarateDatabase): AvisoDao {
+        return db.AvisoDao()
     }
 }

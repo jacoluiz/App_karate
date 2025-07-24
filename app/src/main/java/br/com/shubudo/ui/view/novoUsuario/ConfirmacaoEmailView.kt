@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -72,6 +73,7 @@ fun ConfirmacaoEmailView(
 ) {
     val focusManager = LocalFocusManager.current
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     var codigo by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
@@ -158,7 +160,7 @@ fun ConfirmacaoEmailView(
             isLoading = uiState is ConfirmacaoEmailUiState.Loading,
             onClick = {
                 focusManager.clearFocus()
-                viewModel.confirmarCodigo(themeViewModel)
+                viewModel.confirmarCodigo(context, themeViewModel)
             }
         )
 

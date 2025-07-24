@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,7 +36,7 @@ class ConfirmacaoEmailViewModel @Inject constructor(
         this.senha = senha
     }
 
-    fun confirmarCodigo(themeViewModel: ThemeViewModel) {
+    fun confirmarCodigo(context: Context, themeViewModel: ThemeViewModel) {
         val email = this.email
         val senha = this.senha
 
@@ -51,7 +52,7 @@ class ConfirmacaoEmailViewModel @Inject constructor(
             if (sucesso) {
                 viewModelScope.launch {
                     try {
-                        val usuario = usuarioRepository.login(email, senha)
+                        val usuario = usuarioRepository.login(context, email, senha)
 
                         // Salva localmente agora que o usuário foi confirmado
                         usuario.toUsuarioEntity()?.let { usuarioDao.salvarUsuario(it) }

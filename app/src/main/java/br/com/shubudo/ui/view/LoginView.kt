@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -99,6 +100,7 @@ fun LoginView(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
@@ -183,7 +185,7 @@ fun LoginView(
                 onPasswordChange = { password = it },
                 passwordVisible = passwordVisible,
                 onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
-                onLogin = { viewModel.login(username, password, themeViewModel) },
+                onLogin = { viewModel.login(context, username, password, themeViewModel) },
                 isLoading = uiState is LoginUiState.Loading,
                 usernameFocusRequester = usernameFocusRequester,
                 passwordFocusRequester = passwordFocusRequester,

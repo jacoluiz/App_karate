@@ -1,7 +1,6 @@
 [versions]
 accompanistFlowlayout = "0.30.1"
 accompanistInsets = "0.26.3-beta"
-agp = "8.5.0"
 awsAndroidSdkCognitoidentityprovider = "2.22.6"
 coilCompose = "2.1.0"
 converterGson = "2.11.0"
@@ -9,8 +8,8 @@ core = "12.0.0"
 gson = "2.10.1"
 hiltAndroid = "2.44"
 hiltCompiler = "1.2.0"
-inputMaskAndroid = "7.2.6"
-kotlin = "2.0.0"
+firebaseMessaging = "25.0.0"
+firebaseMessagingVersion = "23.4.1"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -39,6 +38,7 @@ media3Ui = "1.4.1"
 youtubeAndroidPlayerApi = "1.2.2"
 foundationLayoutAndroid = "1.7.0"
 suggestions = "1.0.0"
+symbolProcessingApi = "2.2.0-2.0.2"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
@@ -57,10 +57,11 @@ aws-android-sdk-core = { module = "com.amazonaws:aws-android-sdk-core", version.
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-messaging-v2341 = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessagingVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
-input-mask-android = { module = "com.github.redmadrobot:input-mask-android", version.ref = "inputMaskAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -82,18 +83,14 @@ androidx-room-common = { group = "androidx.room", name = "room-common", version.
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-serialization = { module = "io.github.pdvrieze.xmlutil:serialization" }
+symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingApi" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "uiGraphics" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 vvalidator = { module = "com.afollestad:vvalidator", version.ref = "vvalidator" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Ui" }
-youtube-android-player-api = { module = "com.google.android.youtube:youtube-android-player-api", version.ref = "youtubeAndroidPlayerApi" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 suggestions = { group = "com.google.assistant.appactions", name = "suggestions", version.ref = "suggestions" }
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
-jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
