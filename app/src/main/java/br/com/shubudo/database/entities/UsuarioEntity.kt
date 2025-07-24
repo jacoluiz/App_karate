@@ -14,7 +14,6 @@ data class UsuarioEntity(
     val nome: String,
     val username: String,
     val email: String,
-    val senha: String,
     val peso: String,
     val altura: String,
     val idade: String,
@@ -25,7 +24,8 @@ data class UsuarioEntity(
     val academia: String = "",
     val tamanhoFaixa: String = "",
     val lesaoOuLaudosMedicos: String = "",
-    val registroAKSD: String = ""
+    val registroAKSD: String = "",
+    val fcmToken: String = ""
 )
 
 fun UsuarioEntity.toUsuario(): Usuario {
@@ -34,7 +34,6 @@ fun UsuarioEntity.toUsuario(): Usuario {
         nome = this.nome,
         username = this.username,
         email = this.email,
-        senha = this.senha,
         peso = this.peso,
         altura = this.altura,
         idade = this.idade,
@@ -47,6 +46,7 @@ fun UsuarioEntity.toUsuario(): Usuario {
         faixas = null,
         lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
         registroAKSD = this.registroAKSD,
+        fcmToken = this.fcmToken.ifEmpty { null }
     )
 }
 

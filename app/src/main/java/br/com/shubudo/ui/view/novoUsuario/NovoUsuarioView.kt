@@ -49,13 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.CadastroUiState
-import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import br.com.shubudo.utils.isValidDate
@@ -63,7 +63,6 @@ import br.com.shubudo.utils.isValidDate
 @Composable
 fun NovoUsuarioView(
     themeViewModel: ThemeViewModel,
-    dropDownMenuViewModel: DropDownMenuViewModel,
     novoUsuarioViewModel: NovoUsuarioViewModel = hiltViewModel(),
     onNavigateToLogin: (String, String, String) -> Unit,
 ) {
@@ -72,6 +71,7 @@ fun NovoUsuarioView(
     val currentPage = currentPageIndex + 1
     val totalPages = 3
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
     var dialogMessage by remember { mutableStateOf("") }
@@ -169,7 +169,7 @@ fun NovoUsuarioView(
             },
             onNext = {
                 if (currentPage == totalPages) {
-                    novoUsuarioViewModel.cadastrarUsuario()
+                    novoUsuarioViewModel.cadastrarUsuario(context)
                 } else {
                     currentPageIndex++
                 }

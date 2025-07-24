@@ -3,12 +3,10 @@ package br.com.shubudo.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
@@ -20,7 +18,7 @@ fun KarateNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppDestination.Evento.route,
+        startDestination = AppDestination.Recursos.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
         popEnterTransition = { EnterTransition.None },
@@ -33,7 +31,7 @@ fun KarateNavHost(
                 navController.navigateToNovoUsuario(username.toString())
             },
             onNavigateToHome = {
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
+                navController.navigateToRecursos()
             },
             onNavigateToEsqueciMinhaSenha = {
                 navController.navigateToEsqueciMinhaSenha()
@@ -68,7 +66,7 @@ fun KarateNavHost(
             themeViewModel = themeViewModel,
             onConfirmado = {
                 // Navegar para a tela principal após confirmação bem-sucedida
-                navController.navigateToBottomAppBarItem(BottomAppBarItem.Eventos)
+                navController.navigateToRecursos()
             },
             onBackToLogin = {
                 // Navegar para login quando há falha nas credenciais
@@ -137,31 +135,37 @@ fun KarateNavHost(
         eventoDetalheScreen {
             navController.popBackStack()
         }
-    }
-}
 
-// Navegação para a tela correta dependendo do item da BottomBar
-fun NavController.navigateToBottomAppBarItem(item: BottomAppBarItem) {
-    when (item) {
-        BottomAppBarItem.Conteudo -> {
-            navigateToProgramacao(navOptions {
-                launchSingleTop = true
-                popUpTo(programacaoRoute)
-            })
-        }
-
-        BottomAppBarItem.Perfil -> {
-            navigate(perfilRoute) {
-                popUpTo(perfilRoute) { inclusive = true }
-                launchSingleTop = true
+        // Tela de Recursos
+        recursosScreen(
+            onNavigateToAvisos = {
+                navController.navigateToAvisos()
+            },
+            onNavigateToEventos = {
+                navController.navigateToEventos()
+            },
+            onNavigateToProgramacao = {
+                navController.navigateToProgramacao(navOptions {
+                    launchSingleTop = true
+                    popUpTo(programacaoRoute)
+                })
             }
-        }
+        )
 
-        BottomAppBarItem.Eventos -> {
-            navigateToEventos(navOptions {
-                launchSingleTop = true
-                popUpTo(eventosRoute)
-            })
-        }
+        // Tela de Avisos
+        avisosScreen(
+            onNavigateToCadastroAviso = { navController.navigateToCadastroAviso() },
+            onNavigateToEditarAviso = { avisoId ->
+                navController.navigateToCadastroAviso(avisoId)
+            }
+        )
+
+        // Tela de Cadastro de Aviso
+        cadastroAvisoScreen(
+            onNavigateBack = {
+                navController.popBackStack()
+            }
+        )
     }
 }
+

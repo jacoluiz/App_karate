@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "337944636423",
+    "project_id": "app-karate-3006c",
+    "storage_bucket": "app-karate-3006c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:337944636423:android:1ef12ed7b38342de03cea2",
+        "android_client_info": {
+          "package_name": "br.com.shubudo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjKvNR0sELBN6n4XIri4xX1Ub8k7gyTc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

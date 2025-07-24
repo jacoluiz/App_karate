@@ -82,6 +82,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -275,6 +276,7 @@ fun EditarPerfilContent(
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
     var currentLesaoOuLaudosMedicos by remember { mutableStateOf("") }
     var currentRegistroAKSD by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
     var showFaixaDialog by remember { mutableStateOf(false) }
@@ -554,12 +556,12 @@ fun EditarPerfilContent(
                                 idade = currentDataNascimento,
                                 peso = currentPeso,
                                 altura = currentAltura,
-                                senha = "",
                                 dan = currentDan,
                                 academia = currentAcademia,
                                 tamanhoFaixa = currentTamanhoFaixa,
                                 lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
-                                registroAKSD = currentRegistroAKSD
+                                registroAKSD = currentRegistroAKSD,
+                                context = context
                             )
                             delay(2000L)
                             onSave()

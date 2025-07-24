@@ -1,8 +1,10 @@
 package br.com.shubudo.utils
 
+import android.content.Context
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -21,6 +23,19 @@ fun String.toLocalDateTimeOrNull(): LocalDateTime? {
         LocalDateTime.parse(this, DateTimeFormatter.ISO_DATE_TIME)
     } catch (e: Exception) {
         null
+    }
+}
+
+fun formatarDataHoraLocal(isoDate: String): String {
+    return try {
+        val instant = Instant.parse(isoDate)
+        val zonaBrasil = ZoneId.of("America/Sao_Paulo")
+        val dateTime = instant.atZone(zonaBrasil)
+
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", Locale("pt", "BR"))
+        dateTime.format(formatter)
+    } catch (e: Exception) {
+        isoDate // retorna como veio caso dê erro
     }
 }
 
@@ -364,4 +379,9 @@ fun formatDateForDisplay(dateString: String): String {
     }
 
     return dateString
+}
+
+fun getFcmToken(context: Context): String? {
+    val sharedPref = context.getSharedPreferences("fcm_prefs", Context.MODE_PRIVATE)
+    return sharedPref.getString("fcm_token", null)
 }

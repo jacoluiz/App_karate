@@ -1,10 +1,12 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
+import br.com.shubudo.utils.getFcmToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,12 +87,12 @@ class EditarPerfilViewModel @Inject constructor(
         idade: String,
         peso: String,
         altura: String,
-        senha: String,
         dan: Int,
         academia: String,
         tamanhoFaixa: String,
         lesaoOuLaudosMedicos: String,
-        registroAKSD: String
+        registroAKSD: String,
+        context: Context
     ) {
         viewModelScope.launch {
             try {
@@ -103,17 +105,16 @@ class EditarPerfilViewModel @Inject constructor(
                     idade = idade,
                     peso = peso,
                     altura = altura,
-                    senha = senha,
                     dan = dan,
                     academia = academia,
                     tamanhoFaixa = tamanhoFaixa,
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos,
-                    registroAKSD = registroAKSD,
+                    registroAKSD = registroAKSD
                     // Caso tenha 'id', lembre-se de passá-lo aqui também
                 )
 
 
-                val resultado = repository.atualizarUsuario(usuarioAtualizado)
+                val resultado = repository.atualizarUsuario(context, usuarioAtualizado)
 
                 // Se a atualização foi bem-sucedida (resultado != null),
                 // atualizamos o estado para refletir os novos dados.

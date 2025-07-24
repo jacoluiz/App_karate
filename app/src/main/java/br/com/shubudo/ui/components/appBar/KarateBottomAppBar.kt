@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.SportsMartialArts
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,23 +24,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import br.com.shubudo.navigation.AppDestination
 import br.com.shubudo.navigation.perfilRoute
-import br.com.shubudo.navigation.eventosRoute
-import br.com.shubudo.navigation.programacaoRoute
+import br.com.shubudo.navigation.recursosRoute
 
 sealed class BottomAppBarItem(
     val icon: ImageVector, val label: String, val route: String
 ) {
-    object Conteudo : BottomAppBarItem(
-        Icons.Default.SportsMartialArts, "Conteudo", programacaoRoute
+    object Recursos : BottomAppBarItem(
+        Icons.Default.Apps, "Recursos", recursosRoute
     )
 
     object Perfil : BottomAppBarItem(
         Icons.Default.AccountCircle, "Perfil", perfilRoute
     )
 
-    object Eventos : BottomAppBarItem(
-        Icons.Default.Event, "Eventos", eventosRoute
-    )
 }
 
 @Composable
@@ -54,16 +49,15 @@ fun KarateBottomAppBar(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
-        BottomAppBarItem.Eventos,
-        BottomAppBarItem.Perfil,
-        BottomAppBarItem.Conteudo
+        BottomAppBarItem.Recursos,
+        BottomAppBarItem.Perfil
     )
 
     val selectedItem = when {
         currentRoute == AppDestination.Login.route -> BottomAppBarItem.Perfil // força seleção de "Perfil" para a tela de login
-        else -> items.firstOrNull { currentRoute?.startsWith(it.route) == true } ?: BottomAppBarItem.Eventos
+        else -> items.firstOrNull { currentRoute?.startsWith(it.route) == true }
+            ?: BottomAppBarItem.Perfil
     }
-
 
     BottomAppBar(
         modifier = modifier,

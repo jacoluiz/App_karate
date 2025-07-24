@@ -19,7 +19,6 @@ fun NavGraphBuilder.novoUsuarioScreen(
     composable(novoUsuarioRote) { backStackEntry ->
         NovoUsuarioView(
             themeViewModel = themeViewModel,
-            dropDownMenuViewModel = dropDownMenuViewModel,
             onNavigateToLogin = onNavigateToLogin,
         )
     }
@@ -27,7 +26,6 @@ fun NavGraphBuilder.novoUsuarioScreen(
     composable(novoUsuarioRoteSemUsername) {
         NovoUsuarioView(
             themeViewModel = themeViewModel,
-            dropDownMenuViewModel = dropDownMenuViewModel,
             onNavigateToLogin = onNavigateToLogin
         )
     }

@@ -40,6 +40,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.shubudo.navigation.AppDestination
 import br.com.shubudo.navigation.KarateNavHost
+import br.com.shubudo.navigation.avisosRoute
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
 import br.com.shubudo.navigation.detalheMovimentoArgument
@@ -52,6 +53,7 @@ import br.com.shubudo.navigation.novoUsuarioRote
 import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
 import br.com.shubudo.navigation.perfilRoute
 import br.com.shubudo.navigation.programacaoRoute
+import br.com.shubudo.navigation.recursosRoute
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
@@ -61,6 +63,7 @@ import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.PerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import br.com.shubudo.utils.isInternetAvailable
+import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -72,6 +75,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         checkAndRequestPermissions()
         SessionManager.inicializar(applicationContext)
 
@@ -84,105 +88,112 @@ class MainActivity : ComponentActivity() {
             }
 
             when (isOnline) {
-                null -> { /* carregando */ }
+                null -> {
+                }
+
                 false -> OfflineScreen(onRetry = {
                     isOnline = isInternetAvailable(context)
                 })
+
                 true -> {
-            val themeViewModel: ThemeViewModel = viewModel()
-            val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
-            val perfilViewModel: PerfilViewModel = viewModel()
+                    val themeViewModel: ThemeViewModel = viewModel()
+                    val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
+                    val perfilViewModel: PerfilViewModel = viewModel()
 
-            val uiState by perfilViewModel.uiState.collectAsState()
-            val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
+                    val uiState by perfilViewModel.uiState.collectAsState()
+                    val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
 
-            // Priorizar a faixa selecionada no ThemeViewModel sobre a faixa do usuário logado
-            val faixaParaTema = themeViewModel.getCurrentFaixa()
-                ?: SessionManager.usuarioLogado?.corFaixa
-                ?: themeViewModel.getFaixaAtualOuAleatoria()
+                    // Priorizar a faixa selecionada no ThemeViewModel sobre a faixa do usuário logado
+                    val faixaParaTema = themeViewModel.getCurrentFaixa()
+                        ?: SessionManager.usuarioLogado?.corFaixa
+                        ?: themeViewModel.getFaixaAtualOuAleatoria()
 
-            AppShubudoTheme(faixa = faixaParaTema) {
+                    AppShubudoTheme(faixa = faixaParaTema) {
 
-                val navController = rememberNavController()
-                val backStackEntryState by navController.currentBackStackEntryAsState()
-                val currentDestination = backStackEntryState?.destination
+                        val navController = rememberNavController()
+                        val backStackEntryState by navController.currentBackStackEntryAsState()
+                        val currentDestination = backStackEntryState?.destination
 
-                Surface {
-                    val isShowTopBar = when (currentDestination?.route) {
-                        detalheMovimentoRuteFullpath,
-                        AppDestination.Login.route -> false
+                        Surface {
+                            val isShowTopBar = when (currentDestination?.route) {
+                                detalheMovimentoRuteFullpath,
+                                AppDestination.Login.route -> false
 
-                        else -> true
-                    }
+                                else -> true
+                            }
 
-                    val isShowBottomBar = when (currentDestination?.route) {
-                        AppDestination.Perfil.route,
-                        AppDestination.Programacao.route,
-                        AppDestination.Login.route,
-                        AppDestination.Evento.route -> true
+                            val isShowBottomBar = when (currentDestination?.route) {
+                                AppDestination.Recursos.route,
+                                AppDestination.Perfil.route,
+                                AppDestination.Login.route
+                                    -> true
 
-                        else -> false
-                    }
+                                else -> false
+                            }
 
+                            val topAppBarTitle = when (currentDestination?.route) {
+                                editarPerfilRoute -> "Editar Perfil"
+                                perfilRoute -> "Perfil"
+                                eventosRoute -> "Evento"
+                                AppDestination.Login.route -> "Login"
+                                programacaoRoute -> "Conteúdo"
+                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
+                                    detalheFaixaArgument
+                                )
 
-                    val topAppBarTitle = when (currentDestination?.route) {
-                        editarPerfilRoute -> "Editar Perfil"
-                        perfilRoute -> "Perfil"
-                        AppDestination.Evento.route -> "Evento"
-                        AppDestination.Login.route -> "Login"
-                        AppDestination.Programacao.route -> "Conteúdo"
-                        detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
-                            detalheFaixaArgument
-                        )
+                                detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
+                                    detalheMovimentoArgument
+                                )
 
-                        detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
-                            detalheMovimentoArgument
-                        )
+                                novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
+                                else -> "Shubu-dô App"
+                            }
 
-                        novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
-                        else -> "Shubu-dô App"
-                    }
+                            val showBottomBack = when (currentDestination?.route) {
+                                detalheFaixaRuteFullpath,
+                                novoUsuarioRote,
+                                novoUsuarioRoteSemUsername,
+                                esqueciMinhaSenhaRote,
+                                avisosRoute,
+                                eventosRoute,
+                                programacaoRoute,
+                                esqueciMinhaSenhaRoteSemUsername -> true
 
-                    val showBottomBack = when (currentDestination?.route) {
-                        detalheFaixaRuteFullpath,
-                        novoUsuarioRote,
-                        novoUsuarioRoteSemUsername,
-                        esqueciMinhaSenhaRote,
-                        esqueciMinhaSenhaRoteSemUsername -> true
+                                else -> false
+                            }
 
-                        else -> false
-                    }
+                            val showColorTopAppBar = when (currentDestination?.route) {
+                                detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
+                                else -> true
+                            }
 
-                    val showColorTopAppBar = when (currentDestination?.route) {
-                        detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
-                        else -> true
-                    }
+                            val showTitleTopAppBar = when (currentDestination?.route) {
+                                detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
+                                else -> true
+                            }
 
-                    val showTitleTopAppBar = when (currentDestination?.route) {
-                        detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
-                        else -> true
-                    }
-
-                    KarateApp(
-                        isShowTopBar = isShowTopBar,
-                        isShowBottomBar = isShowBottomBar,
-                        topAppBarTitle = topAppBarTitle ?: "",
-                        showBottomBack = showBottomBack,
-                        navController = navController,
-                        showColorTopAppBar = showColorTopAppBar,
-                        showTitleTopAppBar = showTitleTopAppBar,
-                        themeViewModel = themeViewModel,
-                        isLoggedIn = isLoggedIn
-                    ) {
-                        KarateNavHost(
-                            navController = navController,
-                            themeViewModel = themeViewModel,
-                            dropDownMenuViewModel = dropDownMenuViewModel
-                        )
+                            KarateApp(
+                                isShowTopBar = isShowTopBar,
+                                isShowBottomBar = isShowBottomBar,
+                                topAppBarTitle = topAppBarTitle ?: "",
+                                showBottomBack = showBottomBack,
+                                navController = navController,
+                                showColorTopAppBar = showColorTopAppBar,
+                                showTitleTopAppBar = showTitleTopAppBar,
+                                themeViewModel = themeViewModel,
+                                isLoggedIn = isLoggedIn
+                            ) {
+                                KarateNavHost(
+                                    navController = navController,
+                                    themeViewModel = themeViewModel,
+                                    dropDownMenuViewModel = dropDownMenuViewModel
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }}}
+        }
     }
 
     private fun checkAndRequestPermissions() {
@@ -300,15 +311,8 @@ fun KarateApp(
                                     }
                                 }
 
-                                BottomAppBarItem.Eventos -> {
-                                    navController.navigate(eventosRoute) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-
-                                BottomAppBarItem.Conteudo -> {
-                                    navController.navigate(programacaoRoute) {
+                                BottomAppBarItem.Recursos -> {
+                                    navController.navigate(recursosRoute) {
                                         launchSingleTop = true
                                         restoreState = true
                                     }
