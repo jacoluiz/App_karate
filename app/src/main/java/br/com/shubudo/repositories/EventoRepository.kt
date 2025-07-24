@@ -5,6 +5,7 @@ import br.com.shubudo.database.entities.toEvento
 import br.com.shubudo.model.Evento
 import br.com.shubudo.network.services.EventoResponse
 import br.com.shubudo.network.services.EventoService
+import br.com.shubudo.network.services.NovoEventoRequest
 import br.com.shubudo.network.services.toEventoEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,10 @@ class EventoRepository @Inject constructor(
         return eventoDao.getEventos().map { list -> list.map { it.toEvento() } }
     }
 
+    // Obtém evento por ID
+    suspend fun getEventoPorId(eventoId: String): Evento? {
+        return eventoDao.getEventoPorId(eventoId)?.toEvento()
+    }
     suspend fun confirmarPresenca(evento: Evento): Evento {
         val response = eventoService.atualizarEvento(evento._id, evento)
 
@@ -40,5 +45,32 @@ class EventoRepository @Inject constructor(
         } else {
             throw Exception("Erro ao atualizar evento: ${response.code()}")
         }
+    }
+
+    suspend fun deletarEvento(eventoId: String) {
+        eventoService.deletarEvento(eventoId)
+        eventoDao.deletarPorId(eventoId)
+    }
+
+    suspend fun criarEvento(titulo: String, descricao: String, dataInicio: String, local: String) {
+        val novoEvento = NovoEventoRequest(
+            titulo = titulo,
+            descricao = descricao,
+            dataInicio = dataInicio,
+            local = local
+        )
+        eventoService.criarEvento(novoEvento)
+        refreshEventos()
+    }
+
+    suspend fun editarEvento(eventoId: String, titulo: String, descricao: String, dataInicio: String, local: String) {
+        val eventoAtualizado = NovoEventoRequest(
+            titulo = titulo,
+            descricao = descricao,
+            dataInicio = dataInicio,
+            local = local
+        )
+        eventoService.editarEvento(eventoId, eventoAtualizado)
+        refreshEventos()
     }
 }

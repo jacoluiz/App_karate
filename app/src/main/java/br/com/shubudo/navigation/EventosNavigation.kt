@@ -14,7 +14,9 @@ internal const val eventosRoute = "eventos"
 
 fun NavGraphBuilder.eventosScreen(
     onReload: () -> Unit,
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    onAddEventoClick: () -> Unit = {},
+    onEditEventoClick: (String) -> Unit = {}
 ) {
     composable(
         route = eventosRoute,
@@ -29,7 +31,10 @@ fun NavGraphBuilder.eventosScreen(
         EventosView(
             uiState = uiState,
             onReload = { viewModel.recarregarEventos() },
-            onEventClick = onEventClick
+            onEventClick = onEventClick,
+            onAddEventoClick = onAddEventoClick,
+            onEditEventoClick = onEditEventoClick,
+            onDeleteEvento = { eventoId -> viewModel.deletarEvento(eventoId) }
         )
     }
 }

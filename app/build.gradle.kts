@@ -117,6 +117,7 @@ dependencies {
     implementation(libs.aws.android.sdk.cognitoidentityprovider)
     implementation(kotlin("reflect"))
     implementation(libs.firebase.messaging.v2341)
+    implementation(libs.app.update.ktx)
 }
 
 // Allow references to generated code

@@ -18,4 +18,11 @@ interface EventoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun salvarTodos(vararg eventos: EventoEntity)
+
+    @Query("SELECT * FROM Evento WHERE _id = :id")
+    suspend fun getEventoPorId(id: String): EventoEntity?
+
+    @Query("DELETE FROM Evento WHERE _id = :id")
+    suspend fun deletarPorId(id: String)
+
 }

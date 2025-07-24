@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -21,11 +23,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +45,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +63,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.SessionManager
+import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Evento
+import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
+import br.com.shubudo.ui.viewModel.EventoViewModel
+import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -98,9 +117,13 @@ fun EventosView(
     uiState: EventosUiState,
     onReload: () -> Unit = {},
     onEventClick: (String) -> Unit = {},
-    onAddEventoClick: () -> Unit = {}
+    onAddEventoClick: () -> Unit = {},
+    onEditEventoClick: (String) -> Unit = {},
+    onDeleteEvento: (String) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
+    val usuarioListViewModel: UsuarioListViewModel = hiltViewModel()
+    val usuarios by usuarioListViewModel.usuarios.collectAsState()
 
 
     LoadingWrapper(
@@ -249,17 +272,51 @@ fun EventosView(
                         ) {
                             if (filteredFuturos.isNotEmpty()) {
                                 item {
-                                    SectionHeader(
-                                        title = "Próximos Eventos",
-                                        subtitle = "${filteredFuturos.size} evento${if (filteredFuturos.size != 1) "s" else ""}",
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        SectionHeader(
+                                            title = "Próximos Eventos",
+                                            subtitle = "${filteredFuturos.size} evento${if (filteredFuturos.size != 1) "s" else ""}",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.weight(1f)
+                                        )
+
+                                        if (SessionManager.usuarioLogado?.perfil?.equals(
+                                                "adm",
+                                                ignoreCase = true
+                                            ) == true
+                                        ) {
+                                            FloatingActionButton(
+                                                onClick = onAddEventoClick,
+                                                modifier = Modifier.size(48.dp),
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Add,
+                                                    contentDescription = "Criar novo evento",
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                                 items(filteredFuturos) { evento ->
                                     EventoItem(
                                         evento = evento,
                                         isPast = false,
-                                        onClick = { onEventClick(evento._id) })
+                                        onClick = { onEventClick(evento._id) },
+                                        isAdmin = SessionManager.usuarioLogado?.perfil?.equals(
+                                            "adm",
+                                            ignoreCase = true
+                                        ) == true,
+                                        usuarios = usuarios,
+                                        onDeleteEvento = onDeleteEvento,
+                                        onEditEvento = onEditEventoClick
+                                    )
                                 }
                             }
 
@@ -276,7 +333,15 @@ fun EventosView(
                                     EventoItem(
                                         evento = evento,
                                         isPast = true,
-                                        onClick = { onEventClick(evento._id) })
+                                        onClick = { onEventClick(evento._id) },
+                                        isAdmin = SessionManager.usuarioLogado?.perfil?.equals(
+                                            "adm",
+                                            ignoreCase = true
+                                        ) == true,
+                                        usuarios = usuarios,
+                                        onDeleteEvento = onDeleteEvento,
+                                        onEditEvento = onEditEventoClick
+                                    )
                                 }
                             }
                         }
@@ -286,18 +351,93 @@ fun EventosView(
                                 ignoreCase = true
                             ) == true
                         ) {
-                            FloatingActionButton(
-                                onClick = onAddEventoClick,
+                            // Botão flutuante movido para dentro das seções
+                        }
+                    }
+                }
+
+                is EventosUiState.Empty -> {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        bottomStart = 32.dp,
+                                        bottomEnd = 32.dp
+                                    )
+                                )
+                        ) {
+                            Column(
                                 modifier = Modifier
-                                    .align(Alignment.End)
-                                    .padding(16.dp),
-                                containerColor = MaterialTheme.colorScheme.primary
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Adicionar Evento",
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(48.dp)
                                 )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Eventos do karate",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Fique por dentro de todas as atividades",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Nenhum evento disponível no momento",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                                if (SessionManager.usuarioLogado?.perfil?.equals(
+                                        "adm",
+                                        ignoreCase = true
+                                    ) == true
+                                ) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(onClick = onAddEventoClick) {
+                                        Icon(Icons.Default.Add, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Criar Primeiro Evento")
+                                    }
+                                }
                             }
                         }
                     }
@@ -308,7 +448,19 @@ fun EventosView(
 }
 
 @Composable
-fun EventoItem(evento: Evento, isPast: Boolean = false, onClick: () -> Unit = {}) {
+fun EventoItem(
+    evento: Evento,
+    isPast: Boolean = false,
+    onClick: () -> Unit = {},
+    isAdmin: Boolean = false,
+    usuarios: List<Usuario> = emptyList(),
+    onDeleteEvento: (String) -> Unit = {},
+    onEditEvento: (String) -> Unit = {}
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showUsersDialog by remember { mutableStateOf(false) }
+
     val cardColor = if (isPast) {
         MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
     } else {
@@ -424,6 +576,266 @@ fun EventoItem(evento: Evento, isPast: Boolean = false, onClick: () -> Unit = {}
                     )
                 }
             }
+
+            // Menu de 3 pontos para admin
+            if (isAdmin) {
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções",
+                            tint = textColor.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.Group,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Ver confirmados")
+                                }
+                            },
+                            onClick = {
+                                showMenu = false
+                                showUsersDialog = true
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Editar evento")
+                                }
+                            },
+                            onClick = {
+                                showMenu = false
+                                onEditEvento(evento._id)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Excluir evento",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            onClick = {
+                                showMenu = false
+                                showDeleteDialog = true
+                            }
+                        )
+                    }
+                }
+            }
+
+        }
+        // Indicador de público alvo
+        if (usuarioLogado?.perfil == "adm") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            )
+            {
+                if (evento.confirmados.isNotEmpty()) {
+                    Text(
+                        text = "${evento.confirmados.size} usuário(s) confirmado(s)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    )
+                } else {
+                    Text(
+                        text = "Sem confirmações",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+
+        // Dialog de confirmação de exclusão
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Confirmar Exclusão") },
+                text = {
+                    Column {
+                        Text("Deseja realmente excluir este evento?")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Título: ${evento.titulo}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Esta ação não pode ser desfeita.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDeleteEvento(evento._id)
+                            showDeleteDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Excluir")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDeleteDialog = false }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+        // Dialog de visualização de usuários confirmados
+        if (showUsersDialog) {
+            Dialog(
+                onDismissRequest = { showUsersDialog = false }
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Usuários confirmados",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        if (evento.confirmados.isEmpty()) {
+                            Text(
+                                text = "Nenhum usuário confirmou presença ainda.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(vertical = 16.dp)
+                            )
+                        } else {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(evento.confirmados) { email ->
+                                    val usuario = usuarios.find { it.email == email }
+                                    if (usuario != null) {
+                                        Card(
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        text = usuario.nome,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        text = usuario.email,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(
+                                                            alpha = 0.7f
+                                                        )
+                                                    )
+                                                }
+                                                Card(
+                                                    colors = CardDefaults.cardColors(
+                                                        containerColor = MaterialTheme.colorScheme.primary
+                                                    ),
+                                                    modifier = Modifier.wrapContentWidth()
+                                                ) {
+                                                    Text(
+                                                        text = usuario.corFaixa,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 8.dp,
+                                                            vertical = 4.dp
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        Card(
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                            )
+                                        ) {
+                                            Text(
+                                                text = email,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.padding(12.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = { showUsersDialog = false }
+                            ) {
+                                Text("Fechar")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -433,9 +845,10 @@ fun EventoItem(evento: Evento, isPast: Boolean = false, onClick: () -> Unit = {}
 fun SectionHeader(
     title: String,
     subtitle: String,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,

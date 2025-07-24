@@ -49,4 +49,31 @@ class EventoViewModel @Inject constructor(
                 }
         }
     }
+
+    fun deletarEvento(eventoId: String) {
+        viewModelScope.launch {
+            try {
+                eventoRepository.deletarEvento(eventoId)
+                // Atualiza lista manualmente após a exclusão
+                val estadoAtual = _eventosUiState.value
+                if (estadoAtual is EventosUiState.Success) {
+                    val eventosAtualizados = estadoAtual.eventosAgrupados.values.flatten()
+                        .filterNot { it._id == eventoId }
+
+                    if (eventosAtualizados.isEmpty()) {
+                        _eventosUiState.update { EventosUiState.Empty }
+                    } else {
+                        val novoAgrupamento = eventosAtualizados.groupBy {
+                            it.dataInicio.substring(0, 10)
+                        }
+                        _eventosUiState.update {
+                            EventosUiState.Success(eventosAgrupados = novoAgrupamento)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Log do erro, mas não altera o estado
+            }
+        }
+    }
 }

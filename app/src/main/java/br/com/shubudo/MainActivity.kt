@@ -1,5 +1,7 @@
 package br.com.shubudo
 
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -63,6 +65,10 @@ import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.PerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import br.com.shubudo.utils.isInternetAvailable
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -70,11 +76,14 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val REQUEST_PERMISSION_CODE = 100
+    private val REQUEST_CODE_UPDATE = 1234
+    private lateinit var appUpdateManager: AppUpdateManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
         super.onCreate(savedInstanceState)
+        appUpdateManager = AppUpdateManagerFactory.create(this)
         FirebaseApp.initializeApp(this)
         checkAndRequestPermissions()
         SessionManager.inicializar(applicationContext)
@@ -88,46 +97,34 @@ class MainActivity : ComponentActivity() {
             }
 
             when (isOnline) {
-                null -> {
-                }
-
-                false -> OfflineScreen(onRetry = {
-                    isOnline = isInternetAvailable(context)
-                })
-
+                null -> {}
+                false -> OfflineScreen(onRetry = { isOnline = isInternetAvailable(context) })
                 true -> {
                     val themeViewModel: ThemeViewModel = viewModel()
                     val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
                     val perfilViewModel: PerfilViewModel = viewModel()
-
                     val uiState by perfilViewModel.uiState.collectAsState()
                     val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
 
-                    // Priorizar a faixa selecionada no ThemeViewModel sobre a faixa do usuário logado
                     val faixaParaTema = themeViewModel.getCurrentFaixa()
                         ?: SessionManager.usuarioLogado?.corFaixa
                         ?: themeViewModel.getFaixaAtualOuAleatoria()
 
                     AppShubudoTheme(faixa = faixaParaTema) {
-
                         val navController = rememberNavController()
                         val backStackEntryState by navController.currentBackStackEntryAsState()
                         val currentDestination = backStackEntryState?.destination
 
                         Surface {
                             val isShowTopBar = when (currentDestination?.route) {
-                                detalheMovimentoRuteFullpath,
-                                AppDestination.Login.route -> false
-
+                                detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
                                 else -> true
                             }
 
                             val isShowBottomBar = when (currentDestination?.route) {
                                 AppDestination.Recursos.route,
                                 AppDestination.Perfil.route,
-                                AppDestination.Login.route
-                                    -> true
-
+                                AppDestination.Login.route -> true
                                 else -> false
                             }
 
@@ -137,14 +134,8 @@ class MainActivity : ComponentActivity() {
                                 eventosRoute -> "Evento"
                                 AppDestination.Login.route -> "Login"
                                 programacaoRoute -> "Conteúdo"
-                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
-                                    detalheFaixaArgument
-                                )
-
-                                detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
-                                    detalheMovimentoArgument
-                                )
-
+                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(detalheFaixaArgument)
+                                detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(detalheMovimentoArgument)
                                 novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
                                 else -> "Shubu-dô App"
                             }
@@ -158,19 +149,11 @@ class MainActivity : ComponentActivity() {
                                 eventosRoute,
                                 programacaoRoute,
                                 esqueciMinhaSenhaRoteSemUsername -> true
-
                                 else -> false
                             }
 
-                            val showColorTopAppBar = when (currentDestination?.route) {
-                                detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
-                                else -> true
-                            }
-
-                            val showTitleTopAppBar = when (currentDestination?.route) {
-                                detalheMovimentoRuteFullpath, AppDestination.Login.route -> false
-                                else -> true
-                            }
+                            val showColorTopAppBar = currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
+                            val showTitleTopAppBar = showColorTopAppBar
 
                             KarateApp(
                                 isShowTopBar = isShowTopBar,
@@ -193,6 +176,35 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkForUpdate()
+    }
+
+    private fun checkForUpdate() {
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (
+                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    this,
+                    REQUEST_CODE_UPDATE
+                )
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_UPDATE && resultCode != Activity.RESULT_OK) {
+            finish()
         }
     }
 
@@ -226,14 +238,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
     private fun hideSystemUI() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.let {
@@ -244,6 +248,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Composable
 fun KarateApp(

@@ -399,3 +399,56 @@ fun validarRequisitosSenha(senha: String): Map<String, Boolean> {
 fun senhaAtendeAosRequisitos(senha: String): Boolean {
     return validarRequisitosSenha(senha).all { it.value }
 }
+
+fun applySimpleTimeMask(input: TextFieldValue): TextFieldValue {
+    val digits = input.text.filter { it.isDigit() }.take(4)
+
+    var hour = ""
+    var minute = ""
+
+    when (digits.length) {
+        1 -> {
+            // Primeiro dígito da hora: no máximo 2
+            val first = digits[0].digitToInt().coerceAtMost(2)
+            hour = "$first"
+        }
+
+        2 -> {
+            val first = digits[0].digitToInt().coerceAtMost(2)
+            val secondLimit = if (first == 2) 3 else 9
+            val second = digits[1].digitToInt().coerceAtMost(secondLimit)
+            hour = "$first$second"
+        }
+
+        3 -> {
+            val first = digits[0].digitToInt().coerceAtMost(2)
+            val secondLimit = if (first == 2) 3 else 9
+            val second = digits[1].digitToInt().coerceAtMost(secondLimit)
+            hour = "$first$second"
+
+            val third = digits[2].digitToInt().coerceAtMost(5)
+            minute = "$third"
+        }
+
+        4 -> {
+            val first = digits[0].digitToInt().coerceAtMost(2)
+            val secondLimit = if (first == 2) 3 else 9
+            val second = digits[1].digitToInt().coerceAtMost(secondLimit)
+            hour = "$first$second"
+
+            val third = digits[2].digitToInt().coerceAtMost(5)
+            val fourth = digits[3].digitToInt().coerceAtMost(9)
+            minute = "$third$fourth"
+        }
+    }
+
+    val result = when {
+        digits.isEmpty() -> ""
+        digits.length <= 2 -> hour
+        else -> "$hour:$minute"
+    }
+
+    return TextFieldValue(result, TextRange(result.length))
+}
+
+

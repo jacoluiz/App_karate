@@ -60,9 +60,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Aviso
+import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.viewModel.AvisosViewModel
+import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
 
 @Composable
@@ -73,6 +75,8 @@ fun AvisosView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val usuarioLogado = SessionManager.usuarioLogado
+    val usuarioListViewModel: UsuarioListViewModel = hiltViewModel()
+    val usuarios by usuarioListViewModel.usuarios.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.avisoParaEditar.collect { avisoId ->
@@ -286,6 +290,7 @@ fun AvisosView(
                                     aviso = aviso,
                                     isAdmin = usuarioLogado.perfil == "adm",
                                     userEmail = usuarioLogado.email,
+                                    usuarios = usuarios,
                                     onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
                                     onEditAviso = { onNavigateToEditarAviso(aviso.id) }
                                 )
@@ -303,6 +308,7 @@ fun AvisoCard(
     aviso: Aviso,
     isAdmin: Boolean,
     userEmail: String,
+    usuarios: List<Usuario> = emptyList(),
     onDeleteAviso: (String) -> Unit,
     onEditAviso: (Aviso) -> Unit
 ) {
@@ -587,16 +593,58 @@ fun AvisoCard(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(aviso.publicoAlvo) { email ->
-                                Card(
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                                    )
-                                ) {
-                                    Text(
-                                        text = email,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(12.dp)
-                                    )
+                                val usuario = usuarios.find { it.email == email }
+                                if (usuario != null) {
+                                    Card(
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = usuario.nome,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = usuario.email,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                            Card(
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary
+                                                ),
+                                                modifier = Modifier.wrapContentWidth()
+                                            ) {
+                                                Text(
+                                                    text = usuario.corFaixa,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Card(
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    ) {
+                                        Text(
+                                            text = email,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.padding(12.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

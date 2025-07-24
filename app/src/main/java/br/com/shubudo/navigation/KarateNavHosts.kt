@@ -29,11 +29,11 @@ fun KarateNavHost(
             when (targetState.destination.route) {
                 AppDestination.Recursos.route -> slideInHorizontally(
                     initialOffsetX = { -it }, // entra pela esquerda
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeIn()
                 else -> slideInHorizontally(
                     initialOffsetX = { it }, // entra pela direita
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeIn()
             }
         },
@@ -41,11 +41,11 @@ fun KarateNavHost(
             when (initialState.destination.route) {
                 AppDestination.Recursos.route -> slideOutHorizontally(
                     targetOffsetX = { -it }, // sai pela esquerda
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeOut()
                 else -> slideOutHorizontally(
                     targetOffsetX = { it }, // sai pela direita
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeOut()
             }
         },
@@ -53,11 +53,11 @@ fun KarateNavHost(
             when (targetState.destination.route) {
                 AppDestination.Recursos.route -> slideInHorizontally(
                     initialOffsetX = { it }, // volta da direita
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeIn()
                 else -> slideInHorizontally(
                     initialOffsetX = { -it }, // volta da esquerda
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeIn()
             }
         },
@@ -65,11 +65,11 @@ fun KarateNavHost(
             when (initialState.destination.route) {
                 AppDestination.Recursos.route -> slideOutHorizontally(
                     targetOffsetX = { it }, // sai pela direita
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeOut()
                 else -> slideOutHorizontally(
                     targetOffsetX = { -it }, // sai pela esquerda
-                    animationSpec = tween(300)
+                    animationSpec = tween(500)
                 ) + fadeOut()
             }
         }
@@ -97,7 +97,9 @@ fun KarateNavHost(
             onReload = { navController.navigate(eventosRoute) },
             onEventClick = { eventoId ->
                 navController.navigateToEventoDetalhe(eventoId)
-            }
+            },
+            onAddEventoClick = { navController.navigateToCadastroEvento() },
+            onEditEventoClick = { eventoId -> navController.navigateToCadastroEvento(eventoId) }
         )
 
         // Tela de Perfil
@@ -202,6 +204,13 @@ fun KarateNavHost(
 
         // Tela de Cadastro de Aviso
         cadastroAvisoScreen(
+            onNavigateBack = {
+                navController.popBackStack()
+            }
+        )
+
+        // Tela de Cadastro de Evento
+        cadastroEventoScreen(
             onNavigateBack = {
                 navController.popBackStack()
             }
