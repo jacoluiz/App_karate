@@ -389,6 +389,7 @@ fun getFcmToken(context: Context): String? {
 fun validarRequisitosSenha(senha: String): Map<String, Boolean> {
     val requisitos = mutableMapOf<String, Boolean>()
     requisitos["Contém letra maiúscula"] = senha.any { it.isUpperCase() }
+    requisitos["Contém letra minúscula"] = senha.any { it.isLowerCase() }
     requisitos["Pelo menos 8 caracteres"] = senha.length >= 8
     requisitos["Contém número"] = senha.any { it.isDigit() }
     requisitos["Contém caracter especial"] = senha.any { !it.isLetterOrDigit() }
