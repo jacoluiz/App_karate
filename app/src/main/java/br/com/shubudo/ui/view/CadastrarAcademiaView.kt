@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -30,6 +32,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.model.Filial
+import br.com.shubudo.ui.uistate.CadastroAcademiaUiState
 import br.com.shubudo.ui.viewModel.CadastroAcademiaViewModel
 
 @Composable
@@ -49,10 +54,29 @@ fun CadastroAcademiaView(
     onNavigateBack: () -> Unit,
     viewModel: CadastroAcademiaViewModel = hiltViewModel()
 ) {
+    val scrollState = rememberScrollState()
+    val uiState by viewModel.uiState.collectAsState()
+
     var nome by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var filiais by remember { mutableStateOf(listOf<Filial>()) }
     var showDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        if (uiState is CadastroAcademiaUiState.Success) {
+            val data = uiState as CadastroAcademiaUiState.Success
+            nome = data.nome
+            descricao = data.descricao
+            filiais = data.filiais
+        }
+        Log.d("CadastroAcademiaView", "$filiais")
+    }
+
+    LaunchedEffect(academiaId) {
+        if (academiaId.isNotBlank()) {
+            viewModel.carregarAcademia(academiaId)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Cabeçalho
@@ -99,6 +123,7 @@ fun CadastroAcademiaView(
         Card(
             modifier = Modifier
                 .padding(16.dp)
+                .verticalScroll(scrollState)
                 .offset(y = (-20).dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -197,17 +222,20 @@ fun CadastroAcademiaView(
             confirmButton = {
                 Button(
                     onClick = {
-                        showDialog = false
+
                         Log.d("CadastroAcademiaView", "Cadastrando academia: $academiaId")
                         viewModel.criarOuAtualizarAcademia(
                             nome = nome,
                             descricao = descricao.takeIf { it.isNotBlank() },
                             filiais = filiais,
                             id = academiaId,
-                            onSuccess = {},
+                            onSuccess = {
+                                showDialog = false
+                                onNavigateBack()
+                            },
                             onError = {}
                         )
-                        onNavigateBack()
+
                     }
                 ) {
                     Text("Confirmar")

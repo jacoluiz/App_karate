@@ -37,7 +37,6 @@ class AcademiaViewModel @Inject constructor(
             try {
                 academiaRepository.refreshAcademias()
             } catch (_: Exception) {
-                // falha silenciosa
             }
 
             academiaRepository.getAcademias()

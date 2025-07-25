@@ -29,6 +29,7 @@ class CadastroAcademiaViewModel @Inject constructor(
                     _uiState.value = CadastroAcademiaUiState.Success(
                         nome = academia.nome,
                         descricao = academia.descricao,
+                        filiais = academia.filiais,
                         id = academia._id,
                         isEditando = true
                     )
@@ -67,6 +68,7 @@ class CadastroAcademiaViewModel @Inject constructor(
                         filiais = filiais
                     )
                 }
+                academiaRepository.refreshAcademias()
                 onSuccess()
             } catch (e: Exception) {
                 _uiState.value =

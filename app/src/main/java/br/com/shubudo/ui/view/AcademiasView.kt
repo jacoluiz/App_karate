@@ -1,4 +1,5 @@
 package br.com.shubudo.ui.view
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -120,7 +121,9 @@ fun AcademiasView(
                                 AcademiaCard(
                                     academia = academia,
                                     isAdmin = usuarioLogado?.perfil == "adm",
-                                    onEdit = { onNavigateToEditarAcademia(academia._id) },
+                                    onEdit = {
+                                        onNavigateToEditarAcademia(academia._id)
+                                    },
                                     onDelete = { viewModel.deletarAcademia(academia._id) }
                                 )
                             }
@@ -273,7 +276,11 @@ fun AcademiaCard(
                             DropdownMenuItem(
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(20.dp))
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text("Editar")
                                     }

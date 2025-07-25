@@ -42,6 +42,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.shubudo.navigation.AppDestination
 import br.com.shubudo.navigation.KarateNavHost
+import br.com.shubudo.navigation.academiasRoute
 import br.com.shubudo.navigation.avisosRoute
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
@@ -125,6 +126,7 @@ class MainActivity : ComponentActivity() {
                                 AppDestination.Recursos.route,
                                 AppDestination.Perfil.route,
                                 AppDestination.Login.route -> true
+
                                 else -> false
                             }
 
@@ -132,10 +134,19 @@ class MainActivity : ComponentActivity() {
                                 editarPerfilRoute -> "Editar Perfil"
                                 perfilRoute -> "Perfil"
                                 eventosRoute -> "Evento"
+                                avisosRoute -> "Avisos"
+                                recursosRoute -> ""
+                                academiasRoute -> "Academias"
                                 AppDestination.Login.route -> "Login"
                                 programacaoRoute -> "Conteúdo"
-                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(detalheFaixaArgument)
-                                detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(detalheMovimentoArgument)
+                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
+                                    detalheFaixaArgument
+                                )
+
+                                detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
+                                    detalheMovimentoArgument
+                                )
+
                                 novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
                                 else -> "Shubu-dô App"
                             }
@@ -148,11 +159,14 @@ class MainActivity : ComponentActivity() {
                                 avisosRoute,
                                 eventosRoute,
                                 programacaoRoute,
+                                academiasRoute,
                                 esqueciMinhaSenhaRoteSemUsername -> true
+
                                 else -> false
                             }
 
-                            val showColorTopAppBar = currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
+                            val showColorTopAppBar =
+                                currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
                             val showTitleTopAppBar = showColorTopAppBar
 
                             KarateApp(

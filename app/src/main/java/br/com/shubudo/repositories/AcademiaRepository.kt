@@ -16,7 +16,6 @@ class AcademiaRepository @Inject constructor(
     private val academiaService: AcademiaService,
     private val academiaDao: AcademiaDao
 ) {
-
     suspend fun refreshAcademias() {
         try {
             val academiasFromApi = academiaService.getAcademias()
@@ -28,11 +27,13 @@ class AcademiaRepository @Inject constructor(
         }
     }
 
-    fun getAcademias(): Flow<List<Academia>> {
+    suspend fun getAcademias(): Flow<List<Academia>> {
+        refreshAcademias()
         return academiaDao.getAcademias().map { list -> list.map { it.toAcademia() } }
     }
 
     suspend fun getAcademiaById(id: String): Academia? {
+        refreshAcademias()
         return academiaDao.getAcademiaById(id)?.toAcademia()
     }
 

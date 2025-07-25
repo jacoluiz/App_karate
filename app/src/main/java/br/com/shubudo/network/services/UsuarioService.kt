@@ -28,42 +28,48 @@ data class UsuarioResponse(
     val dan: Int?,
     val academia: String?,
     val tamanhoFaixa: String?,
+    val lesaoOuLaudosMedicos: String? = null,
+    val registroAKSD: String? = null,
 )
 
 fun UsuarioResponse.toUsuario(): Usuario {
     return Usuario(
-        _id = _id ?: "",
-        nome = nome ?: "Nome não informado",
-        username = username ?: "Usuário não informado",
-        email = email ?: "Email não informado",
+        _id = _id,
+        nome = nome,
+        username = username,
+        email = email,
         peso = peso ?: "",
         altura = altura ?: "",
         idade = idade ?: "",
-        perfil = perfil ?: "Básico",
-        corFaixa = corFaixa ?: "Sem faixa",
+        perfil = perfil,
+        corFaixa = corFaixa,
         status = status ?: "ativo",
         dan = dan ?: 0,
         academia = academia ?: "",
-        tamanhoFaixa = tamanhoFaixa ?: ""
+        tamanhoFaixa = tamanhoFaixa ?: "",
+        lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
+        registroAKSD = registroAKSD ?: "",
     )
 }
 
 
 fun UsuarioResponse.toUsuarioEntity(): UsuarioEntity {
     return UsuarioEntity(
-        _id = _id ?: "",
-        nome = nome ?: "Nome não informado",
-        username = username ?: "Usuário não informado",
-        email = email ?: "Email não informado",
+        _id = _id,
+        nome = nome,
+        username = username,
+        email = email,
         peso = peso ?: "",
         altura = altura ?: "",
         idade = idade ?: "",
-        perfil = perfil ?: "Básico",
-        corFaixa = corFaixa ?: "Sem faixa",
+        perfil = perfil,
+        corFaixa = corFaixa,
         status = status ?: "ativo",
         dan = dan ?: 0,
         academia = academia ?: "",
-        tamanhoFaixa = tamanhoFaixa ?: ""
+        tamanhoFaixa = tamanhoFaixa ?: "",
+        lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
+        registroAKSD = registroAKSD ?: "",
     )
 }
 
