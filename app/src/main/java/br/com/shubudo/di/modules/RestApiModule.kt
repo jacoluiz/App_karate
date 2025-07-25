@@ -113,4 +113,9 @@ object RestApiModule {
     @Singleton
     fun provideAvisoService(retrofit: Retrofit): AvisoService =
         retrofit.create(AvisoService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAcademiaService(retrofit: Retrofit): AcademiaService =
+        retrofit.create(AcademiaService::class.java)
 }

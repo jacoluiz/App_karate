@@ -2,8 +2,19 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "ab7266dffa2d2313d4b0c47eacd99710",
+    "identityHash": "88d9a122501c2b0dc072829661210191",
     "entities": [
+      {
+        "tableName": "AcademiaDao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
+        "fields": [],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
       {
         "tableName": "avisos",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `conteudo` TEXT NOT NULL, `dataHoraCriacao` TEXT NOT NULL, `publicoAlvo` TEXT NOT NULL, PRIMARY KEY(`id`))",
@@ -724,7 +735,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ab7266dffa2d2313d4b0c47eacd99710')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '88d9a122501c2b0dc072829661210191')"
     ]
   }
 }

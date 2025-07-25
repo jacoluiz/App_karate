@@ -191,6 +191,9 @@ fun KarateNavHost(
                     launchSingleTop = true
                     popUpTo(programacaoRoute)
                 })
+            },
+            onNavigateToAcademias = {
+                navController.navigateToAcademias()
             }
         )
 
@@ -211,6 +214,23 @@ fun KarateNavHost(
 
         // Tela de Cadastro de Evento
         cadastroEventoScreen(
+            onNavigateBack = {
+                navController.popBackStack()
+            }
+        )
+
+        // Tela de Academias
+        academiasScreen(
+            onAddAcademiaClick = {
+                navController.navigateToCadastroAcademia()
+            },
+            onEditAcademiaClick = { academiaId ->
+                navController.navigateToCadastroAcademia(academiaId)
+            }
+        )
+
+        // Tela de Cadastro de Academia
+        cadastroAcademiaScreen(
             onNavigateBack = {
                 navController.popBackStack()
             }

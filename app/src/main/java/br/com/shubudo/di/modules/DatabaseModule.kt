@@ -3,6 +3,7 @@ package br.com.shubudo.di.modules
 import android.content.Context
 import androidx.room.Room
 import br.com.shubudo.database.KarateDatabase
+import br.com.shubudo.database.dao.AcademiaDao
 import br.com.shubudo.database.dao.ArmamentoDao
 import br.com.shubudo.database.dao.AvisoDao
 import br.com.shubudo.database.dao.DefesaArmaDao
@@ -102,5 +103,10 @@ class DatabaseModule {
     @Provides
     fun provideAvisoDao(db: KarateDatabase): AvisoDao {
         return db.AvisoDao()
+    }
+
+    @Provides
+    fun provideAcademiaDao(db: KarateDatabase): AcademiaDao {
+        return db.AcademiaDao()
     }
 }

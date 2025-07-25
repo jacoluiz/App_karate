@@ -13,7 +13,8 @@ const val recursosRoute = "recursos"
 fun NavGraphBuilder.recursosScreen(
     onNavigateToAvisos: () -> Unit = {},
     onNavigateToEventos: () -> Unit = {},
-    onNavigateToProgramacao: () -> Unit = {}
+    onNavigateToProgramacao: () -> Unit = {},
+    onNavigateToAcademias: () -> Unit = {}
 ) {
     composable(
         route = recursosRoute,
@@ -25,7 +26,8 @@ fun NavGraphBuilder.recursosScreen(
         RecursosView(
             onNavigateToAvisos = onNavigateToAvisos,
             onNavigateToEventos = onNavigateToEventos,
-            onNavigateToProgramacao = onNavigateToProgramacao
+            onNavigateToProgramacao = onNavigateToProgramacao,
+            onNavigateToAcademias = onNavigateToAcademias
         )
     }
 }

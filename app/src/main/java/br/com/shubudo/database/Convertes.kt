@@ -1,6 +1,7 @@
 package br.com.shubudo.database
 
 import androidx.room.TypeConverter
+import br.com.shubudo.model.Filial
 import br.com.shubudo.model.Movimento
 import br.com.shubudo.model.TempoVideo
 import br.com.shubudo.model.Video
@@ -8,6 +9,18 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class Convertes {
+
+    @TypeConverter
+    fun fromFilialList(value: List<Filial>): String {
+        return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    fun toFilialList(value: String): List<Filial> {
+        val type = object : TypeToken<List<Filial>>() {}.type
+        return Gson().fromJson(value, type)
+    }
+
     @TypeConverter
     fun fromObservacaoList(observacao: List<String>): String {
         return Gson().toJson(observacao)

@@ -703,7 +703,6 @@ private fun ProfileHeader() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AnimatedTextField(
     value: String,
@@ -756,7 +755,6 @@ private fun AnimatedTextField(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HeightTextField(
     value: String,

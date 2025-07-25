@@ -17,9 +17,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.Announcement
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.SessionManager.usuarioLogado
 
 data class RecursoItem(
     val titulo: String,
@@ -46,25 +50,20 @@ data class RecursoItem(
 fun RecursosView(
     onNavigateToAvisos: () -> Unit = {},
     onNavigateToEventos: () -> Unit = {},
-    onNavigateToProgramacao: () -> Unit = {}
+    onNavigateToProgramacao: () -> Unit = {},
+    onNavigateToAcademias: () -> Unit = {}
 ) {
-    val recursos = listOf(
-        RecursoItem(
-            titulo = "Avisos",
-            icon = Icons.AutoMirrored.Filled.Announcement,
-            onClick = onNavigateToAvisos
-        ),
-        RecursoItem(
-            titulo = "Eventos",
-            icon = Icons.Default.Event,
-            onClick = onNavigateToEventos
-        ),
-        RecursoItem(
-            titulo = "Programação",
-            icon = Icons.Default.SportsMartialArts,
-            onClick = onNavigateToProgramacao
-        )
-    )
+    val recursos = buildList {
+        add(RecursoItem("Avisos", Icons.AutoMirrored.Filled.Announcement, onNavigateToAvisos))
+        add(RecursoItem("Eventos", Icons.Default.Event, onNavigateToEventos))
+        add(RecursoItem("Programação", Icons.Default.SportsMartialArts, onNavigateToProgramacao))
+
+        if (usuarioLogado?.perfil == "adm") {
+            add(RecursoItem("Academias",
+                Icons.AutoMirrored.Filled.Accessible, onNavigateToAcademias))
+        }
+    }.sortedBy { it.titulo }
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Cabeçalho com fundo gradiente
