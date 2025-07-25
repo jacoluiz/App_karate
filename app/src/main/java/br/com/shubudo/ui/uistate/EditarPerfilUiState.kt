@@ -20,6 +20,7 @@ sealed class EditarPerfilUiState {
         val academia: String = "",
         val tamanhoFaixa: String = "",
         val lesaoOuLaudosMedicos: String? = "",
-        val registroAKSD: String? = ""
+        val registroAKSD: String? = "",
+        val perfil: String = "",
     ) : EditarPerfilUiState()
 }

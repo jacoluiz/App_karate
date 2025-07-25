@@ -71,7 +71,8 @@ class EditarPerfilViewModel @Inject constructor(
                 academia = usuario.academia,
                 tamanhoFaixa = usuario.tamanhoFaixa,
                 lesaoOuLaudosMedicos = usuario.lesaoOuLaudosMedicos,
-                registroAKSD = usuario.registroAKSD
+                registroAKSD = usuario.registroAKSD,
+                perfil = usuario.perfil
             )
         }
     }
@@ -93,6 +94,7 @@ class EditarPerfilViewModel @Inject constructor(
         tamanhoFaixa: String,
         lesaoOuLaudosMedicos: String,
         registroAKSD: String,
+        perfil: String,
         context: Context
     ) {
         viewModelScope.launch {
@@ -110,7 +112,8 @@ class EditarPerfilViewModel @Inject constructor(
                     academia = academia,
                     tamanhoFaixa = tamanhoFaixa,
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos,
-                    registroAKSD = registroAKSD
+                    registroAKSD = registroAKSD,
+                    perfil = perfil
                     // Caso tenha 'id', lembre-se de passá-lo aqui também
                 )
 

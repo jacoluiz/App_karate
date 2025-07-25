@@ -158,7 +158,8 @@ fun EditarPerfilView(
                         academia = uiState.academia,
                         tamanhoFaixa = uiState.tamanhoFaixa,
                         lesoesOuLaudosMedicos = lesoes,
-                        registroAKSD = registro
+                        registroAKSD = registro,
+                        perfil = uiState.perfil
                     )
                 }
             }
@@ -269,6 +270,7 @@ fun EditarPerfilContent(
     editarPerfilViewModel: EditarPerfilViewModel,
     lesoesOuLaudosMedicos: String,
     registroAKSD: String ,
+    perfil: String = "básico",
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
     onCancelar: () -> Unit
@@ -286,6 +288,7 @@ fun EditarPerfilContent(
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
     var currentLesaoOuLaudosMedicos by remember { mutableStateOf(lesoesOuLaudosMedicos) }
     var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
+    val currentPerfil by remember { mutableStateOf(perfil) }
     val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
@@ -553,7 +556,7 @@ fun EditarPerfilContent(
             // Action Buttons
             ActionButtons(
                 isSaving = isSaving,
-                isFormValid = currentNome.isNotBlank(), // Remove a validação rígida da data para permitir salvar com idade antiga
+                isFormValid = currentNome.isNotBlank(),
                 onSave = {
                     if (!isSaving) {
                         isSaving = true
@@ -571,6 +574,7 @@ fun EditarPerfilContent(
                                 tamanhoFaixa = currentTamanhoFaixa,
                                 lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
                                 registroAKSD = currentRegistroAKSD,
+                                perfil = currentPerfil,
                                 context = context
                             )
                             delay(2000L)
