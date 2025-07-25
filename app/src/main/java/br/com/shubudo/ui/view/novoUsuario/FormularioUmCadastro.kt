@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view.novoUsuario
 
+import ModernTextField
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -47,12 +47,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,8 +59,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -70,8 +69,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import br.com.shubudo.R
+import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.components.PasswordRequirement
 import br.com.shubudo.ui.theme.PrimaryColorAmarela
 import br.com.shubudo.ui.theme.PrimaryColorBranca
@@ -88,6 +87,7 @@ import br.com.shubudo.utils.getDanOptions
 import br.com.shubudo.utils.isValidDate
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
 import br.com.shubudo.utils.validarRequisitosSenha
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,14 +100,14 @@ fun PaginaUmCadastro(
     val density = LocalDensity.current
 
     val requisitos = validarRequisitosSenha(novoUsuarioViewModel.senha)
-    val mostrarRequisitos = novoUsuarioViewModel.senha.isNotBlank() && !senhaAtendeAosRequisitos(novoUsuarioViewModel.senha)
+    val mostrarRequisitos =
+        novoUsuarioViewModel.senha.isNotBlank() && !senhaAtendeAosRequisitos(novoUsuarioViewModel.senha)
 
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordVisibleConfirmSenha by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
     var showBeltDropdown by remember { mutableStateOf(false) }
     var showDanDialog by remember { mutableStateOf(false) }
-    var showAcademiaDialog by remember { mutableStateOf(false) }
     var dateValue by remember {
         mutableStateOf(TextFieldValue(novoUsuarioViewModel.idade))
     }
@@ -123,8 +123,6 @@ fun PaginaUmCadastro(
         "Mestre",
         "Grão Mestre"
     )
-    val academias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres", "Outros")
-
     val focusRequesterNome = remember { FocusRequester() }
     val focusRequesterIdade = remember { FocusRequester() }
     val focusRequesterAcademia = remember { FocusRequester() }
@@ -292,9 +290,7 @@ fun PaginaUmCadastro(
 
         // Academia Selection
         AcademiaSection(
-            academia = novoUsuarioViewModel.academia,
-            onAcademiaChange = { novoUsuarioViewModel.academia = it },
-            onShowDialog = { showAcademiaDialog = true }
+            viewModel = novoUsuarioViewModel
         )
 
         // Password Field
@@ -375,8 +371,7 @@ fun PaginaUmCadastro(
                         )
                     }
                 }
-            }
-            ,
+            },
             label = "Confirmar senha",
             placeholder = "Confirme sua senha",
             leadingIcon = Icons.Default.Lock,
@@ -416,14 +411,18 @@ fun PaginaUmCadastro(
                 Icon(
                     imageVector = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Icons.Default.CheckCircle else Icons.Default.Cancel,
                     contentDescription = null,
-                    tint = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(0xFF059669) else Color(0xFFDC2626),
+                    tint = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(
+                        0xFF059669
+                    ) else Color(0xFFDC2626),
                     modifier = Modifier.size(20.dp)
                 )
 
                 Text(
                     text = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) "Senhas conferem" else "As senhas não conferem",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(0xFF059669) else Color(0xFFDC2626)
+                    color = if (senhaAtendeAosRequisitos(novoUsuarioViewModel.confirmarSenha)) Color(
+                        0xFF059669
+                    ) else Color(0xFFDC2626)
                 )
             }
         }
@@ -441,36 +440,12 @@ fun PaginaUmCadastro(
             onDismiss = { showDanDialog = false }
         )
     }
-
-    // Academia Selection Dialog
-    if (showAcademiaDialog) {
-        AcademiaSelectionDialog(
-            academias = academias,
-            currentAcademia = novoUsuarioViewModel.academia,
-            onAcademiaSelected = { academia ->
-                novoUsuarioViewModel.academia = academia
-                showAcademiaDialog = false
-            },
-            onDismiss = { showAcademiaDialog = false }
-        )
-    }
 }
 
 @Composable
 private fun AcademiaSection(
-    academia: String,
-    onAcademiaChange: (String) -> Unit,
-    onShowDialog: () -> Unit
+    viewModel: NovoUsuarioViewModel
 ) {
-    var showCustomField by remember {
-        mutableStateOf(
-            academia.isNotBlank() && !listOf(
-                "CDL Team Boa Vista",
-                "CDL Team Av. Das Torres"
-            ).contains(academia)
-        )
-    }
-
     Column {
         Text(
             text = "Academia",
@@ -481,103 +456,10 @@ private fun AcademiaSection(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if (showCustomField) {
-            // Campo de texto personalizado
-            OutlinedTextField(
-                value = academia,
-                onValueChange = onAcademiaChange,
-                placeholder = {
-                    Text(
-                        "Digite o nome da sua academia",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        showCustomField = false
-                        onAcademiaChange("")
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Voltar para seleção",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                ),
-                singleLine = true
-            )
-        } else {
-            // Card de seleção
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onShowDialog() },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                ),
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-
-                        Text(
-                            text = academia.ifBlank { "Selecionar Academia" },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (academia.isBlank())
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
-        }
-    }
-
-    // Atualiza o estado quando a academia muda externamente
-    LaunchedEffect(academia) {
-        showCustomField = academia.isNotBlank() && !listOf(
-            "CDL Team Boa Vista",
-            "CDL Team Av. Das Torres"
-        ).contains(academia)
+        AcademiaSelector(
+            academia = viewModel.academia,
+            onAcademiaChange = { viewModel.academia = it }
+        )
     }
 }
 
@@ -645,75 +527,6 @@ private fun SelectionCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun ModernTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
-    trailingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    onTrailingIconClick: (() -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    focusRequester: FocusRequester,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    onFocusChanged: ((Boolean) -> Unit)? = null
-) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = {
-                Text(
-                    placeholder,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            trailingIcon = trailingIcon?.let { icon ->
-                {
-                    IconButton(onClick = { onTrailingIconClick?.invoke() }) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-            },
-            visualTransformation = visualTransformation,
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester)
-                .onFocusChanged { onFocusChanged?.invoke(it.isFocused) },
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            ),
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions
-        )
     }
 }
 

@@ -94,6 +94,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
+import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
@@ -309,7 +310,6 @@ fun EditarPerfilContent(
         "Mestre",
         "Grão Mestre"
     )
-    val academias = listOf("CDL Team Boa Vista", "CDL Team Av. Das Torres", "Outros")
     val tamanhosFaixa = (1..8).map { "Tamanho $it" }
 
     // Estado para indicar se a operação de salvar está em andamento
@@ -499,21 +499,10 @@ fun EditarPerfilContent(
                     )
 
                     // Academia Selection
-                    AcademiaSelectionCard(
-                        currentAcademia = currentAcademia,
-                        onClick = { showAcademiaDialog = true }
+                    AcademiaSelector(
+                        academia = currentAcademia,
+                        onAcademiaChange = { currentAcademia = it }
                     )
-
-                    // Campo para "Outros" academia
-                    if (currentAcademia == "Outros") {
-                        AnimatedTextField(
-                            value = currentAcademia,
-                            onValueChange = { currentAcademia = it },
-                            label = "Nome da Academia",
-                            icon = Icons.Default.Edit,
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
-                        )
-                    }
 
                     // Tamanho da Faixa
                     TamanhoFaixaSelectionCard(
@@ -627,19 +616,6 @@ fun EditarPerfilContent(
                     showDanDialog = false
                 },
                 onDismiss = { showDanDialog = false }
-            )
-        }
-
-        // Academia Selection Dialog
-        if (showAcademiaDialog) {
-            AcademiaSelectionDialog(
-                academias = academias,
-                currentAcademia = currentAcademia,
-                onAcademiaSelected = { academia ->
-                    currentAcademia = academia
-                    showAcademiaDialog = false
-                },
-                onDismiss = { showAcademiaDialog = false }
             )
         }
 
@@ -1270,66 +1246,6 @@ private fun DanSelectionCard(
 }
 
 @Composable
-private fun AcademiaSelectionCard(
-    currentAcademia: String,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-
-                Column {
-                    Text(
-                        text = "Academia",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = currentAcademia.ifBlank { "Selecionar Academia" },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    }
-}
-
-@Composable
 private fun TamanhoFaixaSelectionCard(
     currentTamanhoFaixa: String,
     onClick: () -> Unit
@@ -1466,141 +1382,6 @@ private fun DanSelectionDialog(
         },
         shape = RoundedCornerShape(20.dp),
         properties = DialogProperties()
-    )
-}
-
-@Composable
-private fun AcademiaSelectionDialog(
-    academias: List<String>,
-    currentAcademia: String,
-    onAcademiaSelected: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var showCustomField by remember { mutableStateOf(false) }
-    var customAcademia by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Selecione sua Academia",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            if (showCustomField) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    OutlinedTextField(
-                        value = customAcademia,
-                        onValueChange = { customAcademia = it },
-                        label = { Text("Nome da Academia") },
-                        placeholder = { Text("Digite o nome da sua academia") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TextButton(
-                            onClick = {
-                                showCustomField = false
-                                customAcademia = ""
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Voltar")
-                        }
-
-                        Button(
-                            onClick = {
-                                if (customAcademia.isNotBlank()) {
-                                    onAcademiaSelected(customAcademia)
-                                }
-                            },
-                            enabled = customAcademia.isNotBlank(),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Confirmar")
-                        }
-                    }
-                }
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(academias.size) { index ->
-                        val academia = academias[index]
-                        val isSelected = academia == currentAcademia
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    Log.d("Tag", "Acdamia clicada $academia")
-                                    if (academia == "Outros") {
-                                        showCustomField = true
-                                    } else {
-                                        onAcademiaSelected(academia)
-                                    }
-                                },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (isSelected)
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                else MaterialTheme.colorScheme.surface
-                            ),
-                            border = if (isSelected) BorderStroke(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
-                            ) else null
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_sequencia_de_combate),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-
-                                Text(
-                                    text = academia,
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            if (!showCustomField) {
-                TextButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Cancelar")
-                }
-            }
-        },
-        shape = RoundedCornerShape(20.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp
     )
 }
 

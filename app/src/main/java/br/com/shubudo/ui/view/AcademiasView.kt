@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import AcademiaUiState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -45,11 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.R
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Academia
 import br.com.shubudo.ui.components.LoadingWrapper
@@ -162,8 +164,8 @@ fun CabecalhoAcademia() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                imageVector = Icons.Default.Group,
-                contentDescription = null,
+                painter = painterResource(R.drawable.ic_academia),
+                contentDescription = "Icone de aademia",
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(48.dp)
             )

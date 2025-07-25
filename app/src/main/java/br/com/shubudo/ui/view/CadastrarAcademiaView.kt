@@ -69,7 +69,6 @@ fun CadastroAcademiaView(
             descricao = data.descricao
             filiais = data.filiais
         }
-        Log.d("CadastroAcademiaView", "$filiais")
     }
 
     LaunchedEffect(academiaId) {

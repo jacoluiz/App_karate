@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +18,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.Announcement
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,17 +32,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.R
 import br.com.shubudo.SessionManager.usuarioLogado
 
 data class RecursoItem(
     val titulo: String,
-    val icon: ImageVector,
+    val icon: RecursoIcon,
     val onClick: () -> Unit
 )
+
+sealed class RecursoIcon {
+    data class Vector(val icon: ImageVector) : RecursoIcon()
+    data class PainterIcon(val icon: Painter) : RecursoIcon()
+}
 
 @Composable
 fun RecursosView(
@@ -54,13 +60,30 @@ fun RecursosView(
     onNavigateToAcademias: () -> Unit = {}
 ) {
     val recursos = buildList {
-        add(RecursoItem("Avisos", Icons.AutoMirrored.Filled.Announcement, onNavigateToAvisos))
-        add(RecursoItem("Eventos", Icons.Default.Event, onNavigateToEventos))
-        add(RecursoItem("Programação", Icons.Default.SportsMartialArts, onNavigateToProgramacao))
+        add(
+            RecursoItem(
+                "Avisos",
+                RecursoIcon.Vector(Icons.AutoMirrored.Filled.Announcement),
+                onNavigateToAvisos
+            )
+        )
+        add(RecursoItem("Eventos", RecursoIcon.Vector(Icons.Default.Event), onNavigateToEventos))
+        add(
+            RecursoItem(
+                "Programação",
+                RecursoIcon.Vector(Icons.Default.SportsMartialArts),
+                onNavigateToProgramacao
+            )
+        )
 
         if (usuarioLogado?.perfil == "adm") {
-            add(RecursoItem("Academias",
-                Icons.AutoMirrored.Filled.Accessible, onNavigateToAcademias))
+            add(
+                RecursoItem(
+                    "Academias",
+                    RecursoIcon.PainterIcon(painterResource(R.drawable.ic_academia)),
+                    onNavigateToAcademias
+                )
+            )
         }
     }.sortedBy { it.titulo }
 
@@ -154,7 +177,7 @@ fun RecursosView(
 @Composable
 fun RecursoCard(
     titulo: String,
-    icon: ImageVector,
+    icon: RecursoIcon,
     onClick: () -> Unit
 ) {
     Card(
@@ -183,12 +206,21 @@ fun RecursoCard(
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = titulo,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
+                when (icon) {
+                    is RecursoIcon.Vector -> Icon(
+                        imageVector = icon.icon,
+                        contentDescription = titulo,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+
+                    is RecursoIcon.PainterIcon -> Icon(
+                        painter = icon.icon,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = titulo,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
