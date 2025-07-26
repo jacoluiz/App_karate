@@ -17,7 +17,7 @@ data class UsuarioEntity(
     val peso: String,
     val altura: String,
     val idade: String,
-    val perfil: String = "básico",
+    val perfis: List<String> = listOf("aluno"),
     val corFaixa: String,
     val status: String = "ativo",
     val dan: Int = 0,
@@ -37,16 +37,14 @@ fun UsuarioEntity.toUsuario(): Usuario {
         peso = this.peso,
         altura = this.altura,
         idade = this.idade,
-        perfil = this.perfil,
+        perfis = this.perfis,
         corFaixa = this.corFaixa,
         status = this.status,
         dan = this.dan,
         academia = this.academia,
         tamanhoFaixa = this.tamanhoFaixa,
-        faixas = null,
         lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
         registroAKSD = this.registroAKSD,
         fcmToken = this.fcmToken.ifEmpty { null }
     )
 }
-

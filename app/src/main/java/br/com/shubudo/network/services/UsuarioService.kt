@@ -1,6 +1,5 @@
 package br.com.shubudo.network.services
 
-import br.com.shubudo.database.entities.UsuarioEntity
 import br.com.shubudo.model.Usuario
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -22,7 +21,7 @@ data class UsuarioResponse(
     val peso: String?,
     val altura: String?,
     val idade: String?,
-    val perfil: String,
+    val perfis: List<String> = listOf("aluno"),
     val corFaixa: String,
     val status: String?,
     val dan: Int?,
@@ -41,28 +40,7 @@ fun UsuarioResponse.toUsuario(): Usuario {
         peso = peso ?: "",
         altura = altura ?: "",
         idade = idade ?: "",
-        perfil = perfil,
-        corFaixa = corFaixa,
-        status = status ?: "ativo",
-        dan = dan ?: 0,
-        academia = academia ?: "",
-        tamanhoFaixa = tamanhoFaixa ?: "",
-        lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
-        registroAKSD = registroAKSD ?: "",
-    )
-}
-
-
-fun UsuarioResponse.toUsuarioEntity(): UsuarioEntity {
-    return UsuarioEntity(
-        _id = _id,
-        nome = nome,
-        username = username,
-        email = email,
-        peso = peso ?: "",
-        altura = altura ?: "",
-        idade = idade ?: "",
-        perfil = perfil,
+        perfis = perfis,
         corFaixa = corFaixa,
         status = status ?: "ativo",
         dan = dan ?: 0,
@@ -77,6 +55,9 @@ interface UsuarioService {
 
     @GET("/usuarios")
     suspend fun getUsuarios(): List<UsuarioResponse>
+
+    @GET("/usuarios/{id}")
+    suspend fun getUsuariosPorId(@Path("id") id: String): UsuarioResponse
 
     @POST("/usuarios") // Endpoint para obter o usuário logado
     suspend fun criarUsuarios(@Body usuario: Usuario): UsuarioResponse

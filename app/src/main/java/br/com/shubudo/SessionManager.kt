@@ -17,7 +17,7 @@ object SessionManager {
             val peso = getString("peso", "")
             val altura = getString("altura", "")
             val idade = getString("idade", "")
-            val perfil = getString("perfil", "básico")
+            val perfis = getString("perfis", "aluno")?.split(",") ?: listOf("aluno")
             val corFaixa = getString("corFaixa", null)
             val status = getString("status", "ativo")
             val dan = getInt("dan", 0)
@@ -36,9 +36,8 @@ object SessionManager {
                     peso = peso ?: "",
                     altura = altura ?: "",
                     idade = idade ?: "",
-                    perfil = perfil ?: "básico",
+                    perfis = perfis,
                     corFaixa = corFaixa,
-                    faixas = null, // carregue separadamente se necessário
                     status = status ?: "ativo",
                     dan = dan,
                     academia = academia ?: "",

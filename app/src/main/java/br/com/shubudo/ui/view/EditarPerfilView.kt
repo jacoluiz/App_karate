@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -45,6 +44,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
@@ -62,6 +62,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -94,19 +95,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.ui.components.AcademiaSelector
-import br.com.shubudo.ui.components.CustomIconButton
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 import br.com.shubudo.utils.DateValidation
 import br.com.shubudo.utils.applyHeightMask
 import br.com.shubudo.utils.formatDateForDisplay
+import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getDanOptions
 import br.com.shubudo.utils.shouldShowDan
 import br.com.shubudo.utils.validateBirthDate
 import br.com.shubudo.utils.validateHeight
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -125,8 +126,7 @@ fun EditarPerfilView(
     AnimatedVisibility(
         visible = animatedVisibility,
         enter = fadeIn(animationSpec = tween(600)) + slideInVertically(
-            initialOffsetY = { it / 4 },
-            animationSpec = tween(600, easing = EaseOutCubic)
+            initialOffsetY = { it / 4 }, animationSpec = tween(600, easing = EaseOutCubic)
         )
     ) {
         when (uiState) {
@@ -144,6 +144,7 @@ fun EditarPerfilView(
 
                 if (lesoes != null && registro != null) {
                     EditarPerfilContent(
+                        id = uiState.id,
                         nome = uiState.nome,
                         username = uiState.username,
                         email = uiState.email,
@@ -159,8 +160,9 @@ fun EditarPerfilView(
                         academia = uiState.academia,
                         tamanhoFaixa = uiState.tamanhoFaixa,
                         lesoesOuLaudosMedicos = lesoes,
+                        status = uiState.status,
                         registroAKSD = registro,
-                        perfil = uiState.perfil
+                        perfis = uiState.perfis,
                     )
                 }
             }
@@ -181,8 +183,7 @@ private fun LoadingState() {
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                     )
                 )
-            ),
-        contentAlignment = Alignment.Center
+            ), contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -190,13 +191,9 @@ private fun LoadingState() {
         ) {
             val infiniteTransition = rememberInfiniteTransition(label = "loading")
             val rotation by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                ),
-                label = "rotation"
+                initialValue = 0f, targetValue = 360f, animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = LinearEasing), repeatMode = RepeatMode.Restart
+                ), label = "rotation"
             )
 
             CircularProgressIndicator(
@@ -230,8 +227,7 @@ private fun EmptyState() {
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                     )
                 )
-            ),
-        contentAlignment = Alignment.Center
+            ), contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -258,6 +254,7 @@ private fun EmptyState() {
 
 @Composable
 fun EditarPerfilContent(
+    id: String,
     nome: String,
     username: String,
     email: String,
@@ -270,13 +267,15 @@ fun EditarPerfilContent(
     tamanhoFaixa: String,
     editarPerfilViewModel: EditarPerfilViewModel,
     lesoesOuLaudosMedicos: String,
-    registroAKSD: String ,
-    perfil: String = "básico",
+    registroAKSD: String,
+    perfis: List<String>,
+    status: String = "ativo",
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
     onCancelar: () -> Unit
 ) {
     // Estados locais para cada campo
+    var currentId by remember { mutableStateOf(id) }
     var currentNome by remember { mutableStateOf(nome) }
     var currentUsername by remember { mutableStateOf(username) }
     var currentEmail by remember { mutableStateOf(email) }
@@ -289,7 +288,9 @@ fun EditarPerfilContent(
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
     var currentLesaoOuLaudosMedicos by remember { mutableStateOf(lesoesOuLaudosMedicos) }
     var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
-    val currentPerfil by remember { mutableStateOf(perfil) }
+    var currentPerfis by remember { mutableStateOf(perfis) }
+    var currentStatus by remember { mutableStateOf(status) }
+
     val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
@@ -298,17 +299,11 @@ fun EditarPerfilContent(
     var showDanDialog by remember { mutableStateOf(false) }
     var showAcademiaDialog by remember { mutableStateOf(false) }
     var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
+    var showPerfisDialog by remember { mutableStateOf(false) }
+
 
     val faixas = listOf(
-        "Branca",
-        "Amarela",
-        "Laranja",
-        "Verde",
-        "Roxa",
-        "Marrom",
-        "Preta",
-        "Mestre",
-        "Grão Mestre"
+        "Branca", "Amarela", "Laranja", "Verde", "Roxa", "Marrom", "Preta", "Mestre", "Grão Mestre"
     )
     val tamanhosFaixa = (1..8).map { "Tamanho $it" }
 
@@ -351,9 +346,7 @@ fun EditarPerfilContent(
                         elevation = 8.dp,
                         shape = RoundedCornerShape(20.dp),
                         ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    ),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
+                    ), shape = RoundedCornerShape(20.dp), colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
@@ -394,8 +387,7 @@ fun EditarPerfilContent(
                         icon = Icons.Default.Email,
                         enabled = false,
                         keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
+                            keyboardType = KeyboardType.Email, imeAction = ImeAction.Next
                         )
                     )
 
@@ -412,11 +404,9 @@ fun EditarPerfilContent(
                     )
 
                     // Data de Nascimento Field
-                    DateOfBirthField(
-                        value = formatDateForDisplay(currentDataNascimento),
+                    DateOfBirthField(value = formatDateForDisplay(currentDataNascimento),
                         validation = dateValidation,
-                        onDatePickerClick = { showDatePicker = true }
-                    )
+                        onDatePickerClick = { showDatePicker = true })
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -429,8 +419,7 @@ fun EditarPerfilContent(
                             icon = Icons.Default.FitnessCenter,
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Next
+                                keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next
                             )
                         )
 
@@ -455,17 +444,13 @@ fun EditarPerfilContent(
                     )
 
                     // Belt Selection
-                    BeltSelectionCard(
-                        currentFaixa = currentFaixa,
-                        onClick = { showFaixaDialog = true }
-                    )
+                    BeltSelectionCard(currentFaixa = currentFaixa,
+                        onClick = { showFaixaDialog = true })
 
                     // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
                     if (shouldShowDan(currentFaixa)) {
-                        DanSelectionCard(
-                            currentDan = currentDan,
-                            onClick = { showDanDialog = true }
-                        )
+                        DanSelectionCard(currentDan = currentDan,
+                            onClick = { showDanDialog = true })
                     }
 
                     HorizontalDivider(
@@ -487,8 +472,7 @@ fun EditarPerfilContent(
                         label = "Registro AKSD",
                         icon = Icons.Default.AccountCircle,
                         keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
+                            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
                         )
                     )
                     Text(
@@ -499,16 +483,12 @@ fun EditarPerfilContent(
                     )
 
                     // Academia Selection
-                    AcademiaSelector(
-                        academia = currentAcademia,
-                        onAcademiaChange = { currentAcademia = it }
-                    )
+                    AcademiaSelector(academia = currentAcademia,
+                        onAcademiaChange = { currentAcademia = it })
 
                     // Tamanho da Faixa
-                    TamanhoFaixaSelectionCard(
-                        currentTamanhoFaixa = currentTamanhoFaixa,
-                        onClick = { showTamanhoFaixaDialog = true }
-                    )
+                    TamanhoFaixaSelectionCard(currentTamanhoFaixa = currentTamanhoFaixa,
+                        onClick = { showTamanhoFaixaDialog = true })
                     Text(
                         text = "Você pode encontrar o número da faixa na etiqueta da faixa. Caso ache sua faixa muito grande fique a vontade para colocar um número menor",
                         style = MaterialTheme.typography.bodySmall,
@@ -542,15 +522,122 @@ fun EditarPerfilContent(
                 }
             }
 
+            if (usuarioLogado?._id != currentId) {
+                Spacer(modifier = Modifier.height(24.dp))
+                // Seção administrativa
+                Text(
+                    text = "Configurações Administrativas",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Status Switch
+                Card(
+                    modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ), shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Status do Usuário",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = if (currentStatus == "ativo") "Usuário ativo no sistema" else "Usuário inativo no sistema",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                        Switch(checked = currentStatus == "ativo", onCheckedChange = { isChecked ->
+                            currentStatus = if (isChecked) "ativo" else "inativo"
+                        })
+                    }
+                }
+
+                // Perfis
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showPerfisDialog = true },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Perfis do Usuário",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Toque para gerenciar os perfis",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.Group,
+                                contentDescription = "Gerenciar perfis",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Mostrar perfis atuais
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            currentPerfis.forEach { perfil ->
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ), shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Text(
+                                        text = perfil,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.padding(
+                                            horizontal = 12.dp, vertical = 6.dp
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // Action Buttons
             ActionButtons(
-                isSaving = isSaving,
-                isFormValid = currentNome.isNotBlank(),
-                onSave = {
+                isSaving = isSaving, isFormValid = currentNome.isNotBlank(), onSave = {
                     if (!isSaving) {
                         isSaving = true
                         coroutineScope.launch {
                             editarPerfilViewModel.salvarPerfil(
+                                id = currentId,
                                 nome = currentNome,
                                 username = currentUsername,
                                 email = currentEmail,
@@ -563,23 +650,31 @@ fun EditarPerfilContent(
                                 tamanhoFaixa = currentTamanhoFaixa,
                                 lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
                                 registroAKSD = currentRegistroAKSD,
-                                perfil = currentPerfil,
+                                perfis = currentPerfis,
+                                status = currentStatus,
+                                onSave = onSave,
                                 context = context
                             )
-                            delay(2000L)
-                            onSave()
                             isSaving = false
                         }
                     }
-                },
-                onCancelar = onCancelar
+                }, onCancelar = onCancelar
             )
+        }
+
+        // Dialog para seleção de perfis
+        if (showPerfisDialog) {
+            PerfisSelectionDialog(perfisAtuais = currentPerfis,
+                onDismiss = { showPerfisDialog = false },
+                onConfirm = { novosPerfis ->
+                    currentPerfis = novosPerfis
+                    showPerfisDialog = false
+                })
         }
 
         // Belt Selection Dialog
         if (showFaixaDialog) {
-            BeltSelectionDialog(
-                faixas = faixas,
+            BeltSelectionDialog(faixas = faixas,
                 currentFaixa = currentFaixa,
                 onFaixaSelected = { faixa ->
                     currentFaixa = faixa
@@ -588,48 +683,42 @@ fun EditarPerfilContent(
                         "Grão Mestre" -> 10
                         else -> 0
                     }
-                    themeViewModel.changeThemeFaixa(faixa)
+                    if (usuarioLogado?._id == currentId) {
+                        themeViewModel.changeThemeFaixa(faixa)
+                    }
                     showFaixaDialog = false
                 },
-                onDismiss = { showFaixaDialog = false }
-            )
+                onDismiss = { showFaixaDialog = false })
         }
 
         // Date Picker Dialog
         if (showDatePicker) {
-            DatePickerModal(
-                onDateSelected = { selectedDate ->
-                    currentDataNascimento = selectedDate
-                    showDatePicker = false
-                },
-                onDismiss = { showDatePicker = false }
-            )
+            DatePickerModal(onDateSelected = { selectedDate ->
+                currentDataNascimento = selectedDate
+                showDatePicker = false
+            }, onDismiss = { showDatePicker = false })
         }
 
         // Dan Selection Dialog
         if (showDanDialog) {
-            DanSelectionDialog(
-                danOptions = getDanOptions(currentFaixa),
+            DanSelectionDialog(danOptions = getDanOptions(currentFaixa),
                 currentDan = currentDan,
                 onDanSelected = { dan ->
                     currentDan = dan
                     showDanDialog = false
                 },
-                onDismiss = { showDanDialog = false }
-            )
+                onDismiss = { showDanDialog = false })
         }
 
         // Tamanho Faixa Selection Dialog
         if (showTamanhoFaixaDialog) {
-            TamanhoFaixaSelectionDialog(
-                tamanhos = tamanhosFaixa,
+            TamanhoFaixaSelectionDialog(tamanhos = tamanhosFaixa,
                 currentTamanho = currentTamanhoFaixa,
                 onTamanhoSelected = { tamanho ->
                     currentTamanhoFaixa = tamanho
                     showTamanhoFaixaDialog = false
                 },
-                onDismiss = { showTamanhoFaixaDialog = false }
-            )
+                onDismiss = { showTamanhoFaixaDialog = false })
         }
     }
 }
@@ -637,8 +726,7 @@ fun EditarPerfilContent(
 @Composable
 private fun ProfileHeader() {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
@@ -651,8 +739,7 @@ private fun ProfileHeader() {
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                         )
                     )
-                ),
-            contentAlignment = Alignment.Center
+                ), contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
@@ -700,8 +787,7 @@ private fun AnimatedTextField(
         label = "border_color"
     )
 
-    OutlinedTextField(
-        value = value,
+    OutlinedTextField(value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         leadingIcon = {
@@ -733,9 +819,7 @@ private fun AnimatedTextField(
 
 @Composable
 private fun HeightTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue(value)) }
@@ -746,9 +830,7 @@ private fun HeightTextField(
             !isValid && value.isNotEmpty() -> MaterialTheme.colorScheme.error
             isFocused -> MaterialTheme.colorScheme.primary
             else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-        },
-        animationSpec = tween(200),
-        label = "border_color"
+        }, animationSpec = tween(200), label = "border_color"
     )
 
     val labelColor = when {
@@ -765,18 +847,15 @@ private fun HeightTextField(
     }
 
     Column(modifier = modifier) {
-        OutlinedTextField(
-            value = textFieldValue,
+        OutlinedTextField(value = textFieldValue,
             onValueChange = { newTextFieldValue ->
                 val (maskedValue, cursorPosition) = applyHeightMask(
-                    newTextFieldValue.text,
-                    textFieldValue.text
+                    newTextFieldValue.text, textFieldValue.text
                 )
 
                 // Atualiza o estado local com a nova posição do cursor
                 textFieldValue = newTextFieldValue.copy(
-                    text = maskedValue,
-                    selection = TextRange(cursorPosition)
+                    text = maskedValue, selection = TextRange(cursorPosition)
                 )
 
                 // Notifica a mudança para o componente pai
@@ -785,23 +864,19 @@ private fun HeightTextField(
             label = { Text("Altura (m)") },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Height,
-                    contentDescription = null,
-                    tint = labelColor
+                    imageVector = Icons.Default.Height, contentDescription = null, tint = labelColor
                 )
             },
             placeholder = {
                 Text(
-                    text = "1,75",
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    text = "1,75", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { isFocused = it.isFocused },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Done
+                keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
             ),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -830,9 +905,7 @@ private fun HeightTextField(
 
 @Composable
 private fun DateOfBirthField(
-    value: String,
-    validation: DateValidation,
-    onDatePickerClick: () -> Unit
+    value: String, validation: DateValidation, onDatePickerClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -856,13 +929,10 @@ private fun DateOfBirthField(
     }
 
     Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onDatePickerClick() }
-        ) {
-            OutlinedTextField(
-                value = displayValue,
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onDatePickerClick() }) {
+            OutlinedTextField(value = displayValue,
                 onValueChange = { },
                 label = { Text("Data de Nascimento") },
                 leadingIcon = {
@@ -915,8 +985,7 @@ private fun DateOfBirthField(
 
 @Composable
 private fun BeltSelectionCard(
-    currentFaixa: String,
-    onClick: () -> Unit
+    currentFaixa: String, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -927,8 +996,7 @@ private fun BeltSelectionCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -975,10 +1043,7 @@ private fun BeltSelectionCard(
 
 @Composable
 private fun ActionButtons(
-    isSaving: Boolean,
-    isFormValid: Boolean,
-    onSave: () -> Unit,
-    onCancelar: () -> Unit
+    isSaving: Boolean, isFormValid: Boolean, onSave: () -> Unit, onCancelar: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -993,8 +1058,7 @@ private fun ActionButtons(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             )
         ) {
             Icon(
@@ -1004,8 +1068,7 @@ private fun ActionButtons(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Cancelar",
-                style = MaterialTheme.typography.titleMedium
+                text = "Cancelar", style = MaterialTheme.typography.titleMedium
             )
         }
 
@@ -1018,13 +1081,11 @@ private fun ActionButtons(
             enabled = !isSaving && isFormValid
         ) {
             AnimatedContent(
-                targetState = isSaving,
-                transitionSpec = {
+                targetState = isSaving, transitionSpec = {
                     fadeIn(animationSpec = tween(200)) togetherWith fadeOut(
                         animationSpec = tween(200)
                     )
-                },
-                label = "button_content"
+                }, label = "button_content"
             ) { saving ->
                 if (saving) {
                     Row(
@@ -1037,8 +1098,7 @@ private fun ActionButtons(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                         Text(
-                            text = "Salvando...",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Salvando...", style = MaterialTheme.typography.titleMedium
                         )
                     }
                 } else {
@@ -1052,8 +1112,7 @@ private fun ActionButtons(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "Salvar",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Salvar", style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
@@ -1069,76 +1128,96 @@ private fun BeltSelectionDialog(
     onFaixaSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Selecione sua Faixa",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(faixas.size) { index ->
-                    val faixa = faixas[index]
-                    val isSelected = faixa == currentFaixa
-                    val iconPainter = if (faixa == "Branca" && !isSystemInDarkTheme()) {
-                        painterResource(id = R.drawable.ic_faixa_outline)
-                    } else {
-                        painterResource(id = R.drawable.ic_faixa)
-                    }
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Text(
+            text = "Selecione sua Faixa",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }, text = {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(faixas.size) { index ->
+                val faixa = faixas[index]
+                val isSelected = faixa == currentFaixa
+                val iconPainter = if (faixa == "Branca" && !isSystemInDarkTheme()) {
+                    painterResource(id = R.drawable.ic_faixa_outline)
+                } else {
+                    painterResource(id = R.drawable.ic_faixa)
+                }
 
-                    Card(
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onFaixaSelected(faixa) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) getCorDaFaixa(faixa)
+                        else MaterialTheme.colorScheme.surface
+                    ),
+                    border = if (!isSelected) BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ) else null,
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (isSelected) 4.dp else 1.dp
+                    )
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onFaixaSelected(faixa) },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.surface
-                        ),
-                        border = if (isSelected) BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        ) else null
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        CustomIconButton(
-                            texto = faixa,
-                            iconPainter = iconPainter,
-                            onClick = { onFaixaSelected(faixa) },
-                            cor = selecionaCorIcone(faixa, isSystemInDarkTheme())
+                        Icon(
+                            painter = iconPainter,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else selecionaCorIcone(faixa, isSystemInDarkTheme())
                         )
+
+                        Text(
+                            text = faixa, style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selecionado",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
+
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Cancelar")
-            }
-        },
-        shape = RoundedCornerShape(20.dp),
-        properties = DialogProperties()
+        }
+    }, confirmButton = {}, dismissButton = {
+        TextButton(
+            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Cancelar")
+        }
+    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerModal(
-    onDateSelected: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDateSelected: (String) -> Unit, onDismiss: () -> Unit
 ) {
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = null,
-        yearRange = 1900..2099
+        initialSelectedDateMillis = null, yearRange = 1900..2099
     )
 
     val confirmEnabled = remember(datePickerState.selectedDateMillis) {
@@ -1147,34 +1226,28 @@ private fun DatePickerModal(
         }
     }
 
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val date = Date(millis)
-                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
-                        onDateSelected(formatter.format(date))
-                    }
-                },
-                enabled = confirmEnabled.value
-            ) {
-                Text("Confirmar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
+    DatePickerDialog(onDismissRequest = onDismiss, confirmButton = {
+        TextButton(
+            onClick = {
+                datePickerState.selectedDateMillis?.let { millis ->
+                    val date = Date(millis)
+                    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+                    onDateSelected(formatter.format(date))
+                }
+            }, enabled = confirmEnabled.value
+        ) {
+            Text("Confirmar")
         }
-    ) {
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancelar")
+        }
+    }) {
         DatePicker(
             state = datePickerState,
             title = {
                 Text(
-                    text = "Selecione sua data de nascimento",
-                    modifier = Modifier.padding(16.dp)
+                    text = "Selecione sua data de nascimento", modifier = Modifier.padding(16.dp)
                 )
             },
         )
@@ -1183,8 +1256,7 @@ private fun DatePickerModal(
 
 @Composable
 private fun DanSelectionCard(
-    currentDan: Int,
-    onClick: () -> Unit
+    currentDan: Int, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -1195,8 +1267,7 @@ private fun DanSelectionCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -1247,8 +1318,7 @@ private fun DanSelectionCard(
 
 @Composable
 private fun TamanhoFaixaSelectionCard(
-    currentTamanhoFaixa: String,
-    onClick: () -> Unit
+    currentTamanhoFaixa: String, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -1259,8 +1329,7 @@ private fun TamanhoFaixaSelectionCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -1307,81 +1376,83 @@ private fun TamanhoFaixaSelectionCard(
 
 @Composable
 private fun DanSelectionDialog(
-    danOptions: List<Int>,
-    currentDan: Int,
-    onDanSelected: (Int) -> Unit,
-    onDismiss: () -> Unit
+    danOptions: List<Int>, currentDan: Int, onDanSelected: (Int) -> Unit, onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Selecione seu Dan",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(danOptions.size) { index ->
-                    val dan = danOptions[index]
-                    val isSelected = dan == currentDan
-                    val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Text(
+            text = "Selecione seu Dan",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }, text = {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(danOptions.size) { index ->
+                val dan = danOptions[index]
+                val isSelected = dan == currentDan
+                val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
 
-                    Card(
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onDanSelected(dan) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surface
+                    ),
+                    border = if (!isSelected) BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ) else null,
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (isSelected) 4.dp else 1.dp
+                    )
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onDanSelected(dan) },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.surface
-                        ),
-                        border = if (isSelected) BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        ) else null
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_faixa),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_faixa),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.primary
+                        )
 
-                            Text(
-                                text = danText,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
+                        Text(
+                            text = danText, style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selecionado",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Cancelar")
-            }
-        },
-        shape = RoundedCornerShape(20.dp),
-        properties = DialogProperties()
+        }
+    }, confirmButton = {}, dismissButton = {
+        TextButton(
+            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Cancelar")
+        }
+    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
     )
 }
 
@@ -1392,37 +1463,132 @@ private fun TamanhoFaixaSelectionDialog(
     onTamanhoSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Text(
+            text = "Selecione o Tamanho da Faixa",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }, text = {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(tamanhos.size) { index ->
+                val tamanho = tamanhos[index]
+                val isSelected = tamanho == currentTamanho
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onTamanhoSelected(tamanho) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surface
+                    ),
+                    border = if (!isSelected) BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ) else null,
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (isSelected) 4.dp else 1.dp
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_faixa),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = tamanho, style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selecionado",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }, confirmButton = {}, dismissButton = {
+        TextButton(
+            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Cancelar")
+        }
+    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
+    )
+}
+
+@Composable
+fun PerfisSelectionDialog(
+    perfisAtuais: List<String>, onDismiss: () -> Unit, onConfirm: (List<String>) -> Unit
+) {
+    val perfisDisponiveis = listOf("adm", "professor", "aluno")
+    var perfisTemporarios by remember { mutableStateOf(perfisAtuais.toSet()) }
+
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Text(
+            text = "Selecionar Perfis",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+    }, text = {
+        Column {
             Text(
-                text = "Selecione o Tamanho da Faixa",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                text = "Selecione os perfis que o usuário deve ter:",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-        },
-        text = {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(tamanhos.size) { index ->
-                    val tamanho = tamanhos[index]
-                    val isSelected = tamanho == currentTamanho
+                perfisDisponiveis.forEach { perfil ->
+                    val isSelected = perfisTemporarios.contains(perfil)
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onTamanhoSelected(tamanho) },
-                        shape = RoundedCornerShape(12.dp),
+                            .clickable {
+                                perfisTemporarios = if (perfisTemporarios.contains(perfil)) {
+                                    perfisTemporarios - perfil
+                                } else {
+                                    perfisTemporarios + perfil
+                                }
+                            },
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            containerColor = if (isSelected) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.surface
                         ),
-                        border = if (isSelected) BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        ) else null
+                        border = if (!isSelected) BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ) else null,
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = if (isSelected) 4.dp else 1.dp
+                        )
                     ) {
                         Row(
                             modifier = Modifier
@@ -1432,34 +1598,52 @@ private fun TamanhoFaixaSelectionDialog(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_faixa),
+                                imageVector = when (perfil) {
+                                    "adm" -> Icons.Default.AccountCircle
+                                    "professor" -> Icons.Default.Person
+                                    "aluno" -> Icons.Default.Group
+                                    else -> Icons.Default.Person
+                                },
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.primary
                             )
 
                             Text(
-                                text = tamanho,
+                                text = perfil.replaceFirstChar { it.uppercase() },
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurface
                             )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selecionado",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Cancelar")
-            }
-        },
-        shape = RoundedCornerShape(20.dp),
-        properties = DialogProperties()
-    )
+        }
+    }, confirmButton = {
+        Button(
+            onClick = { onConfirm(perfisTemporarios.toList()) },
+            enabled = perfisTemporarios.isNotEmpty()
+        ) {
+            Text("Confirmar")
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancelar")
+        }
+    })
 }

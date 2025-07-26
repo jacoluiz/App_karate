@@ -57,7 +57,6 @@ import br.com.shubudo.model.Academia
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.viewModel.AcademiaViewModel
 
-
 @Composable
 fun AcademiasView(
     onNavigateToCadastroAcademia: () -> Unit = {},
@@ -76,9 +75,13 @@ fun AcademiasView(
             // Estrutura semelhante à tela de avisos
             Column(modifier = Modifier.fillMaxSize()) {
                 CabecalhoAcademia()
-                ConteudoVazioAcademia(usuarioLogado?.perfil == "adm", onNavigateToCadastroAcademia)
+                ConteudoVazioAcademia(
+                    usuarioLogado?.perfis?.contains("adm") == true,
+                    onNavigateToCadastroAcademia
+                )
             }
         }
+
 
         is AcademiaUiState.Success -> {
             val academias = (uiState as AcademiaUiState.Success).academias
@@ -105,7 +108,7 @@ fun AcademiasView(
                                 color = MaterialTheme.colorScheme.primary
                             )
 
-                            if (usuarioLogado?.perfil == "adm") {
+                            if (usuarioLogado?.perfis?.contains("adm") == true) {
                                 FloatingActionButton(
                                     onClick = onNavigateToCadastroAcademia,
                                     modifier = Modifier.size(48.dp),
@@ -122,7 +125,7 @@ fun AcademiasView(
                             items(academias) { academia ->
                                 AcademiaCard(
                                     academia = academia,
-                                    isAdmin = usuarioLogado?.perfil == "adm",
+                                    isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
                                     onEdit = {
                                         onNavigateToEditarAcademia(academia._id)
                                     },

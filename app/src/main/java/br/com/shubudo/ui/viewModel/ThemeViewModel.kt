@@ -1,7 +1,13 @@
 package br.com.shubudo.ui.viewModel
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager.usuarioLogado
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ThemeViewModel : ViewModel() {
 
@@ -10,18 +16,21 @@ class ThemeViewModel : ViewModel() {
         "Mestre", "Grão Mestre"
     )
 
-    private val _currentFaixa = mutableStateOf<String?>(null)
+    var currentFaixa by mutableStateOf("Branca")
+        private set
+
+    init {
+        viewModelScope.launch {
+            delay(1000)
+            updateFromSession()
+        }
+    }
+
+    private fun updateFromSession() {
+        currentFaixa = usuarioLogado?.corFaixa ?: availableFaixas.random()
+    }
 
     fun changeThemeFaixa(faixa: String) {
-        _currentFaixa.value = faixa
-    }
-
-    fun getCurrentFaixa(): String? {
-        return _currentFaixa.value
-    }
-
-    fun getFaixaAtualOuAleatoria(): String {
-        return _currentFaixa.value ?: availableFaixas.random()
+        currentFaixa = faixa
     }
 }
-

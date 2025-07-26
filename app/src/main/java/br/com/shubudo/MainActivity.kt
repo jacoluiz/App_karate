@@ -33,9 +33,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -44,6 +46,7 @@ import br.com.shubudo.navigation.AppDestination
 import br.com.shubudo.navigation.KarateNavHost
 import br.com.shubudo.navigation.academiasRoute
 import br.com.shubudo.navigation.avisosRoute
+import br.com.shubudo.navigation.baseUsuariosRoute
 import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
 import br.com.shubudo.navigation.detalheMovimentoArgument
@@ -72,6 +75,8 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -80,14 +85,28 @@ class MainActivity : ComponentActivity() {
     private val REQUEST_CODE_UPDATE = 1234
     private lateinit var appUpdateManager: AppUpdateManager
 
+    private var isLoading = mutableStateOf(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
-        super.onCreate(savedInstanceState)
         appUpdateManager = AppUpdateManagerFactory.create(this)
         FirebaseApp.initializeApp(this)
         checkAndRequestPermissions()
         SessionManager.inicializar(applicationContext)
+
+        val splashScreen = installSplashScreen()
+
+        splashScreen.setKeepOnScreenCondition {
+            isLoading.value // enquanto true, mantém splash
+        }
+
+        super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            delay(1500)
+            isLoading.value = false // libera splash com transição suave
+        }
 
         setContent {
             val context = LocalContext.current
@@ -107,9 +126,7 @@ class MainActivity : ComponentActivity() {
                     val uiState by perfilViewModel.uiState.collectAsState()
                     val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
 
-                    val faixaParaTema = themeViewModel.getCurrentFaixa()
-                        ?: SessionManager.usuarioLogado?.corFaixa
-                        ?: themeViewModel.getFaixaAtualOuAleatoria()
+                    val faixaParaTema = themeViewModel.currentFaixa ?: themeViewModel.currentFaixa
 
                     AppShubudoTheme(faixa = faixaParaTema) {
                         val navController = rememberNavController()
@@ -123,9 +140,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             val isShowBottomBar = when (currentDestination?.route) {
-                                AppDestination.Recursos.route,
-                                AppDestination.Perfil.route,
-                                AppDestination.Login.route -> true
+                                AppDestination.Recursos.route, AppDestination.Perfil.route, AppDestination.Login.route -> true
 
                                 else -> false
                             }
@@ -136,6 +151,7 @@ class MainActivity : ComponentActivity() {
                                 eventosRoute -> "Evento"
                                 avisosRoute -> "Avisos"
                                 recursosRoute -> ""
+                                baseUsuariosRoute -> "Base de Usuários"
                                 academiasRoute -> "Academias"
                                 AppDestination.Login.route -> "Login"
                                 programacaoRoute -> "Conteúdo"
@@ -152,22 +168,13 @@ class MainActivity : ComponentActivity() {
                             }
 
                             val showBottomBack = when (currentDestination?.route) {
-                                detalheFaixaRuteFullpath,
-                                novoUsuarioRote,
-                                novoUsuarioRoteSemUsername,
-                                esqueciMinhaSenhaRote,
-                                avisosRoute,
-                                eventosRoute,
-                                programacaoRoute,
-                                academiasRoute,
-                                esqueciMinhaSenhaRoteSemUsername -> true
+                                detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, avisosRoute, eventosRoute, programacaoRoute, academiasRoute, baseUsuariosRoute, esqueciMinhaSenhaRoteSemUsername -> true
 
                                 else -> false
                             }
 
                             val showColorTopAppBar =
                                 currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
-                            val showTitleTopAppBar = showColorTopAppBar
 
                             KarateApp(
                                 isShowTopBar = isShowTopBar,
@@ -176,7 +183,7 @@ class MainActivity : ComponentActivity() {
                                 showBottomBack = showBottomBack,
                                 navController = navController,
                                 showColorTopAppBar = showColorTopAppBar,
-                                showTitleTopAppBar = showTitleTopAppBar,
+                                showTitleTopAppBar = showColorTopAppBar,
                                 themeViewModel = themeViewModel,
                                 isLoggedIn = isLoggedIn
                             ) {
@@ -201,15 +208,12 @@ class MainActivity : ComponentActivity() {
     private fun checkForUpdate() {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (
-                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+                    AppUpdateType.IMMEDIATE
+                )
             ) {
                 appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo,
-                    AppUpdateType.IMMEDIATE,
-                    this,
-                    REQUEST_CODE_UPDATE
+                    appUpdateInfo, AppUpdateType.IMMEDIATE, this, REQUEST_CODE_UPDATE
                 )
             }
         }
@@ -245,9 +249,7 @@ class MainActivity : ComponentActivity() {
         }
         if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
-                this,
-                permissionsToRequest.toTypedArray(),
-                REQUEST_PERMISSION_CODE
+                this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSION_CODE
             )
         }
     }
@@ -279,81 +281,68 @@ fun KarateApp(
     content: @Composable () -> Unit
 ) {
     val currentBackStack by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStack?.destination?.route
     val focusManager = LocalFocusManager.current
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            modifier = Modifier.statusBarsPadding(),
-            topBar = {
-                if (isShowTopBar) {
-                    KarateTopAppBar(
-                        texto = topAppBarTitle,
-                        showBottomBack = showBottomBack,
-                        showColor = showColorTopAppBar,
-                        showTitle = showTitleTopAppBar,
-                        onBackNavigationClick = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-            },
-            floatingActionButton = {
-                if (testeDeTela) {
-                    Box(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .height(56.dp)
-                            .width(56.dp)
-                            .padding(8.dp)
-                            .background(Color(0xFF8A2BE2), RoundedCornerShape(28.dp))
-                    )
-                }
-            },
-            bottomBar = {
-                if (isShowBottomBar) {
-                    KarateBottomAppBar(
-                        navController = navController,
-                        onItemClick = { item ->
-                            when (item) {
-                                BottomAppBarItem.Perfil -> {
-                                    if (isLoggedIn) {
-                                        navController.navigate(perfilRoute) {
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    } else {
-                                        navController.navigate(AppDestination.Login.route) {
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
+        Scaffold(modifier = Modifier.statusBarsPadding(), topBar = {
+            if (isShowTopBar) {
+                KarateTopAppBar(texto = topAppBarTitle,
+                    showBottomBack = showBottomBack,
+                    showColor = showColorTopAppBar,
+                    showTitle = showTitleTopAppBar,
+                    onBackNavigationClick = {
+                        navController.popBackStack()
+                    })
+            }
+        }, floatingActionButton = {
+            if (testeDeTela) {
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .height(56.dp)
+                        .width(56.dp)
+                        .padding(8.dp)
+                        .background(Color(0xFF8A2BE2), RoundedCornerShape(28.dp))
+                )
+            }
+        }, bottomBar = {
+            if (isShowBottomBar) {
+                KarateBottomAppBar(navController = navController, onItemClick = { item ->
+                    when (item) {
+                        BottomAppBarItem.Perfil -> {
+                            if (isLoggedIn) {
+                                navController.navigate(perfilRoute) {
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-
-                                BottomAppBarItem.Recursos -> {
-                                    navController.navigate(recursosRoute) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                            } else {
+                                navController.navigate(AppDestination.Login.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
                         }
-                    )
 
-                }
-            }
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .pointerInput(Unit) {
-                        detectTapGestures(onTap = {
-                            focusManager.clearFocus()
-                        })
+                        BottomAppBarItem.Recursos -> {
+                            navController.navigate(recursosRoute) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     }
-            ) {
+                })
+
+            }
+        }) {
+            Box(modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }) {
                 content()
             }
         }

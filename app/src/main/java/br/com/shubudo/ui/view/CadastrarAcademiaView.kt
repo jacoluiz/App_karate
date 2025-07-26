@@ -62,6 +62,11 @@ fun CadastroAcademiaView(
     var filiais by remember { mutableStateOf(listOf<Filial>()) }
     var showDialog by remember { mutableStateOf(false) }
 
+    val camposValidos = nome.isNotBlank()
+            && descricao.isNotBlank()
+            && filiais.isNotEmpty()
+            && filiais.all { it.nome.isNotBlank() && it.endereco.isNotBlank() }
+
     LaunchedEffect(uiState) {
         if (uiState is CadastroAcademiaUiState.Success) {
             val data = uiState as CadastroAcademiaUiState.Success
@@ -203,7 +208,7 @@ fun CadastroAcademiaView(
                 Button(
                     onClick = { showDialog = true },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = nome.isNotBlank()
+                    enabled = camposValidos,
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

@@ -177,7 +177,7 @@ fun AvisosView(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        if (usuarioLogado.perfil == "adm") {
+                        if (usuarioLogado.perfis.contains("adm")) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { onNavigateToCadastroAviso("") }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
@@ -263,7 +263,7 @@ fun AvisosView(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            if (usuarioLogado.perfil == "adm") {
+                            if (usuarioLogado.perfis.contains("adm")) {
                                 FloatingActionButton(
                                     onClick = { onNavigateToCadastroAviso("") },
                                     modifier = Modifier.size(48.dp),
@@ -288,7 +288,7 @@ fun AvisosView(
                             items((uiState as AvisosUiState.Success).avisos.sortedByDescending { it.dataHoraCriacao }) { aviso ->
                                 AvisoCard(
                                     aviso = aviso,
-                                    isAdmin = usuarioLogado.perfil == "adm",
+                                    isAdmin = usuarioLogado.perfis.contains("adm"),
                                     userEmail = usuarioLogado.email,
                                     usuarios = usuarios,
                                     onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
@@ -486,7 +486,7 @@ fun AvisoCard(
                 }
 
                 // Indicador de público alvo
-                if (usuarioLogado?.perfil == "adm") {
+                if (usuarioLogado?.perfis?.contains("adm") == true) {
                     if (aviso.publicoAlvo.isNotEmpty()) {
                         Text(
                             text = "${aviso.publicoAlvo.size} usuário(s)",

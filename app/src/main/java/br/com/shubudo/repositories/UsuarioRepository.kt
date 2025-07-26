@@ -1,6 +1,7 @@
 package br.com.shubudo.repositories
 
 import android.content.Context
+import android.util.Log
 import br.com.shubudo.auth.CognitoAuthManager
 import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.database.entities.toUsuario
@@ -51,8 +52,17 @@ class UsuarioRepository @Inject constructor(
         }
     )
 
+    suspend fun getUsuarioPorId(id: String): Usuario? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            service.getUsuariosPorId(id).toUsuario()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun login(context : Context, userInput: String, password: String): Usuario =
+    suspend fun login(context: Context, userInput: String, password: String): Usuario =
         withContext(Dispatchers.IO) {
             withTimeoutOrNull(30000) {
                 suspendCancellableCoroutine { cont ->
@@ -73,17 +83,29 @@ class UsuarioRepository @Inject constructor(
                                     val fcmToken = getFcmToken(context)
 
                                     val usuario = usuarios.find {
-                                        it.email.equals(userInput, true) || it.username.equals(userInput, true)
+                                        it.email.equals(userInput, true) || it.username.equals(
+                                            userInput,
+                                            true
+                                        )
                                     }
 
                                     if (usuario != null) {
                                         // Atualiza com token
                                         val usuarioComToken = usuario.copy(fcmToken = fcmToken)
-                                        usuario._id?.let { service.atualizarUsuario(it, usuarioComToken) }
+                                        usuario._id?.let {
+                                            service.atualizarUsuario(
+                                                it,
+                                                usuarioComToken
+                                            )
+                                        }
 
                                         dao.deletarTodos()
-                                        usuarioComToken.toUsuarioEntity()?.let { dao.salvarUsuario(it) }
-                                        if (cont.isActive) cont.resume(usuarioComToken, onCancellation = null)
+                                        usuarioComToken.toUsuarioEntity()
+                                            ?.let { dao.salvarUsuario(it) }
+                                        if (cont.isActive) cont.resume(
+                                            usuarioComToken,
+                                            onCancellation = null
+                                        )
                                     }
 
 
@@ -212,6 +234,40 @@ class UsuarioRepository @Inject constructor(
                     userToUpdate.toUsuarioEntity()?.let { dao.atualizarUsuario(it) }
                     return@withContext userToUpdate
                 } ?: return@withContext null
+            } catch (ce: CancellationException) {
+                throw ce
+            } catch (e: Exception) {
+                return@withContext null
+            }
+        }
+
+    suspend fun atualizarUsuarioAdm(context: Context, usuario: Usuario): Usuario? =
+        withContext(Dispatchers.IO) {
+            try {
+                val localUserEntity = dao.obterUsuarioLogado().firstOrNull()
+                if (localUserEntity == null || localUserEntity._id.isBlank()) return@withContext null
+
+                val usuariosResponse = service.getUsuarios()
+                val usuarios = usuariosResponse.map { it.toUsuario() }
+
+                // Ignora o usuário que está sendo atualizado na verificação de duplicidade
+                val outrosUsuarios = usuarios.filter { it._id != usuario._id }
+
+                if (outrosUsuarios.any {
+                        it.email.equals(usuario.email, ignoreCase = true)
+                    }) return@withContext null
+                if (outrosUsuarios.any {
+                        it.username.equals(usuario.username, ignoreCase = true)
+                    }) return@withContext null
+
+                val fcmToken = getFcmToken(context)
+                val userToUpdate = usuario.copy(fcmToken = fcmToken)
+
+                return@withContext service.atualizarUsuario(
+                    usuario._id ?: return@withContext null,
+                    userToUpdate
+                )
+                    ?.toUsuario()
             } catch (ce: CancellationException) {
                 throw ce
             } catch (e: Exception) {

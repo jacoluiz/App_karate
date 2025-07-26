@@ -1,8 +1,18 @@
 package br.com.shubudo.utils
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import br.com.shubudo.ui.theme.PrimaryColorAmarela
+import br.com.shubudo.ui.theme.PrimaryColorBranca
+import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
+import br.com.shubudo.ui.theme.PrimaryColorLaranja
+import br.com.shubudo.ui.theme.PrimaryColorMarron
+import br.com.shubudo.ui.theme.PrimaryColorMestre
+import br.com.shubudo.ui.theme.PrimaryColorPreta
+import br.com.shubudo.ui.theme.PrimaryColorRoxa
+import br.com.shubudo.ui.theme.PrimaryColorVerde
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -449,6 +459,21 @@ fun applySimpleTimeMask(input: TextFieldValue): TextFieldValue {
     }
 
     return TextFieldValue(result, TextRange(result.length))
+}
+
+fun getCorDaFaixa(belt: String): Color {
+    return when (belt) {
+        "Branca" -> PrimaryColorBranca
+        "Amarela" -> PrimaryColorAmarela
+        "Laranja" -> PrimaryColorLaranja
+        "Verde" -> PrimaryColorVerde
+        "Roxa" -> PrimaryColorRoxa
+        "Marrom" -> PrimaryColorMarron
+        "Preta" -> PrimaryColorPreta
+        "Mestre" -> PrimaryColorMestre
+        "Grão Mestre" -> PrimaryColorGraoMestre
+        else -> Color(0xFF6366F1) // fallback
+    }
 }
 
 

@@ -1,16 +1,15 @@
 [versions]
 accompanistFlowlayout = "0.30.1"
 accompanistInsets = "0.26.3-beta"
-accompanistNavigationAnimation = "0.34.0"
 appUpdateKtx = "2.1.0"
 awsAndroidSdkCognitoidentityprovider = "2.22.6"
 coilCompose = "2.1.0"
 converterGson = "2.11.0"
 core = "12.0.0"
+coreSplashscreen = "1.0.1"
 gson = "2.10.1"
 hiltAndroid = "2.44"
 hiltCompiler = "1.2.0"
-firebaseMessaging = "25.0.0"
 firebaseMessagingVersion = "23.4.1"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -37,16 +36,14 @@ uiToolingPreview = "1.7.5"
 vvalidator = "0.5.0"
 media3Exoplayer = "1.4.1"
 media3Ui = "1.4.1"
-youtubeAndroidPlayerApi = "1.2.2"
 foundationLayoutAndroid = "1.7.0"
 suggestions = "1.0.0"
-symbolProcessingApi = "2.2.0-2.0.2"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanistInsets" }
-accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltCompiler" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -61,7 +58,6 @@ aws-android-sdk-core = { module = "com.amazonaws:aws-android-sdk-core", version.
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
-firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 firebase-messaging-v2341 = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessagingVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
@@ -87,7 +83,6 @@ androidx-room-common = { group = "androidx.room", name = "room-common", version.
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingApi" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "uiGraphics" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }

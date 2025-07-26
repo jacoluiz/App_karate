@@ -61,7 +61,7 @@ class NovoUsuarioViewModel @Inject constructor(
                     altura = altura,
                     username = email,
                     idade = idade,
-                    perfil = "básico",
+                    perfis = listOf("aluno"),
                     dan = dan,
                     academia = academia,
                     tamanhoFaixa = tamanhoFaixa

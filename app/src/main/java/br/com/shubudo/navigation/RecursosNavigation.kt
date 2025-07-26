@@ -14,20 +14,18 @@ fun NavGraphBuilder.recursosScreen(
     onNavigateToAvisos: () -> Unit = {},
     onNavigateToEventos: () -> Unit = {},
     onNavigateToProgramacao: () -> Unit = {},
-    onNavigateToAcademias: () -> Unit = {}
+    onNavigateToAcademias: () -> Unit = {},
+    onNavigateToBaseUsuarios: () -> Unit = {}
 ) {
     composable(
         route = recursosRoute,
-        enterTransition = { null },
-        exitTransition = { null },
-        popEnterTransition = { null },
-        popExitTransition = { null }
     ) {
         RecursosView(
             onNavigateToAvisos = onNavigateToAvisos,
             onNavigateToEventos = onNavigateToEventos,
             onNavigateToProgramacao = onNavigateToProgramacao,
-            onNavigateToAcademias = onNavigateToAcademias
+            onNavigateToAcademias = onNavigateToAcademias,
+            onNavigateToBaseUsuarios = onNavigateToBaseUsuarios
         )
     }
 }

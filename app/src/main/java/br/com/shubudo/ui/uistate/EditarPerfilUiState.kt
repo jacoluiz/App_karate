@@ -9,6 +9,7 @@ sealed class EditarPerfilUiState {
 
     // Estado de sucesso com os dados do usuário para edição
     data class Success(
+        val id: String = "",
         val nome: String = "",
         val username: String = "",
         val email: String = "",
@@ -21,6 +22,8 @@ sealed class EditarPerfilUiState {
         val tamanhoFaixa: String = "",
         val lesaoOuLaudosMedicos: String? = "",
         val registroAKSD: String? = "",
-        val perfil: String = "",
+        val perfis: List<String> = listOf("aluno"),
+        val status: String = "ativo",
+        val usuarioId: String? = null
     ) : EditarPerfilUiState()
 }

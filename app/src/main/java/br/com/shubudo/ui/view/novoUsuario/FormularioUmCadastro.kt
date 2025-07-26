@@ -83,6 +83,7 @@ import br.com.shubudo.ui.theme.PrimaryColorRoxa
 import br.com.shubudo.ui.theme.PrimaryColorVerde
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.utils.applyDateMask
+import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getDanOptions
 import br.com.shubudo.utils.isValidDate
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
@@ -200,14 +201,14 @@ fun PaginaUmCadastro(
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_faixa),
                                         contentDescription = null,
-                                        tint = getBeltColor(faixa),
+                                        tint = getCorDaFaixa(faixa),
                                         modifier = Modifier.size(20.dp)
                                     )
 
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(getBeltColor(faixa).copy(alpha = 0.1f))
+                                            .background(getCorDaFaixa(faixa).copy(alpha = 0.1f))
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Text(
@@ -215,7 +216,7 @@ fun PaginaUmCadastro(
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 fontWeight = FontWeight.Medium
                                             ),
-                                            color = getBeltColor(faixa)
+                                            color = getCorDaFaixa(faixa)
                                         )
                                     }
                                 }
@@ -601,21 +602,6 @@ private fun ModernTextFieldWithDateMask(
                 )
             }
         }
-    }
-}
-
-private fun getBeltColor(belt: String): Color {
-    return when (belt) {
-        "Branca" -> PrimaryColorBranca
-        "Amarela" -> PrimaryColorAmarela
-        "Laranja" -> PrimaryColorLaranja
-        "Verde" -> PrimaryColorVerde
-        "Roxa" -> PrimaryColorRoxa
-        "Marrom" -> PrimaryColorMarron
-        "Preta" -> PrimaryColorPreta
-        "Mestre" -> PrimaryColorMestre
-        "Grão Mestre" -> PrimaryColorGraoMestre
-        else -> Color(0xFF6366F1) // fallback
     }
 }
 

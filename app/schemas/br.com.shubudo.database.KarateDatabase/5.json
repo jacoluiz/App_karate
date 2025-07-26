@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "98d91cb61c04beecab81b5c1140bbe2f",
+    "identityHash": "753f585d369eff2aa8228479f0635257",
     "entities": [
       {
         "tableName": "academias",
@@ -394,7 +394,7 @@
       },
       {
         "tableName": "Usuario",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `username` TEXT NOT NULL, `email` TEXT NOT NULL, `peso` TEXT NOT NULL, `altura` TEXT NOT NULL, `idade` TEXT NOT NULL, `perfil` TEXT NOT NULL, `corFaixa` TEXT NOT NULL, `status` TEXT NOT NULL, `dan` INTEGER NOT NULL, `academia` TEXT NOT NULL, `tamanhoFaixa` TEXT NOT NULL, `lesaoOuLaudosMedicos` TEXT NOT NULL, `registroAKSD` TEXT NOT NULL, `fcmToken` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `username` TEXT NOT NULL, `email` TEXT NOT NULL, `peso` TEXT NOT NULL, `altura` TEXT NOT NULL, `idade` TEXT NOT NULL, `perfis` TEXT NOT NULL, `corFaixa` TEXT NOT NULL, `status` TEXT NOT NULL, `dan` INTEGER NOT NULL, `academia` TEXT NOT NULL, `tamanhoFaixa` TEXT NOT NULL, `lesaoOuLaudosMedicos` TEXT NOT NULL, `registroAKSD` TEXT NOT NULL, `fcmToken` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -439,8 +439,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "perfil",
-            "columnName": "perfil",
+            "fieldPath": "perfis",
+            "columnName": "perfis",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -762,7 +762,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '98d91cb61c04beecab81b5c1140bbe2f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '753f585d369eff2aa8228479f0635257')"
     ]
   }
 }

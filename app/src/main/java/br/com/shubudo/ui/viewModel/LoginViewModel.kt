@@ -59,8 +59,7 @@ class LoginViewModel @Inject constructor(
 
                     message.contains("User is not confirmed", ignoreCase = true) -> {
                         val corFaixa = repository.getCorFaixaLocal(username)
-                            ?: themeViewModel.getCurrentFaixa()
-                            ?: "branca"
+                            ?: themeViewModel.currentFaixa
                         _uiState.value = LoginUiState.NavigateToConfirmEmail(username, corFaixa)
                         return@launch
                     }
@@ -77,8 +76,7 @@ class LoginViewModel @Inject constructor(
             } catch (e: UserNotConfirmedException) {
                 Log.w("LoginViewModel", "Usuário não confirmado: ${e.message}")
                 val corFaixa = repository.getCorFaixaLocal(username)
-                    ?: themeViewModel.getCurrentFaixa()
-                    ?: "branca"
+                    ?: themeViewModel.currentFaixa
                 _uiState.value = LoginUiState.NavigateToConfirmEmail(username, corFaixa)
                 return@launch
 

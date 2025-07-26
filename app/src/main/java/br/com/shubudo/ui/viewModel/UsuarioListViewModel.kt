@@ -19,14 +19,25 @@ class UsuarioListViewModel @Inject constructor(
     private val _usuarios = MutableStateFlow<List<Usuario>>(emptyList())
     val usuarios: StateFlow<List<Usuario>> = _usuarios.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         loadUsuarios()
     }
 
-    private fun loadUsuarios() {
+    fun loadUsuarios() {
         viewModelScope.launch {
-            usuarioRepository.getUsuarios().collect { usuarios ->
-                _usuarios.value = usuarios
+            _isLoading.value = true
+            try {
+                usuarioRepository.getUsuarios().collect { usuarios ->
+                    _usuarios.value = usuarios
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _usuarios.value = emptyList()
+            } finally {
+                _isLoading.value = false
             }
         }
     }

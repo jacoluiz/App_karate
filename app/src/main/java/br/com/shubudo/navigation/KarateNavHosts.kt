@@ -1,7 +1,5 @@
 package br.com.shubudo.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,8 +20,7 @@ fun KarateNavHost(
     themeViewModel: ThemeViewModel
 ) {
 
-    NavHost(
-        navController = navController,
+    NavHost(navController = navController,
         startDestination = AppDestination.Recursos.route,
         enterTransition = {
             when (targetState.destination.route) {
@@ -31,6 +28,7 @@ fun KarateNavHost(
                     initialOffsetX = { -it }, // entra pela esquerda
                     animationSpec = tween(500)
                 ) + fadeIn()
+
                 else -> slideInHorizontally(
                     initialOffsetX = { it }, // entra pela direita
                     animationSpec = tween(500)
@@ -41,11 +39,12 @@ fun KarateNavHost(
             when (initialState.destination.route) {
                 AppDestination.Recursos.route -> slideOutHorizontally(
                     targetOffsetX = { -it }, // sai pela esquerda
-                    animationSpec = tween(500)
+                    animationSpec = tween(1500)
                 ) + fadeOut()
+
                 else -> slideOutHorizontally(
                     targetOffsetX = { it }, // sai pela direita
-                    animationSpec = tween(500)
+                    animationSpec = tween(1500)
                 ) + fadeOut()
             }
         },
@@ -55,6 +54,7 @@ fun KarateNavHost(
                     initialOffsetX = { it }, // volta da direita
                     animationSpec = tween(500)
                 ) + fadeIn()
+
                 else -> slideInHorizontally(
                     initialOffsetX = { -it }, // volta da esquerda
                     animationSpec = tween(500)
@@ -65,79 +65,62 @@ fun KarateNavHost(
             when (initialState.destination.route) {
                 AppDestination.Recursos.route -> slideOutHorizontally(
                     targetOffsetX = { it }, // sai pela direita
-                    animationSpec = tween(500)
+                    animationSpec = tween(1500)
                 ) + fadeOut()
+
                 else -> slideOutHorizontally(
                     targetOffsetX = { -it }, // sai pela esquerda
-                    animationSpec = tween(500)
+                    animationSpec = tween(1500)
                 ) + fadeOut()
             }
         }
 
     ) {
         // Tela de Login
-        loginScreen(
-            themeViewModel = themeViewModel,
-            onNavigateToNovoUsuario = { username ->
-                navController.navigateToNovoUsuario(username.toString())
-            },
-            onNavigateToHome = {
-                navController.navigateToRecursos()
-            },
-            onNavigateToEsqueciMinhaSenha = {
-                navController.navigateToEsqueciMinhaSenha()
-            },
-            onNavigateToConfirmEmail = { email, senha, corFaixa ->
-                navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
-            }
-        )
+        loginScreen(themeViewModel = themeViewModel, onNavigateToNovoUsuario = { username ->
+            navController.navigateToNovoUsuario(username.toString())
+        }, onNavigateToHome = {
+            navController.navigateToRecursos()
+        }, onNavigateToEsqueciMinhaSenha = {
+            navController.navigateToEsqueciMinhaSenha()
+        }, onNavigateToConfirmEmail = { email, senha, corFaixa ->
+            navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
+        })
 
         // Tela de Eventos
-        eventosScreen(
-            onReload = { navController.navigate(eventosRoute) },
+        eventosScreen(onReload = { navController.navigate(eventosRoute) },
             onEventClick = { eventoId ->
                 navController.navigateToEventoDetalhe(eventoId)
             },
             onAddEventoClick = { navController.navigateToCadastroEvento() },
-            onEditEventoClick = { eventoId -> navController.navigateToCadastroEvento(eventoId) }
-        )
+            onEditEventoClick = { eventoId -> navController.navigateToCadastroEvento(eventoId) })
 
         // Tela de Perfil
-        perfilScreen(
-            themeViewModel = themeViewModel,
-            onLogoutNavegacao = {
-                navController.navigate(AppDestination.Login.route) {
-                    popUpTo(0) { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
-            onEditarPerfil = { navController.navigateToEditarPerfil() }
-        )
+        perfilScreen(themeViewModel = themeViewModel, onLogoutNavegacao = {
+            navController.navigate(AppDestination.Login.route) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }, onEditarPerfil = { navController.navigateToEditarPerfil() })
 
         // Tela de Confirmação de E-mail
-        confirmacaoEmailScreen(
-            themeViewModel = themeViewModel,
-            onConfirmado = {
-                // Navegar para a tela principal após confirmação bem-sucedida
-                navController.navigateToRecursos()
-            },
-            onBackToLogin = {
-                // Navegar para login quando há falha nas credenciais
-                navController.navigate(AppDestination.Login.route) {
-                    popUpTo(confirmacaoEmailRoute) { inclusive = true }
-                    launchSingleTop = true
-                }
+        confirmacaoEmailScreen(themeViewModel = themeViewModel, onConfirmado = {
+            // Navegar para a tela principal após confirmação bem-sucedida
+            navController.navigateToRecursos()
+        }, onBackToLogin = {
+            // Navegar para login quando há falha nas credenciais
+            navController.navigate(AppDestination.Login.route) {
+                popUpTo(confirmacaoEmailRoute) { inclusive = true }
+                launchSingleTop = true
             }
-        )
+        })
 
         // Tela de Esqueci Minha Senha
-        esqueciMinhaSenhaScreen(
-            onSenhaRedefinida = {
-                navController.navigate("login") {
-                    popUpTo("esqueciMinhaSenha") { inclusive = true }
-                }
+        esqueciMinhaSenhaScreen(onSenhaRedefinida = {
+            navController.navigate("login") {
+                popUpTo("esqueciMinhaSenha") { inclusive = true }
             }
-        )
+        })
 
         // Tela de Programação
         programacaoScreen(
@@ -146,31 +129,25 @@ fun KarateNavHost(
         )
 
         // Tela de Detalhe da Faixa
-        detalheFaixaScreen(
-            onNavigateToDetalheMovimento = { faixa, movimento ->
-                navController.navigateToDetalheMovimento(faixa, movimento)
-            }
-        )
+        detalheFaixaScreen(onNavigateToDetalheMovimento = { faixa, movimento ->
+            navController.navigateToDetalheMovimento(faixa, movimento)
+        })
 
         // Tela de Detalhe do Movimento
-        detalheMovimentoScreen(
-            onBackNavigationClick = { navController.popBackStack() }
-        )
+        detalheMovimentoScreen(onBackNavigationClick = { navController.popBackStack() })
 
         // Tela de Novo Usuário
-        novoUsuarioScreen(
-            themeViewModel = themeViewModel,
+        novoUsuarioScreen(themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
             onNavigateToLogin = { email, senha, corFaixa ->
                 navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
-            }
-        )
+            })
 
         // Tela de Editar Perfil
-        editarPerfilScreen(
-            themeViewModel = themeViewModel,
+        editarPerfilScreen(themeViewModel = themeViewModel,
             onSaveSuccess = { navController.popBackStack() },
-            onCancelar = { navController.popBackStack() }
+            onCancelar = { navController.popBackStack() },
+            navController = navController
         )
 
         // Tela de Detalhe do Evento
@@ -179,62 +156,56 @@ fun KarateNavHost(
         }
 
         // Tela de Recursos
-        recursosScreen(
-            onNavigateToAvisos = {
-                navController.navigateToAvisos()
-            },
-            onNavigateToEventos = {
-                navController.navigateToEventos()
-            },
-            onNavigateToProgramacao = {
-                navController.navigateToProgramacao(navOptions {
-                    launchSingleTop = true
-                    popUpTo(programacaoRoute)
-                })
-            },
-            onNavigateToAcademias = {
-                navController.navigateToAcademias()
+        recursosScreen(onNavigateToAvisos = {
+            navController.navigateToAvisos()
+        }, onNavigateToEventos = {
+            navController.navigateToEventos()
+        }, onNavigateToProgramacao = {
+            navController.navigateToProgramacao(navOptions {
+                launchSingleTop = true
+                popUpTo(programacaoRoute)
+            })
+        }, onNavigateToAcademias = {
+            navController.navigateToAcademias()
+        }, onNavigateToBaseUsuarios = {
+            navController.navigateToBaseUsuarios()
+        })
+
+        // Tela de Base de Usuários
+        baseUsuariosScreen(
+            navController = navController,
+            onNavigateToEditarUsuario = { usuarioId ->
+                navController.navigateToEditarUsuario(usuarioId)
             }
         )
 
         // Tela de Avisos
-        avisosScreen(
-            onNavigateToCadastroAviso = { navController.navigateToCadastroAviso() },
+        avisosScreen(onNavigateToCadastroAviso = { navController.navigateToCadastroAviso() },
             onNavigateToEditarAviso = { avisoId ->
                 navController.navigateToCadastroAviso(avisoId)
-            }
-        )
+            })
 
         // Tela de Cadastro de Aviso
-        cadastroAvisoScreen(
-            onNavigateBack = {
-                navController.popBackStack()
-            }
-        )
+        cadastroAvisoScreen(onNavigateBack = {
+            navController.popBackStack()
+        })
 
         // Tela de Cadastro de Evento
-        cadastroEventoScreen(
-            onNavigateBack = {
-                navController.popBackStack()
-            }
-        )
+        cadastroEventoScreen(onNavigateBack = {
+            navController.popBackStack()
+        })
 
         // Tela de Academias
-        academiasScreen(
-            onAddAcademiaClick = {
-                navController.navigateToCadastroAcademia()
-            },
-            onEditAcademiaClick = { academiaId ->
-                navController.navigateToCadastroAcademia(academiaId)
-            }
-        )
+        academiasScreen(onAddAcademiaClick = {
+            navController.navigateToCadastroAcademia()
+        }, onEditAcademiaClick = { academiaId ->
+            navController.navigateToCadastroAcademia(academiaId)
+        })
 
         // Tela de Cadastro de Academia
-        cadastroAcademiaScreen(
-            onNavigateBack = {
-                navController.popBackStack()
-            }
-        )
+        cadastroAcademiaScreen(onNavigateBack = {
+            navController.popBackStack()
+        })
     }
 }
 

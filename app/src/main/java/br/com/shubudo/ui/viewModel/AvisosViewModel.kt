@@ -47,10 +47,10 @@ class AvisosViewModel @Inject constructor(
                 .collect { avisos ->
                     val usuario = SessionManager.usuarioLogado
                     val emailUsuario = usuario?.email.orEmpty()
-                    val perfilUsuario = usuario?.perfil.orEmpty()
+                    val perfilUsuario = usuario?.perfis.orEmpty()
 
-                    val avisosFiltrados = if (perfilUsuario == "adm") {
-                        avisos // Admin vê todos
+                    val avisosFiltrados = if (perfilUsuario.contains("adm")) {
+                        avisos
                     } else {
                         avisos.filter { aviso ->
                             aviso.publicoAlvo.isEmpty() || aviso.publicoAlvo.contains(emailUsuario)

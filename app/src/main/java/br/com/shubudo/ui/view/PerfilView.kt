@@ -32,7 +32,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -145,8 +144,7 @@ private fun PerfilContent(
         // Header com gradiente e foto de perfil
         ProfileHeader(
             nome = nome,
-            username = username,
-            corFaixa = corFaixa
+            username = username
         )
 
         // Conteúdo principal
@@ -179,8 +177,7 @@ private fun PerfilContent(
 @Composable
 private fun ProfileHeader(
     nome: String,
-    username: String,
-    corFaixa: String
+    username: String
 ) {
     Box(
         modifier = Modifier
@@ -250,25 +247,8 @@ private fun ProfileHeader(
             Text(
                 text = "@$username",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Badge da faixa
-            Surface(
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Text(
-                    text = "Faixa $corFaixa",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
         }
     }
 }
@@ -302,7 +282,7 @@ private fun PersonalInfoSection(
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             // Grid de informações
@@ -370,7 +350,7 @@ private fun PersonalInfoSection(
 
                 // Academia
                 InfoCard(
-                    icon = painterResource(id = R.drawable.ic_sequencia_de_combate),
+                    icon = painterResource(id = R.drawable.ic_academia),
                     label = "Academia",
                     value = academia.ifBlank { "Não informado" },
                     modifier = Modifier.fillMaxWidth()

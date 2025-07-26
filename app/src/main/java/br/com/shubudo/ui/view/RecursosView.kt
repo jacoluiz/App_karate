@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
@@ -57,16 +57,11 @@ fun RecursosView(
     onNavigateToAvisos: () -> Unit = {},
     onNavigateToEventos: () -> Unit = {},
     onNavigateToProgramacao: () -> Unit = {},
-    onNavigateToAcademias: () -> Unit = {}
+    onNavigateToAcademias: () -> Unit = {},
+    onNavigateToBaseUsuarios: () -> Unit = {}
 ) {
     val recursos = buildList {
-        add(
-            RecursoItem(
-                "Avisos",
-                RecursoIcon.Vector(Icons.AutoMirrored.Filled.Announcement),
-                onNavigateToAvisos
-            )
-        )
+
         add(RecursoItem("Eventos", RecursoIcon.Vector(Icons.Default.Event), onNavigateToEventos))
         add(
             RecursoItem(
@@ -76,12 +71,32 @@ fun RecursosView(
             )
         )
 
-        if (usuarioLogado?.perfil == "adm") {
+        // Se o usuário está logado
+        if (usuarioLogado != null) {
+            add(
+                RecursoItem(
+                    "Avisos",
+                    RecursoIcon.Vector(Icons.AutoMirrored.Filled.Announcement),
+                    onNavigateToAvisos
+                )
+            )
+        }
+
+        // Se o usuário for administrador
+        if (usuarioLogado?.perfis?.contains("adm") == true) {
             add(
                 RecursoItem(
                     "Academias",
                     RecursoIcon.PainterIcon(painterResource(R.drawable.ic_academia)),
                     onNavigateToAcademias
+                )
+            )
+
+            add(
+                RecursoItem(
+                    "Base de Usuários",
+                    RecursoIcon.Vector(Icons.Filled.AccountBox),
+                    onNavigateToBaseUsuarios
                 )
             )
         }
@@ -151,7 +166,7 @@ fun RecursosView(
                 Text(
                     text = "Recursos Disponíveis",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
@@ -210,13 +225,13 @@ fun RecursoCard(
                     is RecursoIcon.Vector -> Icon(
                         imageVector = icon.icon,
                         contentDescription = titulo,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(32.dp)
                     )
 
                     is RecursoIcon.PainterIcon -> Icon(
                         painter = icon.icon,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = titulo,
                         modifier = Modifier.size(32.dp)
                     )

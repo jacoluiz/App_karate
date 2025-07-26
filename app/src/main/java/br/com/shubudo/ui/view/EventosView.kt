@@ -65,17 +65,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Evento
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
-import br.com.shubudo.ui.viewModel.EventoViewModel
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.Locale
 
 fun String.formatDate(): String {
     return try {
@@ -106,7 +105,16 @@ fun String.isPastEvent(): Boolean {
 fun String.formatDayMonth(): String {
     return try {
         val zdt = ZonedDateTime.parse(this)
-        zdt.format(DateTimeFormatter.ofPattern("dd\nMMM"))
+        zdt.format(DateTimeFormatter.ofPattern("dd\nMMM", Locale("pt", "BR")))
+    } catch (e: DateTimeParseException) {
+        this
+    }
+}
+
+fun String.getDiaSemanaAbreviado(): String {
+    return try {
+        val zdt = ZonedDateTime.parse(this)
+        zdt.format(DateTimeFormatter.ofPattern("EEE", Locale("pt", "BR")))
     } catch (e: DateTimeParseException) {
         this
     }
@@ -280,15 +288,11 @@ fun EventosView(
                                         SectionHeader(
                                             title = "Próximos Eventos",
                                             subtitle = "${filteredFuturos.size} evento${if (filteredFuturos.size != 1) "s" else ""}",
-                                            color = MaterialTheme.colorScheme.primary,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.weight(1f)
                                         )
 
-                                        if (SessionManager.usuarioLogado?.perfil?.equals(
-                                                "adm",
-                                                ignoreCase = true
-                                            ) == true
-                                        ) {
+                                        if (usuarioLogado?.perfis?.contains("adm") == true) {
                                             FloatingActionButton(
                                                 onClick = onAddEventoClick,
                                                 modifier = Modifier.size(48.dp),
@@ -309,10 +313,7 @@ fun EventosView(
                                         evento = evento,
                                         isPast = false,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = SessionManager.usuarioLogado?.perfil?.equals(
-                                            "adm",
-                                            ignoreCase = true
-                                        ) == true,
+                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
                                         usuarios = usuarios,
                                         onDeleteEvento = onDeleteEvento,
                                         onEditEvento = onEditEventoClick
@@ -334,109 +335,11 @@ fun EventosView(
                                         evento = evento,
                                         isPast = true,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = SessionManager.usuarioLogado?.perfil?.equals(
-                                            "adm",
-                                            ignoreCase = true
-                                        ) == true,
+                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
                                         usuarios = usuarios,
                                         onDeleteEvento = onDeleteEvento,
                                         onEditEvento = onEditEventoClick
                                     )
-                                }
-                            }
-                        }
-
-                        if (SessionManager.usuarioLogado?.perfil?.equals(
-                                "adm",
-                                ignoreCase = true
-                            ) == true
-                        ) {
-                            // Botão flutuante movido para dentro das seções
-                        }
-                    }
-                }
-
-                is EventosUiState.Empty -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(180.dp)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(
-                                        bottomStart = 32.dp,
-                                        bottomEnd = 32.dp
-                                    )
-                                )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarToday,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Eventos do karate",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = "Fique por dentro de todas as atividades",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Nenhum evento disponível no momento",
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-
-                                if (SessionManager.usuarioLogado?.perfil?.equals(
-                                        "adm",
-                                        ignoreCase = true
-                                    ) == true
-                                ) {
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = onAddEventoClick) {
-                                        Icon(Icons.Default.Add, contentDescription = null)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Criar Primeiro Evento")
-                                    }
                                 }
                             }
                         }
@@ -531,6 +434,7 @@ fun EventoItem(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Exibe o dia da semana abreviado
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.CalendarToday,
@@ -540,7 +444,7 @@ fun EventoItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${evento.dataInicio.formatDate()} às ${evento.dataInicio.formatTime()}",
+                        text = "${evento.dataInicio.formatDate()} um ${evento.dataInicio.getDiaSemanaAbreviado()} às ${evento.dataInicio.formatTime()}",
                         style = MaterialTheme.typography.bodySmall,
                         color = textColor.copy(alpha = 0.7f)
                     )
@@ -548,6 +452,7 @@ fun EventoItem(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Exibir localização do evento
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
@@ -657,7 +562,7 @@ fun EventoItem(
 
         }
         // Indicador de público alvo
-        if (usuarioLogado?.perfil == "adm") {
+        if (usuarioLogado?.perfis?.contains("adm") == true) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
