@@ -11,6 +11,8 @@ import br.com.shubudo.database.dao.DefesaPessoalDao
 import br.com.shubudo.database.dao.DefesaPessoalExtraBannerDao
 import br.com.shubudo.database.dao.EventoDao
 import br.com.shubudo.database.dao.FaixaDao
+import br.com.shubudo.database.dao.GaleriaEventoDao
+import br.com.shubudo.database.dao.GaleriaFotoDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
 import br.com.shubudo.database.dao.ProjecaoDao
@@ -102,11 +104,21 @@ class DatabaseModule {
 
     @Provides
     fun provideAvisoDao(db: KarateDatabase): AvisoDao {
-        return db.AvisoDao()
+        return db.avisoDao()
     }
 
     @Provides
     fun provideAcademiaDao(db: KarateDatabase): AcademiaDao {
-        return db.AcademiaDao()
+        return db.academiaDao()
+    }
+
+    @Provides
+    fun provideGaleriaEventoDao(db: KarateDatabase): GaleriaEventoDao {
+        return db.galeriaEventoDao()
+    }
+
+    @Provides
+    fun provideGaleriaFotoDao(db: KarateDatabase): GaleriaFotoDao {
+        return db.galeriaFotoDao()
     }
 }

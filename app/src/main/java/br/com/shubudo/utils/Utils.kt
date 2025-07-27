@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 
 data class DateValidation(
@@ -36,18 +37,20 @@ fun String.toLocalDateTimeOrNull(): LocalDateTime? {
     }
 }
 
-fun formatarDataHoraLocal(isoDate: String): String {
+fun formatarDataHoraLocal(isoDate: String, comHoras: Boolean): String {
     return try {
         val instant = Instant.parse(isoDate)
         val zonaBrasil = ZoneId.of("America/Sao_Paulo")
         val dateTime = instant.atZone(zonaBrasil)
 
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", Locale("pt", "BR"))
+        val padrao = if (comHoras) "dd/MM/yyyy 'às' HH:mm" else "dd/MM/yyyy"
+        val formatter = DateTimeFormatter.ofPattern(padrao, Locale("pt", "BR"))
         dateTime.format(formatter)
     } catch (e: Exception) {
         isoDate // retorna como veio caso dê erro
     }
 }
+
 
 // Função para aplicar máscara de altura no formato x,xx
 fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
@@ -188,7 +191,7 @@ fun getDanOptions(corFaixa: String): List<Int> {
     }
 }
 
-fun applyDateMask(input: TextFieldValue): TextFieldValue {
+fun aplicarMascaraDeDataParaAniversario(input: TextFieldValue): TextFieldValue {
     val digits = input.text.filter { it.isDigit() }
     val limitedDigits = digits.take(8)
 
@@ -303,7 +306,30 @@ fun applyDateMask(input: TextFieldValue): TextFieldValue {
     return TextFieldValue(maskedText, TextRange(maskedText.length))
 }
 
-fun isValidDate(dateString: String): Boolean {
+// Função para validar data não esta no futuro
+fun dataNaoNoFuturo(dateString: String): Boolean {
+    if (dateString.length != 10) return false
+
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    sdf.isLenient = false // impede datas como 32/01/2024
+
+    return try {
+        val dataInformada = sdf.parse(dateString)
+        val hoje = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        dataInformada != null && !dataInformada.after(hoje)
+    } catch (e: Exception) {
+        false
+    }
+}
+
+// Função para validar data no formato dd/MM/yyyy
+fun dataDeAniversarioValida(dateString: String): Boolean {
     if (dateString.length != 10) return false
 
     val parts = dateString.split("/")

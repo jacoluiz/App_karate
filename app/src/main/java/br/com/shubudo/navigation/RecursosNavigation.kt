@@ -15,7 +15,8 @@ fun NavGraphBuilder.recursosScreen(
     onNavigateToEventos: () -> Unit = {},
     onNavigateToProgramacao: () -> Unit = {},
     onNavigateToAcademias: () -> Unit = {},
-    onNavigateToBaseUsuarios: () -> Unit = {}
+    onNavigateToBaseUsuarios: () -> Unit = {},
+    onNavigateToGaleria: () -> Unit = {}
 ) {
     composable(
         route = recursosRoute,
@@ -25,7 +26,8 @@ fun NavGraphBuilder.recursosScreen(
             onNavigateToEventos = onNavigateToEventos,
             onNavigateToProgramacao = onNavigateToProgramacao,
             onNavigateToAcademias = onNavigateToAcademias,
-            onNavigateToBaseUsuarios = onNavigateToBaseUsuarios
+            onNavigateToBaseUsuarios = onNavigateToBaseUsuarios,
+            onNavigateToGaleria = onNavigateToGaleria
         )
     }
 }

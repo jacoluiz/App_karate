@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.suggestions)
     implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.android)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

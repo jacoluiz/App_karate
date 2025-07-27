@@ -1,6 +1,6 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import ModernTextField
+import CampoDeTextoPadrao
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,7 +39,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
@@ -57,7 +56,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -72,20 +70,11 @@ import androidx.compose.ui.unit.dp
 import br.com.shubudo.R
 import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.components.PasswordRequirement
-import br.com.shubudo.ui.theme.PrimaryColorAmarela
-import br.com.shubudo.ui.theme.PrimaryColorBranca
-import br.com.shubudo.ui.theme.PrimaryColorGraoMestre
-import br.com.shubudo.ui.theme.PrimaryColorLaranja
-import br.com.shubudo.ui.theme.PrimaryColorMarron
-import br.com.shubudo.ui.theme.PrimaryColorMestre
-import br.com.shubudo.ui.theme.PrimaryColorPreta
-import br.com.shubudo.ui.theme.PrimaryColorRoxa
-import br.com.shubudo.ui.theme.PrimaryColorVerde
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
-import br.com.shubudo.utils.applyDateMask
+import br.com.shubudo.utils.aplicarMascaraDeDataParaAniversario
 import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getDanOptions
-import br.com.shubudo.utils.isValidDate
+import br.com.shubudo.utils.dataDeAniversarioValida
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
 import br.com.shubudo.utils.validarRequisitosSenha
 import kotlinx.coroutines.launch
@@ -254,7 +243,7 @@ fun PaginaUmCadastro(
         }
 
         // Name Field
-        ModernTextField(
+        CampoDeTextoPadrao(
             value = novoUsuarioViewModel.nome,
             onValueChange = { novoUsuarioViewModel.nome = it },
             label = "Nome completo",
@@ -271,7 +260,7 @@ fun PaginaUmCadastro(
         ModernTextFieldWithDateMask(
             value = dateValue,
             onValueChange = { newValue ->
-                dateValue = applyDateMask(newValue)
+                dateValue = aplicarMascaraDeDataParaAniversario(newValue)
                 novoUsuarioViewModel.idade = dateValue.text
             },
             label = "Data de nascimento",
@@ -286,7 +275,7 @@ fun PaginaUmCadastro(
                 onNext = { focusRequesterAcademia.requestFocus() }
             ),
             helperText = "Formato: 25/12/1990",
-            isError = dateValue.text.isNotEmpty() && !isValidDate(dateValue.text)
+            isError = dateValue.text.isNotEmpty() && !dataDeAniversarioValida(dateValue.text)
         )
 
         // Academia Selection
@@ -295,7 +284,7 @@ fun PaginaUmCadastro(
         )
 
         // Password Field
-        ModernTextField(
+        CampoDeTextoPadrao(
             value = novoUsuarioViewModel.senha,
             onValueChange = { novoUsuarioViewModel.senha = it },
             label = "Senha",
@@ -358,7 +347,7 @@ fun PaginaUmCadastro(
         }
 
         // Confirm Password Field
-        ModernTextField(
+        CampoDeTextoPadrao(
             value = novoUsuarioViewModel.confirmarSenha,
             onValueChange = { newValue ->
                 novoUsuarioViewModel.confirmarSenha = newValue
@@ -532,7 +521,7 @@ private fun SelectionCard(
 }
 
 @Composable
-private fun ModernTextFieldWithDateMask(
+fun ModernTextFieldWithDateMask(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     label: String,

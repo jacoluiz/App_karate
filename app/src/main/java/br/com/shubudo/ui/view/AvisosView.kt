@@ -66,6 +66,7 @@ import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.viewModel.AvisosViewModel
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
+import br.com.shubudo.utils.getCorDaFaixa
 
 @Composable
 fun AvisosView(
@@ -479,7 +480,7 @@ fun AvisoCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = formatarDataHoraLocal(aviso.dataHoraCriacao),
+                        text = formatarDataHoraLocal(aviso.dataHoraCriacao, true),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -620,14 +621,14 @@ fun AvisoCard(
                                             }
                                             Card(
                                                 colors = CardDefaults.cardColors(
-                                                    containerColor = MaterialTheme.colorScheme.primary
+                                                    containerColor = getCorDaFaixa(usuario.corFaixa)
                                                 ),
                                                 modifier = Modifier.wrapContentWidth()
                                             ) {
                                                 Text(
                                                     text = usuario.corFaixa,
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    color = MaterialTheme.colorScheme.onSurface,
                                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                                 )
                                             }

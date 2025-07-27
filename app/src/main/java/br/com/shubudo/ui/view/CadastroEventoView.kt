@@ -51,7 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.CadastroEventoUiState
 import br.com.shubudo.ui.viewModel.CadastroEventoViewModel
-import br.com.shubudo.utils.applyDateMask
+import br.com.shubudo.utils.aplicarMascaraDeDataParaAniversario
 import br.com.shubudo.utils.applySimpleTimeMask
 
 @Composable
@@ -189,7 +189,7 @@ fun CadastroEventoView(
                             label = "Data (dd/MM/yyyy)",
                             valor = form.data,
                             aoMudar = { newValue ->
-                                val maskedValue = applyDateMask(newValue)
+                                val maskedValue = aplicarMascaraDeDataParaAniversario(newValue)
                                 viewModel.updateData(maskedValue)
                             },
                             icone = Icons.Default.CalendarToday,

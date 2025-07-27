@@ -10,6 +10,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import br.com.shubudo.navigation.Galeria.galeriaEventosCadastrarScreen
+import br.com.shubudo.navigation.Galeria.galeriaEventosScreen
+
+import br.com.shubudo.navigation.Galeria.galeriaFotosScreen
+import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventos
+import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventosCadastrar
+
+import br.com.shubudo.navigation.Galeria.navigateToGaleriaFotos
 import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
 
@@ -144,7 +152,8 @@ fun KarateNavHost(
             })
 
         // Tela de Editar Perfil
-        editarPerfilScreen(themeViewModel = themeViewModel,
+        editarPerfilScreen(
+            themeViewModel = themeViewModel,
             onSaveSuccess = { navController.popBackStack() },
             onCancelar = { navController.popBackStack() },
             navController = navController
@@ -156,20 +165,50 @@ fun KarateNavHost(
         }
 
         // Tela de Recursos
-        recursosScreen(onNavigateToAvisos = {
-            navController.navigateToAvisos()
-        }, onNavigateToEventos = {
-            navController.navigateToEventos()
-        }, onNavigateToProgramacao = {
-            navController.navigateToProgramacao(navOptions {
-                launchSingleTop = true
-                popUpTo(programacaoRoute)
-            })
-        }, onNavigateToAcademias = {
-            navController.navigateToAcademias()
-        }, onNavigateToBaseUsuarios = {
-            navController.navigateToBaseUsuarios()
-        })
+        recursosScreen(
+            onNavigateToAvisos = {
+                navController.navigateToAvisos()
+            }, onNavigateToEventos = {
+                navController.navigateToEventos()
+            }, onNavigateToProgramacao = {
+                navController.navigateToProgramacao(navOptions {
+                    launchSingleTop = true
+                    popUpTo(programacaoRoute)
+                })
+            }, onNavigateToAcademias = {
+                navController.navigateToAcademias()
+            }, onNavigateToBaseUsuarios = {
+                navController.navigateToBaseUsuarios()
+            },
+            onNavigateToGaleria = {
+                navController.navigateToGaleriaEventos()
+            }
+        )
+
+        // Tela de Galeria de Eventos
+        galeriaEventosScreen(
+            onEventoClick = { eventoId ->
+                navController.navigateToGaleriaFotos(eventoId)
+            },
+            onCadastrarClick = {
+                navController.navigateToGaleriaEventosCadastrar()
+            },
+            onEditarClick = { eventoId ->
+                navController.navigateToGaleriaEventosCadastrar(eventoId)
+            }
+        )
+
+        // Tela de Cadastro de Evento na Galeria
+        galeriaEventosCadastrarScreen(
+            navigationBack = {
+                navController.popBackStack()
+            }
+        )
+
+        // Tela de Galeria de Fotos
+        galeriaFotosScreen(
+            onVoltar = { navController.popBackStack() },
+        )
 
         // Tela de Base de Usuários
         baseUsuariosScreen(

@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.rounded.CallMade
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
@@ -58,7 +60,8 @@ fun RecursosView(
     onNavigateToEventos: () -> Unit = {},
     onNavigateToProgramacao: () -> Unit = {},
     onNavigateToAcademias: () -> Unit = {},
-    onNavigateToBaseUsuarios: () -> Unit = {}
+    onNavigateToBaseUsuarios: () -> Unit = {},
+    onNavigateToGaleria: () -> Unit = {}
 ) {
     val recursos = buildList {
 
@@ -78,6 +81,14 @@ fun RecursosView(
                     "Avisos",
                     RecursoIcon.Vector(Icons.AutoMirrored.Filled.Announcement),
                     onNavigateToAvisos
+                )
+            )
+
+            add(
+                RecursoItem(
+                    "Galeria",
+                    RecursoIcon.PainterIcon(painterResource(R.drawable.ic_galeria)),
+                    onNavigateToGaleria
                 )
             )
         }

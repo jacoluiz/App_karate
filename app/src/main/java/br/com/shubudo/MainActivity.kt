@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.shubudo.navigation.AppDestination
+import br.com.shubudo.navigation.Galeria.galeriaEventosRoute
 import br.com.shubudo.navigation.KarateNavHost
 import br.com.shubudo.navigation.academiasRoute
 import br.com.shubudo.navigation.avisosRoute
@@ -148,13 +149,7 @@ class MainActivity : ComponentActivity() {
                             val topAppBarTitle = when (currentDestination?.route) {
                                 editarPerfilRoute -> "Editar Perfil"
                                 perfilRoute -> "Perfil"
-                                eventosRoute -> "Evento"
-                                avisosRoute -> "Avisos"
-                                recursosRoute -> ""
-                                baseUsuariosRoute -> "Base de Usuários"
-                                academiasRoute -> "Academias"
                                 AppDestination.Login.route -> "Login"
-                                programacaoRoute -> "Conteúdo"
                                 detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
                                     detalheFaixaArgument
                                 )
@@ -164,11 +159,21 @@ class MainActivity : ComponentActivity() {
                                 )
 
                                 novoUsuarioRote, novoUsuarioRoteSemUsername -> "Precisamos de alguns dados"
-                                else -> "Shubu-dô App"
+                                else -> ""
                             }
 
                             val showBottomBack = when (currentDestination?.route) {
-                                detalheFaixaRuteFullpath, novoUsuarioRote, novoUsuarioRoteSemUsername, esqueciMinhaSenhaRote, avisosRoute, eventosRoute, programacaoRoute, academiasRoute, baseUsuariosRoute, esqueciMinhaSenhaRoteSemUsername -> true
+                                detalheFaixaRuteFullpath,
+                                novoUsuarioRote,
+                                novoUsuarioRoteSemUsername,
+                                esqueciMinhaSenhaRote,
+                                avisosRoute,
+                                eventosRoute,
+                                galeriaEventosRoute,
+                                baseUsuariosRoute,
+                                programacaoRoute,
+                                academiasRoute,
+                                esqueciMinhaSenhaRoteSemUsername -> true
 
                                 else -> false
                             }

@@ -1,6 +1,6 @@
 package br.com.shubudo.ui.components
 
-import ModernTextField
+import CampoDeTextoPadrao
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -153,7 +153,7 @@ fun AcademiaDialog(
 
                 showCustomField -> {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ModernTextField(
+                        CampoDeTextoPadrao(
                             value = customAcademia,
                             onValueChange = { customAcademia = it },
                             label = "Nome da Academia",
@@ -190,7 +190,7 @@ fun AcademiaDialog(
 
                 else -> {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ModernTextField(
+                        CampoDeTextoPadrao(
                             value = searchText,
                             onValueChange = { searchText = it },
                             label = "Buscar Academia",

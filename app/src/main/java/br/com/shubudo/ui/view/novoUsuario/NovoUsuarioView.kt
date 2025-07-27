@@ -1,6 +1,5 @@
 package br.com.shubudo.ui.view.novoUsuario
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -59,9 +58,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.CadastroUiState
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
 import br.com.shubudo.ui.viewModel.ThemeViewModel
-import br.com.shubudo.utils.isValidDate
+import br.com.shubudo.utils.dataDeAniversarioValida
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
-import br.com.shubudo.utils.validarRequisitosSenha
 
 @Composable
 fun NovoUsuarioView(
@@ -446,9 +444,9 @@ private fun NavigationButtons(
 
 fun validarPaginaUmCompleta(viewModel: NovoUsuarioViewModel): Boolean {
     viewModel.senhaAtendeAosRequisitos = senhaAtendeAosRequisitos(viewModel.senha)
-      return viewModel.nome.isNotBlank() &&
+    return viewModel.nome.isNotBlank() &&
             viewModel.idade.isNotBlank() &&
-            isValidDate(viewModel.idade) &&
+            dataDeAniversarioValida(viewModel.idade) &&
             viewModel.faixa.isNotBlank() &&
             viewModel.academia.isNotBlank() &&
             viewModel.senha.isNotBlank() &&

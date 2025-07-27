@@ -71,6 +71,7 @@ import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
+import br.com.shubudo.utils.getCorDaFaixa
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -693,14 +694,14 @@ fun EventoItem(
                                                 }
                                                 Card(
                                                     colors = CardDefaults.cardColors(
-                                                        containerColor = MaterialTheme.colorScheme.primary
+                                                        containerColor = getCorDaFaixa(usuario.corFaixa)
                                                     ),
                                                     modifier = Modifier.wrapContentWidth()
                                                 ) {
                                                     Text(
                                                         text = usuario.corFaixa,
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                        color = MaterialTheme.colorScheme.onSurface,
                                                         modifier = Modifier.padding(
                                                             horizontal = 8.dp,
                                                             vertical = 4.dp
@@ -744,7 +745,6 @@ fun EventoItem(
         }
     }
 }
-
 
 @Composable
 fun SectionHeader(

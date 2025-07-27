@@ -38,6 +38,7 @@ media3Exoplayer = "1.4.1"
 media3Ui = "1.4.1"
 foundationLayoutAndroid = "1.7.0"
 suggestions = "1.0.0"
+foundationAndroid = "1.7.0"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
@@ -91,5 +92,6 @@ androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplaye
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Ui" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 suggestions = { group = "com.google.assistant.appactions", name = "suggestions", version.ref = "suggestions" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
 
 [plugins]

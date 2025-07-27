@@ -30,15 +30,3 @@ fun DefesaArmaEntity.toArmamento(): Armamento {
         video = video
     )
 }
-
-// Função de extensão para converter o modelo de domínio em entidade
-fun Armamento.toDefesaArmaEntity(): DefesaArmaEntity {
-    return DefesaArmaEntity(
-        _id = _id,
-        arma = arma,
-        faixa = faixa,
-        numeroOrdem = numeroOrdem,
-        movimentos = movimentos,
-        video = video
-    )
-}
