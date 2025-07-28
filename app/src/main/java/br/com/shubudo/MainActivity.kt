@@ -1,11 +1,14 @@
 package br.com.shubudo
 
 import android.app.Activity
-import android.content.Intent
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -31,7 +34,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -85,10 +87,41 @@ class MainActivity : ComponentActivity() {
     private val REQUEST_PERMISSION_CODE = 100
     private val REQUEST_CODE_UPDATE = 1234
     private lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var updateAppLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var permissionDialogShown = false
 
     private var isLoading = mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Registro para permissões
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val deniedPermissions = permissions.filter { !it.value }.keys
+
+                if (deniedPermissions.isNotEmpty()) {
+                    AlertDialog.Builder(this)
+                        .setTitle("Permissões necessárias")
+                        .setMessage("Você precisa aceitar as permissões para usar o app.")
+                        .setCancelable(false)
+                        .setPositiveButton("Tentar novamente") { _, _ ->
+                            permissionLauncher.launch(deniedPermissions.toTypedArray())
+                        }
+                        .setNegativeButton("Sair") { _, _ ->
+                            finish()
+                        }
+                        .show()
+                }
+            }
+        // Registro para atualizações do app
+        updateAppLauncher =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                if (result.resultCode != Activity.RESULT_OK) {
+                    finish() // usuário cancelou a atualização
+                }
+            }
+
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
         appUpdateManager = AppUpdateManagerFactory.create(this)
@@ -127,7 +160,7 @@ class MainActivity : ComponentActivity() {
                     val uiState by perfilViewModel.uiState.collectAsState()
                     val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
 
-                    val faixaParaTema = themeViewModel.currentFaixa ?: themeViewModel.currentFaixa
+                    val faixaParaTema = themeViewModel.currentFaixa
 
                     AppShubudoTheme(faixa = faixaParaTema) {
                         val navController = rememberNavController()
@@ -158,22 +191,19 @@ class MainActivity : ComponentActivity() {
                                 else -> ""
                             }
 
-                            val showBottomBack = when (currentDestination?.route) {
-                                detalheFaixaRuteFullpath,
-                                novoUsuarioRote,
-                                novoUsuarioRoteSemUsername,
-                                esqueciMinhaSenhaRote,
-                                avisosRoute,
-                                eventosRoute,
-                                galeriaEventosRoute,
-                                baseUsuariosRoute,
-                                programacaoRoute,
-                                academiasRoute,
-                                eventoDetalheRoute,
-                                esqueciMinhaSenhaRoteSemUsername -> true
-
-                                else -> false
-                            }
+                            val route = currentDestination?.route ?: ""
+                            val showBottomBack = route == detalheFaixaRuteFullpath ||
+                                    route == novoUsuarioRote ||
+                                    route == novoUsuarioRoteSemUsername ||
+                                    route == esqueciMinhaSenhaRote ||
+                                    route == avisosRoute ||
+                                    route == eventosRoute ||
+                                    route == galeriaEventosRoute ||
+                                    route == baseUsuariosRoute ||
+                                    route == programacaoRoute ||
+                                    route == academiasRoute ||
+                                    route == esqueciMinhaSenhaRoteSemUsername ||
+                                    route.startsWith("$eventoDetalheRoute/")
 
                             val showColorTopAppBar =
                                 currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
@@ -186,7 +216,6 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 showColorTopAppBar = showColorTopAppBar,
                                 showTitleTopAppBar = showColorTopAppBar,
-                                themeViewModel = themeViewModel,
                                 isLoggedIn = isLoggedIn
                             ) {
                                 KarateNavHost(
@@ -205,54 +234,93 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         checkForUpdate()
+
+        if (!hasAllPermissions()) {
+            if (!permissionDialogShown) {
+                permissionDialogShown = true // previne múltiplos diálogos
+
+                AlertDialog.Builder(this)
+                    .setTitle("Permissões necessárias")
+                    .setMessage("Você precisa aceitar as permissões para usar o app.")
+                    .setCancelable(false)
+                    .setPositiveButton("Tentar novamente") { _, _ ->
+                        permissionDialogShown =
+                            false // permite mostrar de novo se o usuário recusou
+                        checkAndRequestPermissions()
+                    }
+                    .setNegativeButton("Sair") { _, _ ->
+                        finish()
+                    }
+                    .show()
+            }
+        } else {
+            permissionDialogShown = false // reset caso permissões estejam OK
+        }
     }
+
 
     private fun checkForUpdate() {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                    AppUpdateType.IMMEDIATE
-                )
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
             ) {
-                appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo, AppUpdateType.IMMEDIATE, this, REQUEST_CODE_UPDATE
-                )
+                try {
+                    val intentSender = appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        AppUpdateType.IMMEDIATE,
+                        this,
+                        REQUEST_CODE_UPDATE // você pode deixar isso, mas ele não será mais usado
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_UPDATE && resultCode != Activity.RESULT_OK) {
-            finish()
+    private fun hasAllPermissions(): Boolean {
+        val permissions =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                listOf(
+                    android.Manifest.permission.READ_MEDIA_IMAGES,
+                    android.Manifest.permission.READ_MEDIA_VIDEO,
+                    android.Manifest.permission.READ_MEDIA_AUDIO
+                )
+            } else {
+                listOf(
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                )
+            }
+
+        return permissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
     private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf<String>()
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            val permissions = arrayOf(
+            permissions += listOf(
                 android.Manifest.permission.READ_MEDIA_IMAGES,
                 android.Manifest.permission.READ_MEDIA_VIDEO,
                 android.Manifest.permission.READ_MEDIA_AUDIO
             )
-            requestPermissionsIfNecessary(permissions)
-        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            val permissions = arrayOf(
+        } else {
+            permissions += listOf(
                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             )
-            requestPermissionsIfNecessary(permissions)
         }
-    }
 
-    private fun requestPermissionsIfNecessary(permissions: Array<String>) {
         val permissionsToRequest = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
+
         if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSION_CODE
-            )
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
@@ -278,11 +346,9 @@ fun KarateApp(
     navController: NavHostController,
     showColorTopAppBar: Boolean = true,
     showTitleTopAppBar: Boolean = true,
-    themeViewModel: ThemeViewModel,
     isLoggedIn: Boolean,
     content: @Composable () -> Unit
 ) {
-    val currentBackStack by navController.currentBackStackEntryAsState()
     val focusManager = LocalFocusManager.current
 
     Box(modifier = Modifier.fillMaxSize()) {

@@ -185,11 +185,11 @@ fun GaleriaFotosView(
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
 
-                                Text(
-                                    text = if (isSelectionMode) "${selectedFotos.size} foto(s) selecionada(s)" else "",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                                )
+                            Text(
+                                text = if (isSelectionMode) "${selectedFotos.size} foto(s) selecionada(s)" else "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            )
 
                         }
 
@@ -963,10 +963,9 @@ private fun UploadModal(
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris ->
-        selectedImages = uris.filter { uri ->
-            val mimeType = context.contentResolver.getType(uri)
-            mimeType?.startsWith("image/") == true
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
+            selectedImages = selectedImages + uris
         }
     }
 
@@ -985,7 +984,7 @@ private fun UploadModal(
                 .padding(
                     horizontal = 16.dp,
                     vertical = 84.dp
-                ), // vertical padding evita que vá até o topo/rodapé
+                ),
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface
         ) {
