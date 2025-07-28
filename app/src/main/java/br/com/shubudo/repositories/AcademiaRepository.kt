@@ -37,14 +37,10 @@ class AcademiaRepository @Inject constructor(
         return academiaDao.getAcademiaById(id)?.toAcademia()
     }
 
-    suspend fun criarAcademia(
-        nome: String, descricao: String?, filiais: List<Filial>
-    ) {
-        Log.d("AcademiaRepository", "Criando nova academia: $nome")
+    suspend fun criarAcademia(nome: String, descricao: String?, filiais: List<Filial>) {
         val novaAcademia = NovaAcademiaRequest(nome, descricao, filiais)
         try {
             academiaService.criarAcademia(novaAcademia)
-            Log.d("AcademiaRepository", "Academia criada com sucesso")
         } catch (e: Exception) {
             Log.e("AcademiaRepository", "Erro ao criar academia: ${e.message}", e)
             throw e

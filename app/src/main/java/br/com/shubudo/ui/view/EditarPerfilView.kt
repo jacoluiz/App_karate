@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.view
 
-import androidx.compose.animation.AnimatedContent
+import LoadingButton
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseOutCubic
@@ -11,9 +12,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -291,6 +290,17 @@ fun EditarPerfilContent(
     var currentPerfis by remember { mutableStateOf(perfis) }
     var currentStatus by remember { mutableStateOf(status) }
 
+    val isFormValid = currentNome.isNotBlank() &&
+            currentUsername.isNotBlank() &&
+            currentEmail.isNotBlank() &&
+            currentDataNascimento.isNotBlank() &&
+            currentPeso.isNotBlank() &&
+            currentAltura.isNotBlank() &&
+            currentFaixa.isNotBlank() &&
+            currentAcademia.isNotBlank() &&
+            currentTamanhoFaixa.isNotBlank()
+
+
     val context = LocalContext.current
 
     // Controle do diálogo para selecionar faixa
@@ -300,6 +310,7 @@ fun EditarPerfilContent(
     var showAcademiaDialog by remember { mutableStateOf(false) }
     var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
     var showPerfisDialog by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
 
     val faixas = listOf(
@@ -404,7 +415,8 @@ fun EditarPerfilContent(
                     )
 
                     // Data de Nascimento Field
-                    DateOfBirthField(value = formatDateForDisplay(currentDataNascimento),
+                    DateOfBirthField(
+                        value = formatDateForDisplay(currentDataNascimento),
                         validation = dateValidation,
                         onDatePickerClick = { showDatePicker = true })
 
@@ -444,12 +456,14 @@ fun EditarPerfilContent(
                     )
 
                     // Belt Selection
-                    BeltSelectionCard(currentFaixa = currentFaixa,
+                    BeltSelectionCard(
+                        currentFaixa = currentFaixa,
                         onClick = { showFaixaDialog = true })
 
                     // Dan - só mostra para faixas Preta, Mestre ou Grão Mestre
                     if (shouldShowDan(currentFaixa)) {
-                        DanSelectionCard(currentDan = currentDan,
+                        DanSelectionCard(
+                            currentDan = currentDan,
                             onClick = { showDanDialog = true })
                     }
 
@@ -483,11 +497,13 @@ fun EditarPerfilContent(
                     )
 
                     // Academia Selection
-                    AcademiaSelector(academia = currentAcademia,
+                    AcademiaSelector(
+                        academia = currentAcademia,
                         onAcademiaChange = { currentAcademia = it })
 
                     // Tamanho da Faixa
-                    TamanhoFaixaSelectionCard(currentTamanhoFaixa = currentTamanhoFaixa,
+                    TamanhoFaixaSelectionCard(
+                        currentTamanhoFaixa = currentTamanhoFaixa,
                         onClick = { showTamanhoFaixaDialog = true })
                     Text(
                         text = "Você pode encontrar o número da faixa na etiqueta da faixa. Caso ache sua faixa muito grande fique a vontade para colocar um número menor",
@@ -630,41 +646,86 @@ fun EditarPerfilContent(
                 }
             }
 
-            // Action Buttons
-            ActionButtons(
-                isSaving = isSaving, isFormValid = currentNome.isNotBlank(), onSave = {
-                    if (!isSaving) {
-                        isSaving = true
-                        coroutineScope.launch {
-                            editarPerfilViewModel.salvarPerfil(
-                                id = currentId,
-                                nome = currentNome,
-                                username = currentUsername,
-                                email = currentEmail,
-                                corFaixa = currentFaixa,
-                                idade = currentDataNascimento,
-                                peso = currentPeso,
-                                altura = currentAltura,
-                                dan = currentDan,
-                                academia = currentAcademia,
-                                tamanhoFaixa = currentTamanhoFaixa,
-                                lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
-                                registroAKSD = currentRegistroAKSD,
-                                perfis = currentPerfis,
-                                status = currentStatus,
-                                onSave = onSave,
-                                context = context
-                            )
-                            isSaving = false
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onCancelar,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(
+                        width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Cancelar", style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                LoadingButton(
+                    onClick = {
+                        if (!isSaving) {
+                            isSaving = true
+                            coroutineScope.launch {
+                                editarPerfilViewModel.salvarPerfil(
+                                    id = currentId,
+                                    nome = currentNome,
+                                    username = currentUsername,
+                                    email = currentEmail,
+                                    corFaixa = currentFaixa,
+                                    idade = currentDataNascimento,
+                                    peso = currentPeso,
+                                    altura = currentAltura,
+                                    dan = currentDan,
+                                    academia = currentAcademia,
+                                    tamanhoFaixa = currentTamanhoFaixa,
+                                    lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
+                                    registroAKSD = currentRegistroAKSD,
+                                    perfis = currentPerfis,
+                                    status = currentStatus,
+                                    onSave = {
+                                        isSaving = false
+                                        onSave()
+                                    },
+                                    onError = {
+                                        isSaving = false
+                                        Toast.makeText(
+                                            context,
+                                            "Erro ao salvar",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    context = context
+                                )
+                            }
                         }
-                    }
-                }, onCancelar = onCancelar
-            )
+                    },
+                    isLoading = isSaving,
+                    enabled = isFormValid,
+                    text = "Salvar",
+                    loadingText = "Salvando...",
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                )
+            }
         }
 
         // Dialog para seleção de perfis
         if (showPerfisDialog) {
-            PerfisSelectionDialog(perfisAtuais = currentPerfis,
+            PerfisSelectionDialog(
+                perfisAtuais = currentPerfis,
                 onDismiss = { showPerfisDialog = false },
                 onConfirm = { novosPerfis ->
                     currentPerfis = novosPerfis
@@ -674,7 +735,8 @@ fun EditarPerfilContent(
 
         // Belt Selection Dialog
         if (showFaixaDialog) {
-            BeltSelectionDialog(faixas = faixas,
+            BeltSelectionDialog(
+                faixas = faixas,
                 currentFaixa = currentFaixa,
                 onFaixaSelected = { faixa ->
                     currentFaixa = faixa
@@ -701,7 +763,8 @@ fun EditarPerfilContent(
 
         // Dan Selection Dialog
         if (showDanDialog) {
-            DanSelectionDialog(danOptions = getDanOptions(currentFaixa),
+            DanSelectionDialog(
+                danOptions = getDanOptions(currentFaixa),
                 currentDan = currentDan,
                 onDanSelected = { dan ->
                     currentDan = dan
@@ -712,7 +775,8 @@ fun EditarPerfilContent(
 
         // Tamanho Faixa Selection Dialog
         if (showTamanhoFaixaDialog) {
-            TamanhoFaixaSelectionDialog(tamanhos = tamanhosFaixa,
+            TamanhoFaixaSelectionDialog(
+                tamanhos = tamanhosFaixa,
                 currentTamanho = currentTamanhoFaixa,
                 onTamanhoSelected = { tamanho ->
                     currentTamanhoFaixa = tamanho
@@ -787,7 +851,8 @@ private fun AnimatedTextField(
         label = "border_color"
     )
 
-    OutlinedTextField(value = value,
+    OutlinedTextField(
+        value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         leadingIcon = {
@@ -847,7 +912,8 @@ private fun HeightTextField(
     }
 
     Column(modifier = modifier) {
-        OutlinedTextField(value = textFieldValue,
+        OutlinedTextField(
+            value = textFieldValue,
             onValueChange = { newTextFieldValue ->
                 val (maskedValue, cursorPosition) = applyHeightMask(
                     newTextFieldValue.text, textFieldValue.text
@@ -929,10 +995,12 @@ private fun DateOfBirthField(
     }
 
     Column {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onDatePickerClick() }) {
-            OutlinedTextField(value = displayValue,
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onDatePickerClick() }) {
+            OutlinedTextField(
+                value = displayValue,
                 onValueChange = { },
                 label = { Text("Data de Nascimento") },
                 leadingIcon = {
@@ -1042,172 +1110,93 @@ private fun BeltSelectionCard(
 }
 
 @Composable
-private fun ActionButtons(
-    isSaving: Boolean, isFormValid: Boolean, onSave: () -> Unit, onCancelar: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        OutlinedButton(
-            onClick = onCancelar,
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(
-                width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Cancelar", style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        Button(
-            onClick = onSave,
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            enabled = !isSaving && isFormValid
-        ) {
-            AnimatedContent(
-                targetState = isSaving, transitionSpec = {
-                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(
-                        animationSpec = tween(200)
-                    )
-                }, label = "button_content"
-            ) { saving ->
-                if (saving) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Text(
-                            text = "Salvando...", style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = "Salvar", style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun BeltSelectionDialog(
     faixas: List<String>,
     currentFaixa: String,
     onFaixaSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(onDismissRequest = onDismiss, title = {
-        Text(
-            text = "Selecione sua Faixa",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-    }, text = {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(faixas.size) { index ->
-                val faixa = faixas[index]
-                val isSelected = faixa == currentFaixa
-                val iconPainter = if (faixa == "Branca" && !isSystemInDarkTheme()) {
-                    painterResource(id = R.drawable.ic_faixa_outline)
-                } else {
-                    painterResource(id = R.drawable.ic_faixa)
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onFaixaSelected(faixa) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) getCorDaFaixa(faixa)
-                        else MaterialTheme.colorScheme.surface
-                    ),
-                    border = if (!isSelected) BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                    ) else null,
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = if (isSelected) 4.dp else 1.dp
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            painter = iconPainter,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else selecionaCorIcone(faixa, isSystemInDarkTheme())
-                        )
-
-                        Text(
-                            text = faixa, style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Selecionado",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
+    AlertDialog(
+        onDismissRequest = onDismiss, title = {
+            Text(
+                text = "Selecione sua Faixa",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }, text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(faixas.size) { index ->
+                    val faixa = faixas[index]
+                    val isSelected = faixa == currentFaixa
+                    val iconPainter = if (faixa == "Branca" && !isSystemInDarkTheme()) {
+                        painterResource(id = R.drawable.ic_faixa_outline)
+                    } else {
+                        painterResource(id = R.drawable.ic_faixa)
                     }
 
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onFaixaSelected(faixa) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) getCorDaFaixa(faixa)
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (!isSelected) BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ) else null,
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = if (isSelected) 4.dp else 1.dp
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                painter = iconPainter,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else selecionaCorIcone(faixa, isSystemInDarkTheme())
+                            )
+
+                            Text(
+                                text = faixa, style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                                ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selecionado",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+
+                    }
                 }
             }
-        }
-    }, confirmButton = {}, dismissButton = {
-        TextButton(
-            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Cancelar")
-        }
-    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
+        }, confirmButton = {}, dismissButton = {
+            TextButton(
+                onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
     )
 }
 
@@ -1378,81 +1367,82 @@ private fun TamanhoFaixaSelectionCard(
 private fun DanSelectionDialog(
     danOptions: List<Int>, currentDan: Int, onDanSelected: (Int) -> Unit, onDismiss: () -> Unit
 ) {
-    AlertDialog(onDismissRequest = onDismiss, title = {
-        Text(
-            text = "Selecione seu Dan",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-    }, text = {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(danOptions.size) { index ->
-                val dan = danOptions[index]
-                val isSelected = dan == currentDan
-                val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
+    AlertDialog(
+        onDismissRequest = onDismiss, title = {
+            Text(
+                text = "Selecione seu Dan",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }, text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(danOptions.size) { index ->
+                    val dan = danOptions[index]
+                    val isSelected = dan == currentDan
+                    val danText = if (dan == 0) "Sem Dan" else "${dan}º Dan"
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onDanSelected(dan) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surface
-                    ),
-                    border = if (!isSelected) BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                    ) else null,
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = if (isSelected) 4.dp else 1.dp
-                    )
-                ) {
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            .clickable { onDanSelected(dan) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (!isSelected) BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ) else null,
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = if (isSelected) 4.dp else 1.dp
+                        )
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_faixa),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.primary
-                        )
-
-                        Text(
-                            text = danText, style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        if (isSelected) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Selecionado",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.primary
                             )
+
+                            Text(
+                                text = danText, style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                                ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selecionado",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-    }, confirmButton = {}, dismissButton = {
-        TextButton(
-            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Cancelar")
-        }
-    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
+        }, confirmButton = {}, dismissButton = {
+            TextButton(
+                onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
     )
 }
 
@@ -1463,80 +1453,81 @@ private fun TamanhoFaixaSelectionDialog(
     onTamanhoSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(onDismissRequest = onDismiss, title = {
-        Text(
-            text = "Selecione o Tamanho da Faixa",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-    }, text = {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(tamanhos.size) { index ->
-                val tamanho = tamanhos[index]
-                val isSelected = tamanho == currentTamanho
+    AlertDialog(
+        onDismissRequest = onDismiss, title = {
+            Text(
+                text = "Selecione o Tamanho da Faixa",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }, text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(tamanhos.size) { index ->
+                    val tamanho = tamanhos[index]
+                    val isSelected = tamanho == currentTamanho
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onTamanhoSelected(tamanho) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surface
-                    ),
-                    border = if (!isSelected) BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                    ) else null,
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = if (isSelected) 4.dp else 1.dp
-                    )
-                ) {
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            .clickable { onTamanhoSelected(tamanho) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surface
+                        ),
+                        border = if (!isSelected) BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ) else null,
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = if (isSelected) 4.dp else 1.dp
+                        )
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_faixa),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.primary
-                        )
-
-                        Text(
-                            text = tamanho, style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-                            ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        if (isSelected) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Selecionado",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                painter = painterResource(id = R.drawable.ic_faixa),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.primary
                             )
+
+                            Text(
+                                text = tamanho, style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                                ), color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selecionado",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-    }, confirmButton = {}, dismissButton = {
-        TextButton(
-            onClick = onDismiss, shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Cancelar")
-        }
-    }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
+        }, confirmButton = {}, dismissButton = {
+            TextButton(
+                onClick = onDismiss, shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Cancelar")
+            }
+        }, shape = RoundedCornerShape(20.dp), properties = DialogProperties()
     )
 }
 

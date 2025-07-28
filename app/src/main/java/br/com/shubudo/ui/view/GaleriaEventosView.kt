@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,7 +86,7 @@ fun GaleriaEventosView(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             )
                         ),
                         shape = RoundedCornerShape(
@@ -136,7 +138,7 @@ fun GaleriaEventosView(
                     onValueChange = { searchQuery = it },
                     placeholder = {
                         Text(
-                            "Buscar eventos...",
+                            "Buscar álbuns...",
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                     },
@@ -167,8 +169,17 @@ fun GaleriaEventosView(
                     is GaleriaEventosUiState.Success -> {
                         val eventosFiltrados =
                             (uiState as GaleriaEventosUiState.Success).eventos.filter {
-                                it.titulo.contains(searchQuery.text, ignoreCase = true)
+                                it.titulo.contains(searchQuery.text, ignoreCase = true) ||
+                                        it.descricao?.contains(
+                                            searchQuery.text,
+                                            ignoreCase = true
+                                        ) == true ||
+                                        formatarDataHoraLocal(
+                                            it.data,
+                                            false
+                                        ).contains(searchQuery.text, ignoreCase = true)
                             }
+
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -176,7 +187,7 @@ fun GaleriaEventosView(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 SectionHeader(
-                                    title = "Selecione o Evento",
+                                    title = "Selecione o álbun",
                                     subtitle = "${eventosFiltrados.size} evento${if (eventosFiltrados.size != 1) "s" else ""}",
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f)
@@ -203,17 +214,54 @@ fun GaleriaEventosView(
                                 evento = evento,
                                 onClick = { onClickEvento(evento._id) },
                                 onEditClick = { onEditEventoClick(evento._id) },
-                                onDeleteClick = { evento._id.let { viewModel.deletarEvento(evento._id) } }
+                                onDeleteClick = { evento._id.let { viewModel.deletarEvento(evento._id) } },
+                                viewModel = viewModel,
                             )
                         }
                     }
 
                     GaleriaEventosUiState.Empty -> {
                         item {
-                            Text(
-                                text = "Nenhum evento encontrado.",
-                                modifier = Modifier.padding(16.dp)
-                            )
+
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                // Conteúdo vazio
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .offset(y = (-20).dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = "Nenhum álbum disponível no momento",
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+
+                                        if (usuarioLogado?.perfis?.contains("adm") == true) {
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            Button(
+                                                onClick = {
+                                                    onAddEventoClick()
+                                                }) {
+                                                Icon(Icons.Default.Add, contentDescription = null)
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text("Criar Primeiro Álbum")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -229,10 +277,14 @@ fun GaleriaEventoItem(
     evento: GaleriaEvento,
     onClick: () -> Unit = {},
     onEditClick: (String) -> Unit = {},
-    onDeleteClick: (String) -> Unit = {}
+    onDeleteClick: (String) -> Unit = {},
+    viewModel: GaleriaEventosViewModel,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val numeroFotos by produceState(initialValue = 0) {
+        value = viewModel.numeroDeFotos(evento._id)
+    }
 
     Card(
         modifier = Modifier
@@ -291,7 +343,7 @@ fun GaleriaEventoItem(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Editar aviso")
+                                            Text("Editar álbun")
                                         }
                                     },
                                     onClick = {
@@ -310,7 +362,7 @@ fun GaleriaEventoItem(
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                "Excluir aviso",
+                                                "Excluir álbun",
                                                 color = MaterialTheme.colorScheme.error
                                             )
                                         }
@@ -337,18 +389,29 @@ fun GaleriaEventoItem(
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ){
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = formatarDataHoraLocal(evento.data, false),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
                 Text(
-                    text = formatarDataHoraLocal(evento.data, false),
+                    text = "$numeroFotos foto(s)",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -361,7 +424,7 @@ fun GaleriaEventoItem(
                 title = { Text("Confirmar Exclusão") },
                 text = {
                     Column {
-                        Text("Deseja realmente excluir este aviso?")
+                        Text("Deseja realmente excluir este álbun?")
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Título: ${evento.titulo}",

@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import LoadingButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -62,6 +64,7 @@ fun CadastroEventoView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showCriarEditarDialog = remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
 
     LaunchedEffect(eventoId) {
         if (!eventoId.isNullOrBlank()) {
@@ -86,7 +89,7 @@ fun CadastroEventoView(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             )
                         ),
                         shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -251,18 +254,26 @@ fun CadastroEventoView(
                         )
                     },
                     confirmButton = {
-                        Button(
+                        LoadingButton(
                             onClick = {
+                                isSaving = true
                                 viewModel.salvarEvento(
                                     onSuccess = {
+                                        isSaving = false
                                         showCriarEditarDialog.value = false
                                         onNavigateBack()
                                     },
+                                    onError = {
+                                        isSaving = false
+                                    }
                                 )
-                            }
-                        ) {
-                            Text(if (eventoId.isNullOrBlank()) "Criar" else "Salvar")
-                        }
+                            },
+                            isLoading = isSaving,
+                            enabled = true,
+                            text = if (eventoId.isNullOrBlank()) "Criar" else "Salvar",
+                            loadingText = if (eventoId.isNullOrBlank()) "Criando..." else "Salvando...",
+                            modifier = Modifier.height(48.dp) // altura menor para dialog
+                        )
                     },
                     dismissButton = {
                         TextButton(onClick = { showCriarEditarDialog.value = false }) {
@@ -271,6 +282,7 @@ fun CadastroEventoView(
                     }
                 )
             }
+
         }
     }
 }

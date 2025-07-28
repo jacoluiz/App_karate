@@ -19,8 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.automirrored.rounded.CallMade
-import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
@@ -65,7 +63,6 @@ fun RecursosView(
 ) {
     val recursos = buildList {
 
-        add(RecursoItem("Eventos", RecursoIcon.Vector(Icons.Default.Event), onNavigateToEventos))
         add(
             RecursoItem(
                 "Programação",
@@ -91,6 +88,15 @@ fun RecursosView(
                     onNavigateToGaleria
                 )
             )
+
+            add(
+                RecursoItem(
+                    "Eventos",
+                    RecursoIcon.Vector(Icons.Default.Event),
+                    onNavigateToEventos
+                )
+            )
+
         }
 
         // Se o usuário for administrador
@@ -124,7 +130,7 @@ fun RecursosView(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -228,7 +234,7 @@ fun RecursoCard(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -236,13 +242,13 @@ fun RecursoCard(
                     is RecursoIcon.Vector -> Icon(
                         imageVector = icon.icon,
                         contentDescription = titulo,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(32.dp)
                     )
 
                     is RecursoIcon.PainterIcon -> Icon(
                         painter = icon.icon,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         contentDescription = titulo,
                         modifier = Modifier.size(32.dp)
                     )

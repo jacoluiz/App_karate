@@ -67,6 +67,7 @@ import br.com.shubudo.ui.viewModel.AvisosViewModel
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
 import br.com.shubudo.utils.getCorDaFaixa
+import br.com.shubudo.utils.getCorOnPrimary
 
 @Composable
 fun AvisosView(
@@ -84,6 +85,7 @@ fun AvisosView(
             onNavigateToEditarAviso(avisoId)
         }
     }
+
     if (usuarioLogado == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -119,7 +121,7 @@ fun AvisosView(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                 )
                             ),
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -202,7 +204,7 @@ fun AvisosView(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                 )
                             ),
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -616,7 +618,7 @@ fun AvisoCard(
                                                 Text(
                                                     text = usuario.email,
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                                                 )
                                             }
                                             Card(
@@ -628,7 +630,7 @@ fun AvisoCard(
                                                 Text(
                                                     text = usuario.corFaixa,
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    color = getCorOnPrimary(usuario.corFaixa),
                                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                                 )
                                             }

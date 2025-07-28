@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import LoadingButton
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -350,44 +351,14 @@ private fun LoginCard(
             )
 
             // Botão de login
-            Button(
+            LoadingButton(
                 onClick = onLogin,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = username.isNotBlank() && password.isNotBlank() && !isLoading,
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                )
-            ) {
-                if (isLoading) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Text(
-                            text = "Entrando...",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
-                    }
-                } else {
-                    Text(
-                        text = "Entrar",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-            }
+                isLoading = isLoading,
+                enabled = username.isNotBlank() && password.isNotBlank(),
+                text = "Entrar",
+                loadingText = "Entrando...",
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+            )
         }
     }
 }

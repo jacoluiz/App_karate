@@ -9,6 +9,7 @@ import br.com.shubudo.model.GaleriaEvento
 import br.com.shubudo.network.services.GaleriaEventoRequest
 import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.GaleriaEventoRepository
+import br.com.shubudo.repositories.GaleriaFotoRepository
 import br.com.shubudo.ui.uistate.GaleriaEventosUiState
 import br.com.shubudo.utils.formatarDataHoraLocal
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,12 +19,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class GaleriaEventosViewModel @Inject constructor(
     private val eventoRepository: GaleriaEventoRepository,
-    private val academiaRepository: AcademiaRepository
+    private val academiaRepository: AcademiaRepository,
+    private val galeriaFotoRepository: GaleriaFotoRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<GaleriaEventosUiState>(GaleriaEventosUiState.Loading)
@@ -88,10 +92,19 @@ class GaleriaEventosViewModel @Inject constructor(
         }
     }
 
+    suspend fun numeroDeFotos(eventoId: String): Int {
+        return try {
+            galeriaFotoRepository.getFotosPorEvento(eventoId).first().size
+        } catch (e: Exception) {
+            0
+        }
+    }
+
     fun salvarEvento(
         id: String?,
         nomeFilial: String,
         criadoPor: String,
+        onErro: () -> Unit = {},
         onSalvo: () -> Unit = {}
     ) {
         viewModelScope.launch {
@@ -112,12 +125,24 @@ class GaleriaEventosViewModel @Inject constructor(
                     return@launch
                 }
 
+                val entradaFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val saidaFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val dataConvertida = try {
+                    val parsedDate = entradaFormat.parse(data)
+                    saidaFormat.format(parsedDate!!)
+                } catch (e: Exception) {
+                    _uiState.update {
+                        GaleriaEventosUiState.Error("Data inválida. Use o formato dd/MM/yyyy")
+                    }
+                    return@launch
+                }
+
                 val request = GaleriaEventoRequest(
                     titulo = titulo,
                     descricao = descricao,
-                    data = data,
+                    data = dataConvertida,
                     academiaId = academiaEncontrada._id,
-                    filialId = filialEncontrada._id,
+                    filialId = filialEncontrada._id!!,
                     criadoPor = criadoPor
                 )
 
@@ -131,6 +156,7 @@ class GaleriaEventosViewModel @Inject constructor(
                 onSalvo()
 
             } catch (e: Exception) {
+                onErro()
                 _uiState.update {
                     GaleriaEventosUiState.Error(e.message ?: "Erro ao salvar evento")
                 }

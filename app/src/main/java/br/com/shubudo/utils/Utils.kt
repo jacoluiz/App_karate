@@ -502,4 +502,20 @@ fun getCorDaFaixa(belt: String): Color {
     }
 }
 
+fun getCorOnPrimary(faixa: String): Color {
+    return when (faixa) {
+        "Branca" -> Color.Black
+        "Amarela" -> Color.Black
+        "Laranja" -> Color.White
+        "Verde" -> Color.White
+        "Roxa" -> Color.White
+        "Marrom" -> Color.White
+        "Preta", "Preta 1 dan", "Preta 2 dan", "Preta 3 dan", "Preta 4 dan" -> Color.White
+        "Mestre", "Mestre 6 dan", "Mestre 7 dan", "Mestre 8 dan", "Mestre 9 dan" -> Color.White
+        "Grão Mestre", "Grão Mestre 11 dan", "Grão Mestre 12 dan" -> Color.White
+        else -> Color.White // fallback
+    }
+}
+
+
 

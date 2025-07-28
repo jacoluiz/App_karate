@@ -1,7 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager.usuarioLogado
@@ -122,11 +121,11 @@ class EditarPerfilViewModel @Inject constructor(
         perfis: List<String> = listOf("aluno"),
         status: String = "ativo",
         onSave: () -> Unit = {},
+        onError: (Throwable) -> Unit = {}, // <-- Adicionado
         context: Context
     ) {
         viewModelScope.launch {
             try {
-                // Monta o objeto Usuario para enviar
                 val usuarioAtualizado = Usuario(
                     _id = id,
                     nome = nome,
@@ -144,21 +143,22 @@ class EditarPerfilViewModel @Inject constructor(
                     perfis = perfis,
                     status = status
                 )
-                val resultado: Usuario? = if (usuarioLogado?._id == usuarioAtualizado._id){
+                val resultado: Usuario? = if (usuarioLogado?._id == usuarioAtualizado._id) {
                     repository.atualizarUsuario(context, usuarioAtualizado)
-                }else{
+                } else {
                     repository.atualizarUsuarioAdm(context, usuarioAtualizado)
                 }
-                // Se a atualização foi bem-sucedida (resultado != null),
-                // atualizamos o estado para refletir os novos dados.
+
                 if (resultado != null) {
                     loadUsuario(resultado)
                     onSave()
+                } else {
+                    onError(Exception("Erro ao salvar o usuário"))
                 }
             } catch (e: Exception) {
-                // Trate o erro (ex: mostrar mensagem na tela)
-                // Você pode ter um estado do tipo: EditarPerfilUiState.Error(e.message)
+                onError(e) // <-- Chamado em caso de erro
             }
         }
     }
 }
+

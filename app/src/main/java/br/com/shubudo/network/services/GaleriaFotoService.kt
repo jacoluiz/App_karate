@@ -4,8 +4,9 @@ import br.com.shubudo.database.entities.GaleriaFotoEntity
 import br.com.shubudo.model.GaleriaFoto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.http.DELETE
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -36,6 +37,6 @@ interface GaleriaFotoService {
         @Part("usuarioId") usuarioId: RequestBody
     ): GaleriaFoto
 
-    @DELETE("/galeria/fotos/{id}")
-    suspend fun deletarFoto(@Path("id") fotoId: String)
+    @HTTP(method = "DELETE", path = "/galeria/fotos", hasBody = true)
+    suspend fun deletarFotos(@Body body: HashMap<String, List<String>>)
 }

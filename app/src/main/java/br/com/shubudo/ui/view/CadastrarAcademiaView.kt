@@ -1,11 +1,12 @@
 package br.com.shubudo.ui.view
 
-import android.util.Log
+import LoadingButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.model.Filial
+import br.com.shubudo.ui.components.LoadingDialog
 import br.com.shubudo.ui.uistate.CadastroAcademiaUiState
 import br.com.shubudo.ui.viewModel.CadastroAcademiaViewModel
 
@@ -61,6 +64,7 @@ fun CadastroAcademiaView(
     var descricao by remember { mutableStateOf("") }
     var filiais by remember { mutableStateOf(listOf<Filial>()) }
     var showDialog by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
     val camposValidos = nome.isNotBlank()
             && descricao.isNotBlank()
@@ -92,7 +96,7 @@ fun CadastroAcademiaView(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -220,14 +224,17 @@ fun CadastroAcademiaView(
 
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = {
+                showLoading = false
+                showDialog = false
+            },
             title = { Text("Confirmar Cadastro") },
             text = { Text("Deseja realmente cadastrar esta academia?") },
             confirmButton = {
-                Button(
+                LoadingButton(
                     onClick = {
-
-                        Log.d("CadastroAcademiaView", "Cadastrando academia: $academiaId")
+                        showLoading = true
+                        showDialog = true
                         viewModel.criarOuAtualizarAcademia(
                             nome = nome,
                             descricao = descricao.takeIf { it.isNotBlank() },
@@ -235,15 +242,21 @@ fun CadastroAcademiaView(
                             id = academiaId,
                             onSuccess = {
                                 showDialog = false
+                                showLoading = false
                                 onNavigateBack()
                             },
-                            onError = {}
+                            onError = {
+                                showLoading = false
+                            }
                         )
-
-                    }
-                ) {
-                    Text("Confirmar")
-                }
+                    },
+                    isLoading = showLoading,
+                    text = "Confirmar",
+                    loadingText = "Salvando...",
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .height(48.dp)
+                )
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
@@ -252,4 +265,5 @@ fun CadastroAcademiaView(
             }
         )
     }
+
 }

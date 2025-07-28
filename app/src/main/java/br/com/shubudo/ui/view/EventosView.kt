@@ -72,6 +72,7 @@ import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
 import br.com.shubudo.utils.getCorDaFaixa
+import br.com.shubudo.utils.getCorOnPrimary
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -178,7 +179,7 @@ fun EventosView(
                                     brush = Brush.verticalGradient(
                                         colors = listOf(
                                             MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                         )
                                     ),
                                     shape = RoundedCornerShape(
@@ -331,7 +332,7 @@ fun EventosView(
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                 }
-                                items(filteredPassados) { evento ->
+                                items(filteredPassados.sortedByDescending { it.dataInicio }) { evento ->
                                     EventoItem(
                                         evento = evento,
                                         isPast = true,
@@ -669,7 +670,7 @@ fun EventoItem(
                                     if (usuario != null) {
                                         Card(
                                             colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                                containerColor = MaterialTheme.colorScheme.primary
                                             )
                                         ) {
                                             Row(
@@ -682,12 +683,14 @@ fun EventoItem(
                                                     Text(
                                                         text = usuario.nome,
                                                         style = MaterialTheme.typography.bodyMedium,
-                                                        fontWeight = FontWeight.Bold
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onPrimary
+
                                                     )
                                                     Text(
                                                         text = usuario.email,
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onSurface.copy(
+                                                        color = MaterialTheme.colorScheme.onPrimary.copy(
                                                             alpha = 0.7f
                                                         )
                                                     )
@@ -701,7 +704,7 @@ fun EventoItem(
                                                     Text(
                                                         text = usuario.corFaixa,
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onSurface,
+                                                        color = getCorOnPrimary(usuario.corFaixa),
                                                         modifier = Modifier.padding(
                                                             horizontal = 8.dp,
                                                             vertical = 4.dp

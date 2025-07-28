@@ -112,7 +112,7 @@ fun BaseDeUsuariosView(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                 )
                             ),
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -185,7 +185,7 @@ fun BaseDeUsuariosView(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                 )
                             ),
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -257,7 +257,7 @@ fun BaseDeUsuariosView(
                                 Text(
                                     text = "${usuariosFiltrados.size} usuário${if (usuariosFiltrados.size != 1) "s" else ""}",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                 )
                             }
@@ -465,8 +465,8 @@ fun UsuarioCard(
                                 text = usuario.status,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = when (usuario.status.lowercase()) {
-                                    "ativo" -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    "inativo" -> MaterialTheme.colorScheme.onErrorContainer
+                                    "ativo" -> MaterialTheme.colorScheme.onPrimary
+                                    "inativo" -> MaterialTheme.colorScheme.onPrimary
                                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                                 },
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

@@ -103,9 +103,9 @@ class CadastroEventoViewModel @Inject constructor(
         }
     }
 
-
     fun salvarEvento(
         onSuccess: () -> Unit = {},
+        onError: (Throwable) -> Unit = {}
     ) {
         val currentState = _uiState.value
         if (currentState !is CadastroEventoUiState.Form) return
@@ -127,7 +127,6 @@ class CadastroEventoViewModel @Inject constructor(
             hasError = true
         }
 
-        // Validar formato da data
         try {
             LocalDate.parse(currentState.data.text, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
         } catch (e: DateTimeParseException) {
@@ -135,7 +134,6 @@ class CadastroEventoViewModel @Inject constructor(
             hasError = true
         }
 
-        // Validar formato do horário
         try {
             LocalTime.parse(currentState.horario.text, DateTimeFormatter.ofPattern("HH:mm"))
         } catch (e: DateTimeParseException) {
@@ -157,7 +155,6 @@ class CadastroEventoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = currentState.copy(isLoading = true)
             try {
-                // Converter data e horário para ISO string
                 val data = LocalDate.parse(currentState.data.text, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                 val horario = LocalTime.parse(currentState.horario.text, DateTimeFormatter.ofPattern("HH:mm"))
                 val dateTime = LocalDateTime.of(data, horario)
@@ -178,13 +175,15 @@ class CadastroEventoViewModel @Inject constructor(
                         isoString,
                         currentState.local
                     )
-
                 }
 
-               onSuccess()
+                onSuccess()
             } catch (e: Exception) {
+                onError(e)
+            } finally {
                 _uiState.value = currentState.copy(isLoading = false)
             }
         }
     }
+
 }

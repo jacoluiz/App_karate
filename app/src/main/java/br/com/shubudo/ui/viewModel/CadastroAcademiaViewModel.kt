@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.model.Filial
@@ -44,9 +45,9 @@ class CadastroAcademiaViewModel @Inject constructor(
     }
 
     fun criarOuAtualizarAcademia(
+        id: String? = null,
         nome: String,
         descricao: String?,
-        id: String? = null,
         filiais: List<Filial> ,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
@@ -55,6 +56,7 @@ class CadastroAcademiaViewModel @Inject constructor(
             try {
                 _uiState.value = CadastroAcademiaUiState.Loading
                 if (id != "" ) {
+                    Log.d("CadastroAcademiaViewModel", "Editando academia com ID: $id")
                     academiaRepository.editarAcademia(
                         id = id ?: "",
                         nome = nome,

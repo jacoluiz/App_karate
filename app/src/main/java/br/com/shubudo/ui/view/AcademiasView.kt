@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Academia
+import br.com.shubudo.ui.components.LoadingDialog
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.viewModel.AcademiaViewModel
 
@@ -81,7 +82,6 @@ fun AcademiasView(
                 )
             }
         }
-
 
         is AcademiaUiState.Success -> {
             val academias = (uiState as AcademiaUiState.Success).academias
@@ -152,7 +152,7 @@ fun CabecalhoAcademia() {
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                     )
                 ),
                 shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)

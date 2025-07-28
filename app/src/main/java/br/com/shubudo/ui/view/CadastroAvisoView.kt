@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view
 
+import LoadingButton
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -72,6 +73,7 @@ fun CadastroAvisoView(
     var showConfirmDialog by remember { mutableStateOf(false) }
     var showUserDropdown by remember { mutableStateOf(false) }
     var dadosPreenchidos by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadUsuarios()
@@ -108,7 +110,7 @@ fun CadastroAvisoView(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
@@ -241,11 +243,12 @@ fun CadastroAvisoView(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            usuariosSelecionados = if (usuariosSelecionados.contains(usuario)) {
-                                                usuariosSelecionados - usuario
-                                            } else {
-                                                usuariosSelecionados + usuario
-                                            }
+                                            usuariosSelecionados =
+                                                if (usuariosSelecionados.contains(usuario)) {
+                                                    usuariosSelecionados - usuario
+                                                } else {
+                                                    usuariosSelecionados + usuario
+                                                }
                                         }
                                         .padding(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -399,25 +402,29 @@ fun CadastroAvisoView(
                 }
             },
             confirmButton = {
-                Button(
+                LoadingButton(
                     onClick = {
                         val publicoAlvo = usuariosSelecionados.map { it.email }
+                        showLoading = true
                         viewModel.criarOuAtualizarAviso(
                             titulo = titulo,
                             conteudo = conteudo,
                             publicoAlvo = publicoAlvo,
                             onSuccess = {
                                 showConfirmDialog = false
+                                showLoading = false
                                 onNavigateBack()
                             },
                             onError = {
                                 showConfirmDialog = false
+                                showLoading = false
                             }
                         )
-                    }
-                ) {
-                    Text("Confirmar")
-                }
+                    },
+                    isLoading = showLoading,
+                    text = "Confirmar",
+                    loadingText = "Enviando..."
+                )
             },
             dismissButton = {
                 TextButton(

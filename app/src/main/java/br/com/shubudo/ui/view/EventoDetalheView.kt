@@ -216,7 +216,7 @@ fun EventoDetalheView(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             )
                         ),
                         shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)

@@ -18,7 +18,6 @@ class GaleriaFotoRepository @Inject constructor(
 ) {
     suspend fun listarPorEvento(eventoId: String) {
         val fotos = service.listarFotosPorEvento(eventoId)
-        Log.d("GaleriaFotoRepository", "Listando fotos para o evento: $eventoId, total: ${fotos.size}")
         dao.removerPorEvento(eventoId)
         dao.salvarFotos(fotos.map { it.toGaleriaFotoEntity() })
     }
@@ -38,8 +37,9 @@ class GaleriaFotoRepository @Inject constructor(
         listarPorEvento(eventoId)
     }
 
-    suspend fun deletarFoto(fotoId: String, eventoId: String) {
-        service.deletarFoto(fotoId)
+    suspend fun deletarFotos(fotoIds: List<String>, eventoId: String) {
+        val body = hashMapOf("ids" to fotoIds)
+        service.deletarFotos(body)
         listarPorEvento(eventoId)
     }
 }

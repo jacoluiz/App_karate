@@ -8,7 +8,7 @@ data class Academia(
 )
 
 data class Filial(
-    val _id: String = "",
+    val _id: String? = null,
     val nome: String = "",
     val endereco: String = "",
     val descricao: String = "",
