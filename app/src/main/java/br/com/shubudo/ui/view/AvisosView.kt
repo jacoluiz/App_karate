@@ -61,6 +61,7 @@ import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Aviso
 import br.com.shubudo.model.Usuario
+import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.viewModel.AvisosViewModel
@@ -76,7 +77,7 @@ fun AvisosView(
     viewModel: AvisosViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val usuarioLogado = SessionManager.usuarioLogado
+    val usuarioLogado = usuarioLogado
     val usuarioListViewModel: UsuarioListViewModel = hiltViewModel()
     val usuarios by usuarioListViewModel.usuarios.collectAsState()
 
@@ -84,22 +85,6 @@ fun AvisosView(
         viewModel.avisoParaEditar.collect { avisoId ->
             onNavigateToEditarAviso(avisoId)
         }
-    }
-
-    if (usuarioLogado == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Faça login para ver os avisos",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-        }
-        return
     }
 
     when (uiState) {
@@ -180,7 +165,7 @@ fun AvisosView(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        if (usuarioLogado.perfis.contains("adm")) {
+                        if (usuarioLogado?.perfis?.contains("adm") == true) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { onNavigateToCadastroAviso("") }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
@@ -195,49 +180,11 @@ fun AvisosView(
 
         is AvisosUiState.Success -> {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Cabeçalho com fundo gradiente
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                        .padding(vertical = 24.dp, horizontal = 16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Announcement,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Avisos",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Fique por dentro das últimas informações",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-                }
+                CabecalhoComIconeCentralizado(
+                    iconeAndroid = Icons.AutoMirrored.Filled.Announcement,
+                    titulo = "Avisos",
+                    subtitulo = "Fique por dentro das últimas informações"
+                )
 
                 // Conteúdo principal
                 Card(
@@ -266,7 +213,7 @@ fun AvisosView(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            if (usuarioLogado.perfis.contains("adm")) {
+                            if (usuarioLogado?.perfis?.contains("adm") == true) {
                                 FloatingActionButton(
                                     onClick = { onNavigateToCadastroAviso("") },
                                     modifier = Modifier.size(48.dp),
@@ -291,8 +238,8 @@ fun AvisosView(
                             items((uiState as AvisosUiState.Success).avisos.sortedByDescending { it.dataHoraCriacao }) { aviso ->
                                 AvisoCard(
                                     aviso = aviso,
-                                    isAdmin = usuarioLogado.perfis.contains("adm"),
-                                    userEmail = usuarioLogado.email,
+                                    isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
+                                    userEmail = usuarioLogado?.email ?: "",
                                     usuarios = usuarios,
                                     onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
                                     onEditAviso = { onNavigateToEditarAviso(aviso.id) }

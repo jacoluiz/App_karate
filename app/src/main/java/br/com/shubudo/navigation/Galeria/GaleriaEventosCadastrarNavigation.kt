@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import br.com.shubudo.ui.view.GaleriaEventosCadastrarView
+import br.com.shubudo.ui.view.CadastrarGaleriaEventosView
 
 const val galeriaEventosCadastrarRoute = "galeria/eventos/cadastrar"
 private const val eventoIdArg = "eventoId"
@@ -23,7 +23,7 @@ fun NavGraphBuilder.galeriaEventosCadastrarScreen(
         })
     ) { backStackEntry ->
         val eventoId = backStackEntry.arguments?.getString(eventoIdArg)
-        GaleriaEventosCadastrarView(
+        CadastrarGaleriaEventosView(
             eventoId = eventoId,
             navigationBack = navigationBack
         )

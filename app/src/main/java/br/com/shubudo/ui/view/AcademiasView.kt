@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Academia
+import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingDialog
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.viewModel.AcademiaViewModel
@@ -75,7 +76,11 @@ fun AcademiasView(
         is AcademiaUiState.Empty -> {
             // Estrutura semelhante à tela de avisos
             Column(modifier = Modifier.fillMaxSize()) {
-                CabecalhoAcademia()
+                CabecalhoComIconeCentralizado(
+                    titulo = "Academias",
+                    subtitulo = "Conheça nossas academias e suas filiais",
+                    iconePastaR = R.drawable.ic_academia
+                )
                 ConteudoVazioAcademia(
                     usuarioLogado?.perfis?.contains("adm") == true,
                     onNavigateToCadastroAcademia
@@ -86,7 +91,11 @@ fun AcademiasView(
         is AcademiaUiState.Success -> {
             val academias = (uiState as AcademiaUiState.Success).academias
             Column(modifier = Modifier.fillMaxSize()) {
-                CabecalhoAcademia()
+                CabecalhoComIconeCentralizado(
+                    titulo = "Academias",
+                    subtitulo = "Conheça nossas academias e suas filiais",
+                    iconePastaR = R.drawable.ic_academia
+                )
 
                 Card(
                     modifier = Modifier
@@ -141,55 +150,6 @@ fun AcademiasView(
         else -> {}
     }
 }
-
-@Composable
-fun CabecalhoAcademia() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                    )
-                ),
-                shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-            )
-            .padding(vertical = 24.dp, horizontal = 16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_academia),
-                contentDescription = "Icone de aademia",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Academias",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Conheça nossas academias e suas filiais",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
-    }
-}
-
 @Composable
 fun ConteudoVazioAcademia(isAdmin: Boolean, onAdd: () -> Unit) {
     Card(

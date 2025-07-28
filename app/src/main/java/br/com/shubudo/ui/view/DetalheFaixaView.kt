@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.com.shubudo.R
+import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.CardSelecaoTipoConteudo
 import br.com.shubudo.ui.components.LoadingOverlay
 import br.com.shubudo.ui.components.LoadingWrapper
@@ -46,42 +48,11 @@ fun DetalheFaixaView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Cabeçalho com fundo colorido atrás do texto
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                        .padding(vertical = 24.dp, horizontal = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Faixa ${uiState.programacao.faixa.faixa}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Que tipo de conteúdo você gostaria de ver?",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                CabecalhoComIconeCentralizado(
+                    titulo = "Faixa ${uiState.programacao.faixa.faixa}",
+                    subtitulo = "Que tipo de conteúdo você gostaria de ver?",
+                    iconePastaR = R.drawable.ic_faixa
+                )
 
                 // Conteúdo principal com os drop-downs
                 Surface(

@@ -48,13 +48,13 @@ import br.com.shubudo.navigation.KarateNavHost
 import br.com.shubudo.navigation.academiasRoute
 import br.com.shubudo.navigation.avisosRoute
 import br.com.shubudo.navigation.baseUsuariosRoute
-import br.com.shubudo.navigation.detalheFaixaArgument
 import br.com.shubudo.navigation.detalheFaixaRuteFullpath
 import br.com.shubudo.navigation.detalheMovimentoArgument
 import br.com.shubudo.navigation.detalheMovimentoRuteFullpath
 import br.com.shubudo.navigation.editarPerfilRoute
 import br.com.shubudo.navigation.esqueciMinhaSenhaRote
 import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
+import br.com.shubudo.navigation.eventoDetalheRoute
 import br.com.shubudo.navigation.eventosRoute
 import br.com.shubudo.navigation.novoUsuarioRote
 import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
@@ -150,10 +150,6 @@ class MainActivity : ComponentActivity() {
                                 editarPerfilRoute -> "Editar Perfil"
                                 perfilRoute -> "Perfil"
                                 AppDestination.Login.route -> "Login"
-                                detalheFaixaRuteFullpath -> "Faixa " + backStackEntryState?.arguments?.getString(
-                                    detalheFaixaArgument
-                                )
-
                                 detalheMovimentoRuteFullpath -> backStackEntryState?.arguments?.getString(
                                     detalheMovimentoArgument
                                 )
@@ -173,6 +169,7 @@ class MainActivity : ComponentActivity() {
                                 baseUsuariosRoute,
                                 programacaoRoute,
                                 academiasRoute,
+                                eventoDetalheRoute,
                                 esqueciMinhaSenhaRoteSemUsername -> true
 
                                 else -> false
@@ -291,7 +288,8 @@ fun KarateApp(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(modifier = Modifier.statusBarsPadding(), topBar = {
             if (isShowTopBar) {
-                KarateTopAppBar(texto = topAppBarTitle,
+                KarateTopAppBar(
+                    texto = topAppBarTitle,
                     showBottomBack = showBottomBack,
                     showColor = showColorTopAppBar,
                     showTitle = showTitleTopAppBar,
@@ -339,15 +337,16 @@ fun KarateApp(
 
             }
         }) {
-            Box(modifier = Modifier
-                .padding(it)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
-                }) {
+            Box(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    }) {
                 content()
             }
         }

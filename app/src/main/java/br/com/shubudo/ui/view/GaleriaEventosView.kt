@@ -60,6 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.GaleriaEvento
+import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.GaleriaEventosUiState
 import br.com.shubudo.ui.viewModel.GaleriaEventosViewModel
@@ -78,52 +79,11 @@ fun GaleriaEventosView(
 
     LoadingWrapper(isLoading = uiState is GaleriaEventosUiState.Loading) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(
-                            bottomStart = 32.dp,
-                            bottomEnd = 32.dp
-                        )
-                    )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_galeria),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Galeria",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "Todas as nossas fotos organizadas em um só lugar!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            CabecalhoComIconeCentralizado(
+                titulo = "Galeria",
+                subtitulo = "Todas as nossas fotos organizadas em um só lugar!",
+                iconePastaR = R.drawable.ic_galeria
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -389,11 +349,11 @@ fun GaleriaEventoItem(
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
-            ){
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {

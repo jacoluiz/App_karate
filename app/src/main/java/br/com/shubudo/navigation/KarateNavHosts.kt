@@ -160,9 +160,7 @@ fun KarateNavHost(
         )
 
         // Tela de Detalhe do Evento
-        eventoDetalheScreen {
-            navController.popBackStack()
-        }
+        eventoDetalheScreen()
 
         // Tela de Recursos
         recursosScreen(

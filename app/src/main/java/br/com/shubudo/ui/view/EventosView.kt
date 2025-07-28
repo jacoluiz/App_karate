@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
@@ -68,6 +69,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Evento
 import br.com.shubudo.model.Usuario
+import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
 import br.com.shubudo.ui.viewModel.UsuarioListViewModel
@@ -171,52 +173,11 @@ fun EventosView(
                     }
 
                     Column(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(180.dp)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(
-                                        bottomStart = 32.dp,
-                                        bottomEnd = 32.dp
-                                    )
-                                )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarToday,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Eventos do karate",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = "Fique por dentro de todas as atividades",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
+                        CabecalhoComIconeCentralizado(
+                            titulo = "Eventos do karatê",
+                            subtitulo = "Fique por dentro de todas as atividades",
+                            iconeAndroid = Icons.Default.Event
+                        )
 
                         Card(
                             modifier = Modifier
