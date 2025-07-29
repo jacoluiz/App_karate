@@ -64,7 +64,7 @@ import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.AvisosUiState
 import br.com.shubudo.ui.viewModel.AvisosViewModel
-import br.com.shubudo.ui.viewModel.UsuarioListViewModel
+import br.com.shubudo.ui.viewModel.components.UsuarioListViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
 import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getCorOnPrimary

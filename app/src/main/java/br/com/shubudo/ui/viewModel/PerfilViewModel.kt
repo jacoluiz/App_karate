@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.viewModel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
@@ -7,6 +8,7 @@ import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.PerfilUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PerfilViewModel @Inject constructor(
-    private val repository: UsuarioRepository
+    private val repository: UsuarioRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private var currentUiStateJob: Job? = null
     private val _uiState = MutableStateFlow<PerfilUiState>(
@@ -37,10 +40,10 @@ class PerfilViewModel @Inject constructor(
                 _uiState.update { PerfilUiState.Loading }
             }.collectLatest { usuario ->
                 if (usuario == null) {
-                    SessionManager.usuarioLogado = null // garantir reset
+                    SessionManager.limparSessao(context) // limpa sessão se usuário não encontrado
                     _uiState.update { PerfilUiState.Empty }
                 } else {
-                    SessionManager.usuarioLogado = usuario // manter atualizado
+                    SessionManager.salvarUsuario(context, usuario)// manter atualizado
                     loadUsuario(usuario)
                 }
             }
@@ -50,12 +53,11 @@ class PerfilViewModel @Inject constructor(
     fun logout(onLoggedOut: () -> Unit) {
         viewModelScope.launch {
             repository.logout()
-            SessionManager.usuarioLogado = null // limpa sessão
+            SessionManager.limparSessao(context) // limpa sessão se usuário não encontrado
             _uiState.value = PerfilUiState.Empty
             onLoggedOut()
         }
     }
-
 
     private fun loadUsuario(usuario: Usuario) {
         _uiState.update {

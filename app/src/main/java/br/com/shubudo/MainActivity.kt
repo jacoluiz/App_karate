@@ -68,8 +68,8 @@ import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
 import br.com.shubudo.ui.view.OfflineScreen
-import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.PerfilViewModel
+import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.isInternetAvailable
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     private val REQUEST_PERMISSION_CODE = 100
     private val REQUEST_CODE_UPDATE = 1234
     private lateinit var appUpdateManager: AppUpdateManager
@@ -116,11 +115,10 @@ class MainActivity : ComponentActivity() {
         // Registro para atualizações do app
         updateAppLauncher =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode != Activity.RESULT_OK) {
+                if (result.resultCode != RESULT_OK) {
                     finish() // usuário cancelou a atualização
                 }
             }
-
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()

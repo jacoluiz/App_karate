@@ -71,7 +71,7 @@ import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
-import br.com.shubudo.ui.viewModel.UsuarioListViewModel
+import br.com.shubudo.ui.viewModel.components.UsuarioListViewModel
 import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getCorOnPrimary
 import java.time.ZonedDateTime

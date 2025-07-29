@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.ContactMail
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
@@ -27,18 +28,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
+import br.com.shubudo.ui.viewModel.RecursosViewModel
 
 data class RecursoItem(
     val titulo: String,
@@ -58,8 +63,15 @@ fun RecursosView(
     onNavigateToProgramacao: () -> Unit = {},
     onNavigateToAcademias: () -> Unit = {},
     onNavigateToBaseUsuarios: () -> Unit = {},
-    onNavigateToGaleria: () -> Unit = {}
+    onNavigateToGaleria: () -> Unit = {},
+    viewModel: RecursosViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.atualizarUsuarioLogado(context)
+    }
+
     val recursos = buildList {
 
         add(
@@ -116,6 +128,16 @@ fun RecursosView(
                 )
             )
         }
+
+        if (usuarioLogado?.perfis?.contains("dev") == true) {
+            add(
+                RecursoItem(
+                    "Parceiros",
+                    RecursoIcon.Vector(Icons.Filled.ContactMail),
+                    onNavigateToBaseUsuarios
+                )
+            )
+        }
     }.sortedBy { it.titulo }
 
 
@@ -126,7 +148,7 @@ fun RecursosView(
             subtitulo = "Acesse materiais complementares e informações importantes",
             iconeAndroid = Icons.AutoMirrored.Filled.LibraryBooks
         )
-        
+
         // Conteúdo principal com grid de recursos
         Card(
             modifier = Modifier

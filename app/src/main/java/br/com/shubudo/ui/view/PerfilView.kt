@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.shubudo.R
+import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.PerfilUiState
 import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.calcularIdade
@@ -62,7 +63,10 @@ fun PerfilView(
 ) {
     when (uiState) {
         is PerfilUiState.Loading -> {
-            LoadingScreen()
+            LoadingWrapper(
+                isLoading = true,
+                loadingText = "Carregando perfil..."
+            ) {}
         }
 
         is PerfilUiState.Empty -> {
@@ -93,30 +97,6 @@ fun PerfilView(
         }
 
         is PerfilUiState.Error -> TODO()
-    }
-}
-
-@Composable
-private fun LoadingScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                strokeWidth = 4.dp,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Carregando perfil...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
     }
 }
 

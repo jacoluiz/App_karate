@@ -1,4 +1,4 @@
-package br.com.shubudo.ui.viewModel
+package br.com.shubudo.ui.viewModel.components
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

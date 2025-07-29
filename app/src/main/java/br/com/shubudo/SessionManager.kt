@@ -1,14 +1,28 @@
 package br.com.shubudo
 
 import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.content.edit
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.utils.getFcmToken
 
 object SessionManager {
-    var usuarioLogado: Usuario? = null
+    var usuarioLogado by mutableStateOf<Usuario?>(null)
+        private set
+
+    fun limparSessao(context: Context) {
+        usuarioLogado = null
+        val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
+        prefs.edit { clear() }
+    }
 
     fun inicializar(context: Context) {
+        Log.d("MainActivity", "Inicializando SessionManager")
         val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
+        Log.d("MainActivity", "Carregando dados do usuário logado")
         with(prefs) {
             val _id = getString("_id", null)
             val nome = getString("nome", null)
@@ -26,18 +40,20 @@ object SessionManager {
             val lesaoOuLaudosMedicos = getString("lesaoOuLaudosMedicos", "")
             val registroAKSD = getString("registroAKSD", "")
             val fcmToken = getString("fcmToken", getFcmToken(context))
+            Log.d("MainActivity", "Dados carregados: _id=$_id, nome=$nome, email=$email")
 
-            if (!nome.isNullOrBlank() && !corFaixa.isNullOrBlank() && !username.isNullOrBlank()) {
+            if (!nome.isNullOrBlank() && !email.isNullOrBlank()) {
+                Log.d("MainActivity", "Usuário logado: $nome")
                 usuarioLogado = Usuario(
                     _id = _id,
                     nome = nome,
-                    username = username,
-                    email = email ?: "",
+                    username = username ?: "",
+                    email = email,
                     peso = peso ?: "",
                     altura = altura ?: "",
                     idade = idade ?: "",
                     perfis = perfis,
-                    corFaixa = corFaixa,
+                    corFaixa = corFaixa ?: "",
                     status = status ?: "ativo",
                     dan = dan,
                     academia = academia ?: "",
@@ -47,7 +63,29 @@ object SessionManager {
                     fcmToken = fcmToken ?: getFcmToken(context)
                 )
             }
+            Log.d("MainActivity", "Usuário logado: $usuarioLogado")
         }
     }
+
+    fun salvarUsuario(context: Context, usuario: Usuario) {
+        val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
+        prefs.edit {
+            putString("_id", usuario._id)
+            putString("nome", usuario.nome)
+            putString("email", usuario.email)
+            putString("username", usuario.username)
+            putString("corFaixa", usuario.corFaixa)
+            putString("status", usuario.status)
+            putInt("dan", usuario.dan)
+            putString("academia", usuario.academia)
+            putString("tamanhoFaixa", usuario.tamanhoFaixa)
+            putString("lesaoOuLaudosMedicos", usuario.lesaoOuLaudosMedicos)
+            putString("registroAKSD", usuario.registroAKSD)
+            putString("fcmToken", usuario.fcmToken)
+        }
+
+        usuarioLogado = usuario
+    }
+
 
 }

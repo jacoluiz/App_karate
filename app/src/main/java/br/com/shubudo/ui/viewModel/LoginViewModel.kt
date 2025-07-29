@@ -42,7 +42,7 @@ class LoginViewModel @Inject constructor(
                     return@launch
                 }
 
-                SessionManager.usuarioLogado = result
+                SessionManager.salvarUsuario(context, result)
                 Log.d("LoginViewModel", "Usuário logado: ${result}")
                 themeViewModel.changeThemeFaixa(result.corFaixa)
                 _uiState.value = LoginUiState.Success(result)

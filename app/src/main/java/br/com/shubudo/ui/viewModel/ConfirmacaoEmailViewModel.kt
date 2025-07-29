@@ -57,7 +57,7 @@ class ConfirmacaoEmailViewModel @Inject constructor(
 
                         // Salva localmente agora que o usuário foi confirmado
                         usuario.toUsuarioEntity()?.let { usuarioDao.salvarUsuario(it) }
-                        SessionManager.usuarioLogado = usuario
+                        SessionManager.salvarUsuario(context, usuario)
 
                         // Aplica o tema da faixa correta - usa a faixa do usuário cadastrado
                         Log.d("ConfirmacaoEmail", "Aplicando tema da faixa: ${usuario.corFaixa}")

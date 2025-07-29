@@ -26,7 +26,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -42,7 +44,19 @@ class UsuarioRepository @Inject constructor(
     private val cognito: CognitoAuthManager
 ) {
 
-    fun getUsuario() = dao.obterUsuarioLogado().map { it?.toUsuario() }
+    fun getUsuario() = flow {
+        val localUser = dao.obterUsuarioLogado().firstOrNull()
+        if (localUser != null && localUser._id.isNotBlank()) {
+            try {
+                val remoteUser = service.getUsuariosPorId(localUser._id).toUsuario()
+                remoteUser.let {
+                    dao.atualizarUsuario(it.toUsuarioEntity()!!)
+                }
+            } catch (e: Exception) {
+            }
+        }
+        emitAll(dao.obterUsuarioLogado().map { it?.toUsuario() })
+    }
 
     suspend fun getUsuarios() = flowOf(
         try {
