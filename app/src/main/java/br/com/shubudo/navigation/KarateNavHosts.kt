@@ -18,8 +18,8 @@ import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventos
 import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventosCadastrar
 
 import br.com.shubudo.navigation.Galeria.navigateToGaleriaFotos
-import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
 @Composable
 fun KarateNavHost(

@@ -37,9 +37,16 @@ class CadastroAvisoViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.value = CadastroAvisoUiState.Error("Erro ao carregar usuários: ${e.message}")
+                _uiState.value =
+                    CadastroAvisoUiState.Error("Erro ao carregar usuários: ${e.message}")
             }
         }
+    }
+
+    fun selecionarUsuariosPorFaixa(corFaixa: String): Set<Usuario> {
+        return todosUsuarios.filter {
+            it.status == "ativo" && it.corFaixa.equals(corFaixa, ignoreCase = true)
+        }.toSet()
     }
 
     fun searchUsuarios(query: String) {
@@ -53,18 +60,6 @@ class CadastroAvisoViewModel @Inject constructor(
                             usuario.email.contains(query, ignoreCase = true) ||
                             usuario.username.contains(query, ignoreCase = true)
                 }
-            }
-            _uiState.value = currentState.copy(usuariosFiltrados = filtrados)
-        }
-    }
-
-    fun filterUsersByFaixa(faixa: String?) {
-        val currentState = _uiState.value
-        if (currentState is CadastroAvisoUiState.Success) {
-            val filtrados = if (faixa == null) {
-                emptyList()
-            } else {
-                todosUsuarios.filter { it.corFaixa.equals(faixa, ignoreCase = true) }
             }
             _uiState.value = currentState.copy(usuariosFiltrados = filtrados)
         }

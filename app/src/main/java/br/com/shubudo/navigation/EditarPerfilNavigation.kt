@@ -10,7 +10,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.EditarPerfilView
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
 // Rota para a tela de edição de perfil
 internal const val editarPerfilRoute = "editarPerfil"

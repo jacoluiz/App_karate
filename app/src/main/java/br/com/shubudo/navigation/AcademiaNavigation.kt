@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.AcademiasView
+import br.com.shubudo.ui.view.recursos.academias.AcademiasView
 
 const val academiasRoute = "academias"
 

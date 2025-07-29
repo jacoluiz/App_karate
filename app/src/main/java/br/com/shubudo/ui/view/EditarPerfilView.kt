@@ -97,8 +97,9 @@ import br.com.shubudo.R
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
+import br.com.shubudo.ui.view.recursos.programacao.selecionaCorIcone
 import br.com.shubudo.ui.viewModel.EditarPerfilViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.DateValidation
 import br.com.shubudo.utils.applyHeightMask
 import br.com.shubudo.utils.formatDateForDisplay

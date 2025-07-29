@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import br.com.shubudo.ui.view.CadastrarGaleriaEventosView
+import br.com.shubudo.ui.view.recursos.galeria.CadastrarGaleriaEventosView
 
 const val galeriaEventosCadastrarRoute = "galeria/eventos/cadastrar"
 private const val eventoIdArg = "eventoId"

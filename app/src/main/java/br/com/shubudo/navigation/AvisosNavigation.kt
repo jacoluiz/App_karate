@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.AvisosView
+import br.com.shubudo.ui.view.recursos.avisos.AvisosView
 
 // Rota da tela de avisos
 const val avisosRoute = "avisos"

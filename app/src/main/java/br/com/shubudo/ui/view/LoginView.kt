@@ -86,7 +86,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.LoginUiState
 import br.com.shubudo.ui.viewModel.LoginViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import kotlinx.coroutines.delay
 
 @Composable

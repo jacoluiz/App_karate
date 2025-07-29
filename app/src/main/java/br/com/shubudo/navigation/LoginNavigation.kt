@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.LoginView
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
 internal const val loginRoute = "login"
 

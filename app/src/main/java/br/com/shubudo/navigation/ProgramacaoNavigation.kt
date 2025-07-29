@@ -7,9 +7,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.ProgramacaoView
+import br.com.shubudo.ui.view.recursos.programacao.ProgramacaoView
 import br.com.shubudo.ui.viewModel.ProgramacaoViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
 internal const val programacaoRoute = "programacao"
 

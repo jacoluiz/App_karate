@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
-import br.com.shubudo.ui.viewModel.AcademiaSelectorViewModel
+import br.com.shubudo.ui.viewModel.components.AcademiaSelectorViewModel
 
 @Composable
 fun AcademiaSelector(

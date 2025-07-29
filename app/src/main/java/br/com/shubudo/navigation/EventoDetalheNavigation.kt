@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.EventoDetalheView
+import br.com.shubudo.ui.view.recursos.eventos.EventoDetalheView
 import br.com.shubudo.ui.viewModel.EventoDetalheViewModel
 
 internal const val eventoDetalheRoute = "eventoDetalhe"

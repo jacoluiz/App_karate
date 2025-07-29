@@ -2,12 +2,12 @@ package br.com.shubudo.ui.viewModel
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.LoginUiState
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException

@@ -68,9 +68,9 @@ import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
 import br.com.shubudo.ui.view.OfflineScreen
-import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
+import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.PerfilViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.isInternetAvailable
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory

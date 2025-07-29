@@ -5,8 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import br.com.shubudo.ui.view.novoUsuario.NovoUsuarioView
-import br.com.shubudo.ui.viewModel.DropDownMenuViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
 internal const val novoUsuarioRote = "novoUsuario/{username}"
 internal const val novoUsuarioRoteSemUsername = "novoUsuario"

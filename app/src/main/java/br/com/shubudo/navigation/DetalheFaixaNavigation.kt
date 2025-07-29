@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.DetalheFaixaView
+import br.com.shubudo.ui.view.recursos.programacao.DetalheFaixaView
 import br.com.shubudo.ui.viewModel.DetalheFaixaViewModel
 
 internal const val detalherFaixaRoute = "detalheFiaxa"

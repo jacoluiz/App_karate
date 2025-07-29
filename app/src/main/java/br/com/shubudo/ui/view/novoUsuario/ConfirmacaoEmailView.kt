@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.ConfirmacaoEmailUiState
 import br.com.shubudo.ui.viewModel.ConfirmacaoEmailViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import kotlinx.coroutines.delay
 
 @Composable

@@ -10,6 +10,7 @@ import br.com.shubudo.database.dao.UsuarioDao
 import br.com.shubudo.model.toUsuarioEntity
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.ConfirmacaoEmailUiState
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

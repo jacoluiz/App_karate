@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.shubudo.R
 import br.com.shubudo.ui.uistate.PerfilUiState
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.calcularIdade
 import br.com.shubudo.utils.shouldShowDan
 

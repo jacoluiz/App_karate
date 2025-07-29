@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import br.com.shubudo.ui.view.CadastroAvisoView
+import br.com.shubudo.ui.view.recursos.avisos.CadastroAvisoView
 
 const val cadastroAvisoRoute = "cadastro_aviso"
 const val cadastroAvisoWithIdRoute = "cadastro_aviso/{avisoId}"

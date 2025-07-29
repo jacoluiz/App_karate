@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.uistate.CadastroUiState
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
-import br.com.shubudo.ui.viewModel.ThemeViewModel
+import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.dataDeAniversarioValida
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
 

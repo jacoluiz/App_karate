@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.CadastroEventoView
+import br.com.shubudo.ui.view.recursos.eventos.CadastroEventoView
 
 // Rota da tela de cadastro de evento
 const val cadastroEventoRoute = "cadastro_evento"

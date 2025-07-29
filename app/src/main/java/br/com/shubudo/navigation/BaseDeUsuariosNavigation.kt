@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import br.com.shubudo.ui.view.BaseDeUsuariosView
+import br.com.shubudo.ui.view.recursos.BaseDeUsuariosView
 
 // Caminho da rota
 const val baseUsuariosRoute = "base_usuarios"

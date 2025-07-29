@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import br.com.shubudo.ui.view.CadastroAcademiaView
+import br.com.shubudo.ui.view.recursos.academias.CadastroAcademiaView
 
 const val cadastroAcademiaRoute = "cadastro_academia"
 const val cadastroAcademiaWithIdRoute = "cadastro_academia/{academiaId}"
