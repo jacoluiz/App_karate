@@ -10,6 +10,8 @@ import br.com.shubudo.network.services.toEventoEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 class EventoRepository @Inject constructor(
@@ -33,6 +35,7 @@ class EventoRepository @Inject constructor(
     suspend fun getEventoPorId(eventoId: String): Evento? {
         return eventoDao.getEventoPorId(eventoId)?.toEvento()
     }
+
     suspend fun confirmarPresenca(evento: Evento): Evento {
         val response = eventoService.atualizarEvento(evento._id, evento)
 
@@ -63,7 +66,13 @@ class EventoRepository @Inject constructor(
         refreshEventos()
     }
 
-    suspend fun editarEvento(eventoId: String, titulo: String, descricao: String, dataInicio: String, local: String) {
+    suspend fun editarEvento(
+        eventoId: String,
+        titulo: String,
+        descricao: String,
+        dataInicio: String,
+        local: String
+    ) {
         val eventoAtualizado = NovoEventoRequest(
             titulo = titulo,
             descricao = descricao,
@@ -72,5 +81,25 @@ class EventoRepository @Inject constructor(
         )
         eventoService.editarEvento(eventoId, eventoAtualizado)
         refreshEventos()
+    }
+
+    fun getEventosFuturos(): Flow<List<Evento>> {
+        return eventoDao.getEventos().map { entities ->
+            val now = Instant.now()
+            entities
+                .map { it.toEvento() }
+                .filter { ev -> isFutureOrNow(ev.dataInicio, now) }
+        }
+    }
+
+    private fun isFutureOrNow(dataInicio: String?, now: Instant): Boolean {
+        if (dataInicio.isNullOrBlank()) return false
+        return try {
+            // Ex.: 2025-08-17T15:00:00.000+00:00
+            val odt = OffsetDateTime.parse(dataInicio)
+            odt.toInstant() >= now
+        } catch (_: Exception) {
+            false
+        }
     }
 }

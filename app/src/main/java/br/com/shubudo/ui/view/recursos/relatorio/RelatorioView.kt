@@ -3,40 +3,69 @@ package br.com.shubudo.ui.view.recursos.relatorio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.uistate.RelatorioUiState
 import br.com.shubudo.ui.viewModel.RelatorioViewModel
+import br.com.shubudo.utils.formatarDataHoraLocal
 
 data class ReportAction(
     val titulo: String,
@@ -78,7 +107,7 @@ fun RelatoriosView(
     // Defina os botões (relatórios) aqui
     val acoes = listOf(
         ReportAction(
-            titulo = "Organização Exame",
+            titulo = "Distribuição Exame",
             descricao = "Gera planilha com cones/filas e chamadas por faixa, altura e academia.",
             onClick = {
                 viewModel.baixarRelatorioOrganizado(
@@ -86,7 +115,16 @@ fun RelatoriosView(
                 )
             },
             enabled = !isDownloading
+        ),
+        ReportAction(
+            titulo = "Extração Exame de Faixa",
+            descricao = "Gera planilha de exame a partir da lista de confirmados do evento.",
+            onClick = {
+                viewModel.abrirModalRelatorioEvento()
+            },
+            enabled = !isDownloading
         )
+
     )
 
     Scaffold(
@@ -154,8 +192,377 @@ fun RelatoriosView(
                 }
             }
         }
+
+        val mostrarModal by viewModel.mostrarModal.collectAsState()
+
+        if (mostrarModal) {
+            ModalRelatorioEventoDialog(
+                onDismiss = { viewModel.fecharModalRelatorioEvento() },
+                onConfirm = { eventoId, isPrimeiraInfancia ->
+                    viewModel.gerarRelatorioExamePorEvento(eventoId, isPrimeiraInfancia, context)
+                    viewModel.fecharModalRelatorioEvento()
+                },
+                viewModel = viewModel
+            )
+        }
     }
 }
+
+@Composable
+private fun ModalRelatorioEventoDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (eventoId: String, isPrimeiraInfancia: Boolean) -> Unit,
+    viewModel: RelatorioViewModel
+) {
+    val eventos by viewModel.eventosDisponiveis.collectAsState()
+    var isPrimeiraInfancia by remember { mutableStateOf(false) }
+    var selecionadoId by remember { mutableStateOf<String?>(null) }
+    var searchText by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    // Filtrar eventos baseado na pesquisa
+    val eventosFiltrados = remember(eventos, searchText) {
+        if (searchText.isBlank()) {
+            eventos
+        } else {
+            eventos.filter { evento ->
+                evento.titulo.contains(searchText, ignoreCase = true) ||
+                        formatarDataHoraLocal(evento.dataInicio, false).contains(
+                            searchText,
+                            ignoreCase = true
+                        )
+            }
+        }
+    }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+            modifier = Modifier.fillMaxWidth(0.98f)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                // Cabeçalho da modal
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BarChart,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Extração para exame de faixa",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Selecione o exame de faixa para gerar o relatório",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+                HorizontalDivider(
+                    Modifier,
+                    DividerDefaults.Thickness,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                )
+                Spacer(Modifier.height(20.dp))
+
+                // Switch Primeira Infância
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    onClick = { isPrimeiraInfancia = !isPrimeiraInfancia },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Primeira infância",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "Ativar para gerar arquivo de primeira infância",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                        Switch(
+                            checked = isPrimeiraInfancia,
+                            onCheckedChange = { isPrimeiraInfancia = it },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // Campo de pesquisa
+                Text(
+                    text = "Pesquisar eventos",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = {
+                        Text(
+                            "Digite o nome do evento...",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Pesquisar",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchText.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    searchText = ""
+                                    keyboardController?.hide()
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Limpar",
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { keyboardController?.hide() }
+                    ),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                // Lista de eventos
+                Text(
+                    text = if (eventosFiltrados.isEmpty() && searchText.isNotEmpty()) {
+                        "Nenhum evento encontrado"
+                    } else {
+                        "Eventos disponíveis (${eventosFiltrados.size})"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = if (eventosFiltrados.isEmpty() && searchText.isNotEmpty()) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+
+                if (eventosFiltrados.isEmpty() && searchText.isNotEmpty()) {
+                    Text(
+                        text = "Tente pesquisar com outros termos",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(eventosFiltrados.size) { idx ->
+                        val ev = eventosFiltrados[idx]
+                        val selected = selecionadoId == ev._id
+                        EventRowItem(
+                            titulo = ev.titulo,
+                            dataIso = ev.dataInicio,
+                            selected = selected,
+                            onClick = {
+                                selecionadoId = ev._id
+                                keyboardController?.hide()
+                            }
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+                HorizontalDivider(
+                    Modifier,
+                    DividerDefaults.Thickness,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                )
+                Spacer(Modifier.height(16.dp))
+
+                // Botões de ação
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    ) {
+                        Text("Cancelar", fontWeight = FontWeight.Medium)
+                    }
+                    Button(
+                        onClick = {
+                            selecionadoId?.let { onConfirm(it, isPrimeiraInfancia) }
+                            keyboardController?.hide()
+                        },
+                        enabled = selecionadoId != null,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                    ) {
+                        Text("Gerar Relatório", fontWeight = FontWeight.Medium)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EventRowItem(
+    titulo: String,
+    dataIso: String?,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    // Formata a data ISO (ex.: 2025-08-17T15:00:00.000+00:00) em algo curto
+    val dataFmt = remember(dataIso) { formatarDataCurta(dataIso) }
+
+    val containerColor = if (selected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (selected) 6.dp else 2.dp
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Indicador visual de seleção
+            if (selected) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.size(8.dp)
+                ) {}
+                Spacer(Modifier.width(12.dp))
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = contentColor,
+                    maxLines = 2
+                )
+                if (!dataFmt.isNullOrBlank()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = dataFmt,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Default.Event,
+                    contentDescription = "Selecionado",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+private fun formatarDataCurta(iso: String?): String? {
+    if (iso.isNullOrBlank()) return null
+    return try {
+        // Usa java.time quando disponível
+        java.time.OffsetDateTime.parse(iso)
+            .toLocalDateTime()
+            .let { dt ->
+                "${dt.dayOfMonth.toString().padStart(2, '0')}/${
+                    dt.monthValue.toString().padStart(2, '0')
+                }/${dt.year}"
+            }
+    } catch (_: Exception) {
+        null
+    }
+}
+
 
 @Composable
 private fun ReportActionCard(
