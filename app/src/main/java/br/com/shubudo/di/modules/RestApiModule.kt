@@ -131,4 +131,14 @@ object RestApiModule {
     @Singleton
     fun provideGaleriaFotoService(retrofit: Retrofit): GaleriaFotoService =
         retrofit.create(GaleriaFotoService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideParceiroService(retrofit: Retrofit): ParceiroService =
+        retrofit.create(ParceiroService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRelatorioService(retrofit: Retrofit): RelatorioService =
+        retrofit.create(RelatorioService::class.java)
 }

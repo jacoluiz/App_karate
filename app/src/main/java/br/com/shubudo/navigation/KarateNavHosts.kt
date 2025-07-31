@@ -10,14 +10,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import br.com.shubudo.navigation.Galeria.galeriaEventosCadastrarScreen
-import br.com.shubudo.navigation.Galeria.galeriaEventosScreen
-
-import br.com.shubudo.navigation.Galeria.galeriaFotosScreen
-import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventos
-import br.com.shubudo.navigation.Galeria.navigateToGaleriaEventosCadastrar
-
-import br.com.shubudo.navigation.Galeria.navigateToGaleriaFotos
+import br.com.shubudo.navigation.galeria.galeriaEventosCadastrarScreen
+import br.com.shubudo.navigation.galeria.galeriaEventosScreen
+import br.com.shubudo.navigation.galeria.galeriaFotosScreen
+import br.com.shubudo.navigation.galeria.navigateToGaleriaEventos
+import br.com.shubudo.navigation.galeria.navigateToGaleriaEventosCadastrar
+import br.com.shubudo.navigation.galeria.navigateToGaleriaFotos
+import br.com.shubudo.navigation.parceiros.navigateToParceiroDetalhe
+import br.com.shubudo.navigation.parceiros.navigateToParceiros
+import br.com.shubudo.navigation.parceiros.parceiroDetalheScreen
+import br.com.shubudo.navigation.parceiros.parceirosScreen
+import br.com.shubudo.navigation.relatorio.navigateToRelatorios
+import br.com.shubudo.navigation.relatorio.relatoriosScreen
 import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 
@@ -28,7 +32,8 @@ fun KarateNavHost(
     themeViewModel: ThemeViewModel
 ) {
 
-    NavHost(navController = navController,
+    NavHost(
+        navController = navController,
         startDestination = AppDestination.Recursos.route,
         enterTransition = {
             when (targetState.destination.route) {
@@ -96,7 +101,8 @@ fun KarateNavHost(
         })
 
         // Tela de Eventos
-        eventosScreen(onReload = { navController.navigate(eventosRoute) },
+        eventosScreen(
+            onReload = { navController.navigate(eventosRoute) },
             onEventClick = { eventoId ->
                 navController.navigateToEventoDetalhe(eventoId)
             },
@@ -145,7 +151,8 @@ fun KarateNavHost(
         detalheMovimentoScreen(onBackNavigationClick = { navController.popBackStack() })
 
         // Tela de Novo Usuário
-        novoUsuarioScreen(themeViewModel = themeViewModel,
+        novoUsuarioScreen(
+            themeViewModel = themeViewModel,
             dropDownMenuViewModel = dropDownMenuViewModel,
             onNavigateToLogin = { email, senha, corFaixa ->
                 navController.navigateToConfirmacaoEmail(email, senha, corFaixa)
@@ -180,6 +187,12 @@ fun KarateNavHost(
             },
             onNavigateToGaleria = {
                 navController.navigateToGaleriaEventos()
+            },
+            onNavigateToParceiros = {
+                navController.navigateToParceiros()
+            },
+            onNavigateToRelatorios = {
+                navController.navigateToRelatorios()
             }
         )
 
@@ -217,7 +230,8 @@ fun KarateNavHost(
         )
 
         // Tela de Avisos
-        avisosScreen(onNavigateToCadastroAviso = { navController.navigateToCadastroAviso() },
+        avisosScreen(
+            onNavigateToCadastroAviso = { navController.navigateToCadastroAviso() },
             onNavigateToEditarAviso = { avisoId ->
                 navController.navigateToCadastroAviso(avisoId)
             })
@@ -243,6 +257,25 @@ fun KarateNavHost(
         cadastroAcademiaScreen(onNavigateBack = {
             navController.popBackStack()
         })
+
+        // Tela de parceiros
+        parceirosScreen(
+            onAddParceiroClick = {
+//                navController.navigateToCadastroParceiro()
+            },
+            onEditParceiroClick = { parceiroId ->
+//                navController.navigateToCadastroParceiro(parceiroId)
+            },
+            onParceiroClick = { parceiroId ->
+                navController.navigateToParceiroDetalhe(parceiroId)
+            }
+        )
+
+        // Tela de Detalhe do Parceiro
+        parceiroDetalheScreen()
+
+        // Tela de Relatorio
+        relatoriosScreen()
     }
 }
 

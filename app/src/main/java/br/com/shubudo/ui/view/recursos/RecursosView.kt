@@ -19,7 +19,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ContactMail
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
@@ -64,6 +67,8 @@ fun RecursosView(
     onNavigateToAcademias: () -> Unit = {},
     onNavigateToBaseUsuarios: () -> Unit = {},
     onNavigateToGaleria: () -> Unit = {},
+    onNavigateToParceiros: () -> Unit = {},
+    onNavigateToRelatorios: () -> Unit = {},
     viewModel: RecursosViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -127,14 +132,22 @@ fun RecursosView(
                     onNavigateToBaseUsuarios
                 )
             )
+
+            add(
+                RecursoItem(
+                    "Relatorios",
+                    RecursoIcon.Vector(Icons.Filled.BarChart    ),
+                    onNavigateToRelatorios
+                )
+            )
         }
 
         if (usuarioLogado?.perfis?.contains("dev") == true) {
             add(
                 RecursoItem(
                     "Parceiros",
-                    RecursoIcon.Vector(Icons.Filled.ContactMail),
-                    onNavigateToBaseUsuarios
+                    RecursoIcon.Vector(Icons.Filled.Business),
+                    onNavigateToParceiros
                 )
             )
         }

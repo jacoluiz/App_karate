@@ -15,6 +15,7 @@ import br.com.shubudo.database.dao.GaleriaEventoDao
 import br.com.shubudo.database.dao.GaleriaFotoDao
 import br.com.shubudo.database.dao.KataDao
 import br.com.shubudo.database.dao.MovimentoDao
+import br.com.shubudo.database.dao.ParceiroDao
 import br.com.shubudo.database.dao.ProjecaoDao
 import br.com.shubudo.database.dao.SequenciaDeCombateDao
 import br.com.shubudo.database.dao.TecnicaChaoDao
@@ -120,5 +121,10 @@ class DatabaseModule {
     @Provides
     fun provideGaleriaFotoDao(db: KarateDatabase): GaleriaFotoDao {
         return db.galeriaFotoDao()
+    }
+
+    @Provides
+    fun provideParceiroDao(db: KarateDatabase): ParceiroDao {
+        return db.parceiroDao()
     }
 }

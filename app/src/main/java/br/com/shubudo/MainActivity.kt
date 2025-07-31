@@ -1,6 +1,5 @@
 package br.com.shubudo
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -23,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +42,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.navigation.AppDestination
-import br.com.shubudo.navigation.Galeria.galeriaEventosRoute
 import br.com.shubudo.navigation.KarateNavHost
 import br.com.shubudo.navigation.academiasRoute
 import br.com.shubudo.navigation.avisosRoute
@@ -58,17 +56,20 @@ import br.com.shubudo.navigation.esqueciMinhaSenhaRote
 import br.com.shubudo.navigation.esqueciMinhaSenhaRoteSemUsername
 import br.com.shubudo.navigation.eventoDetalheRoute
 import br.com.shubudo.navigation.eventosRoute
+import br.com.shubudo.navigation.galeria.galeriaEventosRoute
 import br.com.shubudo.navigation.novoUsuarioRote
 import br.com.shubudo.navigation.novoUsuarioRoteSemUsername
+import br.com.shubudo.navigation.parceiros.parceiroDetalheRoute
+import br.com.shubudo.navigation.parceiros.parceirosRoute
 import br.com.shubudo.navigation.perfilRoute
 import br.com.shubudo.navigation.programacaoRoute
 import br.com.shubudo.navigation.recursosRoute
+import br.com.shubudo.navigation.relatorio.relatoriosRoute
 import br.com.shubudo.ui.components.appBar.BottomAppBarItem
 import br.com.shubudo.ui.components.appBar.KarateBottomAppBar
 import br.com.shubudo.ui.components.appBar.KarateTopAppBar
 import br.com.shubudo.ui.theme.AppShubudoTheme
 import br.com.shubudo.ui.view.OfflineScreen
-import br.com.shubudo.ui.viewModel.PerfilViewModel
 import br.com.shubudo.ui.viewModel.components.DropDownMenuViewModel
 import br.com.shubudo.ui.viewModel.components.ThemeViewModel
 import br.com.shubudo.utils.isInternetAvailable
@@ -99,17 +100,17 @@ class MainActivity : ComponentActivity() {
                 val deniedPermissions = permissions.filter { !it.value }.keys
 
                 if (deniedPermissions.isNotEmpty()) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Permissões necessárias")
-                        .setMessage("Você precisa aceitar as permissões para usar o app.")
-                        .setCancelable(false)
-                        .setPositiveButton("Tentar novamente") { _, _ ->
-                            permissionLauncher.launch(deniedPermissions.toTypedArray())
-                        }
-                        .setNegativeButton("Sair") { _, _ ->
-                            finish()
-                        }
-                        .show()
+//                    AlertDialog.Builder(this)
+//                        .setTitle("Permissões necessárias")
+//                        .setMessage("Você precisa aceitar as permissões para usar o app.")
+//                        .setCancelable(false)
+//                        .setPositiveButton("Tentar novamente") { _, _ ->
+//                            permissionLauncher.launch(deniedPermissions.toTypedArray())
+//                        }
+//                        .setNegativeButton("Sair") { _, _ ->
+//                            finish()
+//                        }
+//                        .show()
                 }
             }
         // Registro para atualizações do app
@@ -154,9 +155,7 @@ class MainActivity : ComponentActivity() {
                 true -> {
                     val themeViewModel: ThemeViewModel = viewModel()
                     val dropDownMenuViewModel: DropDownMenuViewModel = viewModel()
-                    val perfilViewModel: PerfilViewModel = viewModel()
-                    val uiState by perfilViewModel.uiState.collectAsState()
-                    val isLoggedIn = uiState is br.com.shubudo.ui.uistate.PerfilUiState.Success
+                    val isLoggedIn = usuarioLogado != null
 
                     val faixaParaTema = themeViewModel.currentFaixa
 
@@ -190,18 +189,22 @@ class MainActivity : ComponentActivity() {
                             }
 
                             val route = currentDestination?.route ?: ""
-                            val showBottomBack = route == detalheFaixaRuteFullpath ||
-                                    route == novoUsuarioRote ||
-                                    route == novoUsuarioRoteSemUsername ||
-                                    route == esqueciMinhaSenhaRote ||
-                                    route == avisosRoute ||
-                                    route == eventosRoute ||
-                                    route == galeriaEventosRoute ||
-                                    route == baseUsuariosRoute ||
-                                    route == programacaoRoute ||
-                                    route == academiasRoute ||
-                                    route == esqueciMinhaSenhaRoteSemUsername ||
-                                    route.startsWith("$eventoDetalheRoute/")
+                            val showBottomBack =
+                                route == detalheFaixaRuteFullpath ||
+                                        route == novoUsuarioRote ||
+                                        route == novoUsuarioRoteSemUsername ||
+                                        route == esqueciMinhaSenhaRote ||
+                                        route == avisosRoute ||
+                                        route == eventosRoute ||
+                                        route == galeriaEventosRoute ||
+                                        route == baseUsuariosRoute ||
+                                        route == programacaoRoute ||
+                                        route == academiasRoute ||
+                                        route == parceirosRoute ||
+                                        route == relatoriosRoute ||
+                                        route.startsWith("$parceiroDetalheRoute/") ||
+                                        route == esqueciMinhaSenhaRoteSemUsername ||
+                                        route.startsWith("$eventoDetalheRoute/")
 
                             val showColorTopAppBar =
                                 currentDestination?.route != detalheMovimentoRuteFullpath && currentDestination?.route != AppDestination.Login.route
@@ -237,19 +240,19 @@ class MainActivity : ComponentActivity() {
             if (!permissionDialogShown) {
                 permissionDialogShown = true // previne múltiplos diálogos
 
-                AlertDialog.Builder(this)
-                    .setTitle("Permissões necessárias")
-                    .setMessage("Você precisa aceitar as permissões para usar o app.")
-                    .setCancelable(false)
-                    .setPositiveButton("Tentar novamente") { _, _ ->
-                        permissionDialogShown =
-                            false // permite mostrar de novo se o usuário recusou
-                        checkAndRequestPermissions()
-                    }
-                    .setNegativeButton("Sair") { _, _ ->
-                        finish()
-                    }
-                    .show()
+//                AlertDialog.Builder(this)
+//                    .setTitle("Permissões necessárias")
+//                    .setMessage("Você precisa aceitar as permissões para usar o app.")
+//                    .setCancelable(false)
+//                    .setPositiveButton("Tentar novamente") { _, _ ->
+//                        permissionDialogShown =
+//                            false // permite mostrar de novo se o usuário recusou
+//                        checkAndRequestPermissions()
+//                    }
+//                    .setNegativeButton("Sair") { _, _ ->
+//                        finish()
+//                    }
+//                    .show()
             }
         } else {
             permissionDialogShown = false // reset caso permissões estejam OK

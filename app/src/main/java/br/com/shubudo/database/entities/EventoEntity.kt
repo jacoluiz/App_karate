@@ -27,14 +27,3 @@ fun EventoEntity.toEvento(): Evento {
         confirmados = confirmados
     )
 }
-
-fun Evento.toEventoEntity(): EventoEntity {
-    return EventoEntity(
-        _id = _id,
-        titulo = titulo,
-        descricao = descricao,
-        dataInicio = dataInicio,
-        local = local,
-        confirmados = confirmados
-    )
-}

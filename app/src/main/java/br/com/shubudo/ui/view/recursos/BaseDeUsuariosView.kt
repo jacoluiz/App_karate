@@ -76,7 +76,8 @@ fun BaseDeUsuariosView(
         } else {
             usuarios.filter { usuario ->
                 usuario.nome.contains(searchQuery, ignoreCase = true) ||
-                        usuario.academia.contains(searchQuery, ignoreCase = true)
+                        usuario.academia.contains(searchQuery, ignoreCase = true) ||
+                        usuario.corFaixa.contains(searchQuery, ignoreCase = true)
             }
         }
     }
@@ -88,7 +89,8 @@ fun BaseDeUsuariosView(
             Log.d("BaseDeUsuariosView", "Current route: ${backStackEntry.destination.route}")
             if (backStackEntry.destination.route == currentRoute) {
                 Log.d("BaseDeUsuariosView", "Refreshing usuarios")
-                val shouldRefresh = backStackEntry.savedStateHandle.get<Boolean>("refreshUsuarios") ?: false
+                val shouldRefresh =
+                    backStackEntry.savedStateHandle.get<Boolean>("refreshUsuarios") ?: false
                 if (shouldRefresh) {
                     Log.d("BaseDeUsuariosView", "Reloading usuarios")
                     viewModel.loadUsuarios()

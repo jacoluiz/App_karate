@@ -2,8 +2,70 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "8e8a0ea40fbf1b215141a474012a85ec",
+    "identityHash": "571a7432c7c9a0855b4e089466ed10dc",
     "entities": [
+      {
+        "tableName": "Parceiro",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `localizacao` TEXT, `telefone` TEXT NOT NULL, `site` TEXT, `logomarca` TEXT NOT NULL, `imagens` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localizacao",
+            "columnName": "localizacao",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "telefone",
+            "columnName": "telefone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "site",
+            "columnName": "site",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "logomarca",
+            "columnName": "logomarca",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imagens",
+            "columnName": "imagens",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
       {
         "tableName": "GaleriaFoto",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `eventoId` TEXT NOT NULL, `url` TEXT NOT NULL, `uploadedBy` TEXT NOT NULL, `nomeArquivo` TEXT, `createdAt` TEXT, PRIMARY KEY(`_id`))",
@@ -874,7 +936,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8e8a0ea40fbf1b215141a474012a85ec')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '571a7432c7c9a0855b4e089466ed10dc')"
     ]
   }
 }
