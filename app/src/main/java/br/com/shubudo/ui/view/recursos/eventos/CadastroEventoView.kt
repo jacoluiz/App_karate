@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view.recursos.eventos
 
+import CampoDeTextoPadrao
 import LoadingButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,6 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -156,58 +161,68 @@ fun CadastroEventoView(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        CampoTextoForm(
+                        CampoDeTextoPadrao(
+                            value = form.titulo,
+                            onValueChange = { viewModel.updateTitulo(it) },
                             label = "Título do evento",
-                            valor = form.titulo,
-                            aoMudar = { newValue ->
-                                viewModel.updateTitulo(newValue)
-                            },
-                            icone = Icons.Default.Title,
-                            erro = form.tituloError
+                            placeholder = "Digite o título do evento",
+                            leadingIcon = Icons.Default.Title,
+                            focusRequester = remember { FocusRequester() },
+                            onFocusChanged = {},
+                            singleLine = true,
+                            maxLines = 1
                         )
 
-                        OutlinedTextField(
+                        CampoDeTextoPadrao(
                             value = form.descricao,
                             onValueChange = viewModel::updateDescricao,
-                            label = { Text("Descrição") },
-                            leadingIcon = {
-                                Icon(Icons.Default.Event, contentDescription = null)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            minLines = 3,
+                            label = "Descrição",
+                            placeholder = "Digite a descrição do evento",
+                            leadingIcon = Icons.Default.Event,
+                            focusRequester = remember { FocusRequester() },
+                            onFocusChanged = {},
+                            singleLine = false,
                             maxLines = 5
                         )
 
-                        CampoTextoForm(
+                        CampoDeTextoPadrao(
+                            value = form.local,
+                            onValueChange = viewModel::updateLocal,
                             label = "Local do evento",
-                            valor = form.local,
-                            aoMudar = { newValue ->
-                                viewModel.updateLocal(newValue)
-                            },
-                            icone = Icons.Default.LocationOn,
-                            erro = form.localError
+                            placeholder = "Digite o local",
+                            leadingIcon = Icons.Default.LocationOn,
+                            focusRequester = remember { FocusRequester() },
+                            onFocusChanged = {},
+                            singleLine = true,
+                            maxLines = 1
                         )
 
-                        CampoTextoComMascara(
+                        CampoDeTextoComMascaraPadrao(
+                            value = form.data,
+                            onValueChange = {
+                                val masked = aplicarMascaraDeDataParaAniversario(it)
+                                viewModel.updateData(masked)
+                            },
                             label = "Data (dd/MM/yyyy)",
-                            valor = form.data,
-                            aoMudar = { newValue ->
-                                val maskedValue = aplicarMascaraDeDataParaAniversario(newValue)
-                                viewModel.updateData(maskedValue)
-                            },
-                            icone = Icons.Default.CalendarToday,
-                            erro = form.dataError
+                            placeholder = "dd/MM/yyyy",
+                            leadingIcon = Icons.Default.CalendarToday,
+                            focusRequester = remember { FocusRequester() },
+                            onFocusChanged = {},
+                            isError = form.dataError != null
                         )
 
-                        CampoTextoComMascara(
-                            label = "Horário (HH:mm)",
-                            valor = form.horario,
-                            aoMudar = { newValue ->
-                                val maskedValue = applySimpleTimeMask(newValue)
-                                viewModel.updateHorario(maskedValue)
+                        CampoDeTextoComMascaraPadrao(
+                            value = form.horario,
+                            onValueChange = {
+                                val masked = applySimpleTimeMask(it)
+                                viewModel.updateHorario(masked)
                             },
-                            icone = Icons.Default.Schedule,
-                            erro = form.horarioError
+                            label = "Horário (HH:mm)",
+                            placeholder = "HH:mm",
+                            leadingIcon = Icons.Default.Schedule,
+                            focusRequester = remember { FocusRequester() },
+                            onFocusChanged = {},
+                            isError = form.horarioError != null
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -288,59 +303,60 @@ fun CadastroEventoView(
 }
 
 @Composable
-private fun CampoTextoComMascara(
+fun CampoDeTextoComMascaraPadrao(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     label: String,
-    valor: TextFieldValue,
-    aoMudar: (TextFieldValue) -> Unit,
-    icone: ImageVector,
-    erro: String?
+    placeholder: String,
+    leadingIcon: ImageVector,
+    focusRequester: FocusRequester,
+    onFocusChanged: ((Boolean) -> Unit)? = null,
+    isError: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Column {
-        OutlinedTextField(
-            value = valor,
-            onValueChange = aoMudar,
-            label = { Text(label) },
-            leadingIcon = { Icon(icone, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = erro != null
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
-        erro?.let {
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            singleLine = true,
+            modifier = modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .onFocusChanged { onFocusChanged?.invoke(it.isFocused) },
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            ),
+            isError = isError
+        )
+
+        if (isError) {
             Text(
-                text = it,
+                text = "Formato inválido",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
         }
     }
 }
-
-
-@Composable
-private fun CampoTextoForm(
-    label: String,
-    valor: String,
-    aoMudar: (String) -> Unit,
-    icone: ImageVector,
-    erro: String?
-) {
-    Column {
-        OutlinedTextField(
-            value = valor,
-            onValueChange = aoMudar,
-            label = { Text(label) },
-            leadingIcon = { Icon(icone, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = erro != null
-        )
-        erro?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-    }
-}
-

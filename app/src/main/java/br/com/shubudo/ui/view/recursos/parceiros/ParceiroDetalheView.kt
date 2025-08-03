@@ -89,7 +89,7 @@ fun ParceiroDetalheView(
             // Header with gradient background
             CabecalhoComIconeCentralizado(
                 titulo = parceiro.nome,
-                subtitulo = "Parceiro Oficial",
+                subtitulo = parceiro.ramo,
                 iconeAndroid = Icons.Default.Business
             )
 

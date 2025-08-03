@@ -29,6 +29,7 @@ data class UsuarioResponse(
     val tamanhoFaixa: String?,
     val lesaoOuLaudosMedicos: String? = null,
     val registroAKSD: String? = null,
+    val professorEm: List<String>? = null
 )
 
 fun UsuarioResponse.toUsuario(): Usuario {
@@ -48,6 +49,7 @@ fun UsuarioResponse.toUsuario(): Usuario {
         tamanhoFaixa = tamanhoFaixa ?: "",
         lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
         registroAKSD = registroAKSD ?: "",
+        professorEm = professorEm ?: emptyList()
     )
 }
 
@@ -59,10 +61,10 @@ interface UsuarioService {
     @GET("/usuarios/{id}")
     suspend fun getUsuariosPorId(@Path("id") id: String): UsuarioResponse
 
-    @POST("/usuarios") // Endpoint para obter o usuário logado
+    @POST("/usuarios")
     suspend fun criarUsuarios(@Body usuario: Usuario): UsuarioResponse
 
-    @POST("/usuarios/login") // Endpoint para login
+    @POST("/usuarios/login")
     suspend fun login(@Body credentials: Map<String, String>): LoginResponse
 
     @PUT("usuarios/{id}")

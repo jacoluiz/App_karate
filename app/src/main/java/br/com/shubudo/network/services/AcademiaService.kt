@@ -1,7 +1,6 @@
 package br.com.shubudo.network.services
 
 import br.com.shubudo.database.entities.AcademiaEntity
-import br.com.shubudo.model.Academia
 import br.com.shubudo.model.Filial
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -22,15 +21,6 @@ data class NovaAcademiaRequest(
     val descricao: String?,
     val filiais: List<Filial>
 )
-
-fun AcademiaResponse.toAcademia(): Academia {
-    return Academia(
-        _id = _id,
-        nome = nome,
-        descricao = descricao ?: "",
-        filiais = filiais
-    )
-}
 
 fun AcademiaResponse.toAcademiaEntity(): AcademiaEntity {
     return AcademiaEntity(

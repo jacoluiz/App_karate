@@ -72,7 +72,7 @@ class PerfilViewModel @Inject constructor(
                 dan = usuario.dan,
                 academia = usuario.academia,
                 tamanhoFaixa = usuario.tamanhoFaixa,
-                registroAKSD = usuario.registroAKSD
+                registroAKSD = usuario.registroAKSD,
             )
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,8 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.ContactMail
-import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Card
@@ -87,6 +86,14 @@ fun RecursosView(
             )
         )
 
+        add(
+            RecursoItem(
+                "Parceiros",
+                RecursoIcon.Vector(Icons.Filled.Business),
+                onNavigateToParceiros
+            )
+        )
+
         // Se o usuário está logado
         if (usuarioLogado != null) {
             add(
@@ -115,7 +122,6 @@ fun RecursosView(
 
         }
 
-        // Se o usuário for administrador
         if (usuarioLogado?.perfis?.contains("adm") == true) {
             add(
                 RecursoItem(
@@ -124,7 +130,10 @@ fun RecursosView(
                     onNavigateToAcademias
                 )
             )
+        }
 
+        // Se o usuário for administrador
+        if (usuarioLogado?.perfis?.contains("adm") == true || usuarioLogado?.perfis?.contains("professor") == true) {
             add(
                 RecursoItem(
                     "Base de Usuários",
@@ -136,23 +145,12 @@ fun RecursosView(
             add(
                 RecursoItem(
                     "Relatorios",
-                    RecursoIcon.Vector(Icons.Filled.BarChart    ),
+                    RecursoIcon.Vector(Icons.Filled.BarChart),
                     onNavigateToRelatorios
                 )
             )
         }
-
-        if (usuarioLogado?.perfis?.contains("dev") == true) {
-            add(
-                RecursoItem(
-                    "Parceiros",
-                    RecursoIcon.Vector(Icons.Filled.Business),
-                    onNavigateToParceiros
-                )
-            )
-        }
     }.sortedBy { it.titulo }
-
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Cabeçalho com fundo gradiente
@@ -177,12 +175,15 @@ fun RecursosView(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(
-                    text = "Recursos Disponíveis",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                Row {
+                    Text(
+                        text = "Recursos Disponíveis",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                }
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),

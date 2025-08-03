@@ -13,6 +13,15 @@ object SessionManager {
     var usuarioLogado by mutableStateOf<Usuario?>(null)
         private set
 
+    var perfilAtivo by mutableStateOf("aluno")
+        private set
+
+    fun alternarPerfil(novoPerfil: String) {
+        if (usuarioLogado?.perfis?.contains(novoPerfil) == true) {
+            perfilAtivo = novoPerfil
+        }
+    }
+
     fun limparSessao(context: Context) {
         usuarioLogado = null
         val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
@@ -40,6 +49,9 @@ object SessionManager {
             val lesaoOuLaudosMedicos = getString("lesaoOuLaudosMedicos", "")
             val registroAKSD = getString("registroAKSD", "")
             val fcmToken = getString("fcmToken", getFcmToken(context))
+            val professorEm =
+                getString("professorEm", "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+
             Log.d("MainActivity", "Dados carregados: _id=$_id, nome=$nome, email=$email")
 
             if (!nome.isNullOrBlank() && !email.isNullOrBlank()) {
@@ -60,7 +72,8 @@ object SessionManager {
                     tamanhoFaixa = tamanhoFaixa ?: "",
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
                     registroAKSD = registroAKSD ?: "",
-                    fcmToken = fcmToken ?: getFcmToken(context)
+                    fcmToken = fcmToken ?: getFcmToken(context),
+                    professorEm = professorEm
                 )
             }
             Log.d("MainActivity", "Usuário logado: $usuarioLogado")
@@ -82,10 +95,9 @@ object SessionManager {
             putString("lesaoOuLaudosMedicos", usuario.lesaoOuLaudosMedicos)
             putString("registroAKSD", usuario.registroAKSD)
             putString("fcmToken", usuario.fcmToken)
+            putString("professorEm", usuario.professorEm.joinToString(","))
         }
 
         usuarioLogado = usuario
     }
-
-
 }

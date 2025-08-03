@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Usuario
+import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditarPerfilViewModel @Inject constructor(
     private val repository: UsuarioRepository,
+    private val academiaRepository: AcademiaRepository,
 ) : ViewModel() {
 
     // Job para cancelar/reiniciar a coleta de dados se necessário
@@ -30,7 +32,6 @@ class EditarPerfilViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Carrega os dados do usuário ao inicializar a ViewModel
         loadUiState()
     }
 
@@ -76,7 +77,31 @@ class EditarPerfilViewModel @Inject constructor(
                 registroAKSD = usuario.registroAKSD,
                 perfis = usuario.perfis,
                 status = usuario.status,
+                professorEm = usuario.professorEm,
+                academias = (_uiState.value as? EditarPerfilUiState.Success)?.academias
+                    ?: emptyList()
             )
+        }
+        loadAcademias()
+    }
+
+    /**
+     * Carrega a lista de academias disponíveis
+     */
+    private fun loadAcademias() {
+        viewModelScope.launch {
+            try {
+                academiaRepository.getAcademias().collectLatest { academias ->
+                    val currentState = _uiState.value
+                    if (currentState is EditarPerfilUiState.Success) {
+                        _uiState.update {
+                            currentState.copy(academias = academias)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Em caso de erro, mantém a lista vazia
+            }
         }
     }
 
@@ -119,6 +144,7 @@ class EditarPerfilViewModel @Inject constructor(
         lesaoOuLaudosMedicos: String,
         registroAKSD: String,
         perfis: List<String> = listOf("aluno"),
+        professorEm: List<String> = listOf(""),
         status: String = "ativo",
         onSave: () -> Unit = {},
         onError: (Throwable) -> Unit = {}, // <-- Adicionado
@@ -126,6 +152,8 @@ class EditarPerfilViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
+                val professorEmFinal = if ("professor" in perfis) professorEm else emptyList()
+
                 val usuarioAtualizado = Usuario(
                     _id = id,
                     nome = nome,
@@ -141,7 +169,8 @@ class EditarPerfilViewModel @Inject constructor(
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos,
                     registroAKSD = registroAKSD,
                     perfis = perfis,
-                    status = status
+                    status = status,
+                    professorEm = professorEmFinal
                 )
                 val resultado: Usuario? = if (usuarioLogado?._id == usuarioAtualizado._id) {
                     repository.atualizarUsuario(context, usuarioAtualizado)

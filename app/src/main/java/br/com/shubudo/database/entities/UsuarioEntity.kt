@@ -25,7 +25,8 @@ data class UsuarioEntity(
     val tamanhoFaixa: String = "",
     val lesaoOuLaudosMedicos: String = "",
     val registroAKSD: String = "",
-    val fcmToken: String = ""
+    val fcmToken: String = "",
+    val professorEm: List<String> = emptyList()
 )
 
 fun UsuarioEntity.toUsuario(): Usuario {
@@ -45,6 +46,7 @@ fun UsuarioEntity.toUsuario(): Usuario {
         tamanhoFaixa = this.tamanhoFaixa,
         lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
         registroAKSD = this.registroAKSD,
-        fcmToken = this.fcmToken.ifEmpty { null }
+        fcmToken = this.fcmToken.ifEmpty { null },
+        professorEm = this.professorEm
     )
 }

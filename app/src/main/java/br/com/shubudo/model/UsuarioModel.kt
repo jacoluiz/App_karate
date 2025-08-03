@@ -18,7 +18,8 @@ data class Usuario(
     val tamanhoFaixa: String = "",
     val lesaoOuLaudosMedicos: String = "",
     val registroAKSD: String = "",
-    val fcmToken: String? = null
+    val fcmToken: String? = null,
+    val professorEm: List<String> = emptyList()
 )
 
 fun Usuario.toUsuarioEntity(): UsuarioEntity? {
@@ -39,7 +40,8 @@ fun Usuario.toUsuarioEntity(): UsuarioEntity? {
             tamanhoFaixa = this.tamanhoFaixa,
             lesaoOuLaudosMedicos = this.lesaoOuLaudosMedicos,
             registroAKSD = this.registroAKSD,
-            fcmToken = this.fcmToken ?: ""
+            fcmToken = this.fcmToken ?: "",
+            professorEm = this.professorEm
         )
     }
 }

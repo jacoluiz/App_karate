@@ -47,7 +47,7 @@ fun TelaListaTecnicasDeChao(
             Text(
                 text = "Técnicas de Chão",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp)
             )

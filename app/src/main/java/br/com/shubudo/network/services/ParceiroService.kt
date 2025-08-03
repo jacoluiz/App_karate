@@ -13,6 +13,7 @@ data class ParceiroResponse(
     val localizacao: String?,
     val telefone: String,
     val site: String?,
+    val ramo: String,
     val logomarca: String,
     val imagens: List<String> = emptyList()
 )
@@ -23,6 +24,7 @@ data class NovoParceiroRequest(
     val localizacao: String?,
     val telefone: String,
     val site: String?,
+    val ramo: String,
     val logomarca: String,
     val imagens: List<String> = emptyList()
 )
@@ -35,6 +37,7 @@ fun ParceiroResponse.toParceiro(): Parceiro {
         localizacao = localizacao ?: "",
         telefone = telefone,
         site = site ?: "",
+        ramo = ramo,
         logomarca = logomarca,
         imagens = imagens
     )
@@ -48,6 +51,7 @@ fun ParceiroResponse.toParceiroEntity(): ParceiroEntity {
         localizacao = localizacao ?: "",
         telefone = telefone,
         site = site ?: "",
+        ramo = ramo,
         logomarca = logomarca,
         imagens = imagens
     )

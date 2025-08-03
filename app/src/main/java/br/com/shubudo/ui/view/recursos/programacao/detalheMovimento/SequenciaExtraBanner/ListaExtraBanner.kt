@@ -48,7 +48,7 @@ fun TelaListaExtraBanner(
             Text(
                 text = "Defesas Extra Banner",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp)
             )

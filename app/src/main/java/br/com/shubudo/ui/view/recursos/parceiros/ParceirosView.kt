@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -114,7 +113,8 @@ fun ParceirosView(
                     is ParceirosUiState.Success -> {
                         val parceirosFiltrados =
                             (uiState as ParceirosUiState.Success).parceiros.filter {
-                                it.nome.contains(searchQuery.text, ignoreCase = true)
+                                it.nome.contains(searchQuery.text, ignoreCase = true) ||
+                                        it.ramo.contains(searchQuery.text, ignoreCase = true)
                             }
                         items(parceirosFiltrados) { parceiro ->
                             ParceiroItem(

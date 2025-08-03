@@ -97,48 +97,11 @@ fun AvisosView(
         is AvisosUiState.Empty -> {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Cabeçalho com fundo gradiente
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                        )
-                        .padding(vertical = 24.dp, horizontal = 16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Announcement,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Avisos",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Fique por dentro das últimas informações",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-                }
+                CabecalhoComIconeCentralizado(
+                    iconeAndroid = Icons.AutoMirrored.Filled.Announcement,
+                    titulo = "Avisos",
+                    subtitulo = "Fique por dentro das últimas informações"
+                )
 
                 // Conteúdo vazio
                 Card(
@@ -208,7 +171,7 @@ fun AvisosView(
                             Text(
                                 text = "Avisos Recentes",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
 

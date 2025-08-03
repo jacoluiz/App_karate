@@ -1,7 +1,9 @@
 package br.com.shubudo.ui.view.recursos.academias
 
+import CampoDeTextoPadrao
 import LoadingButton
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +31,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,7 +57,6 @@ fun CadastroAcademiaView(
     onNavigateBack: () -> Unit,
     viewModel: CadastroAcademiaViewModel = hiltViewModel()
 ) {
-    val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
 
     var nome by remember { mutableStateOf("") }
@@ -63,6 +64,8 @@ fun CadastroAcademiaView(
     var filiais by remember { mutableStateOf(listOf<Filial>()) }
     var showDialog by remember { mutableStateOf(false) }
     var showLoading by remember { mutableStateOf(false) }
+    val focusNome = remember { FocusRequester() }
+    val focusDescricao = remember { FocusRequester() }
 
     val camposValidos = nome.isNotBlank()
             && descricao.isNotBlank()
@@ -99,9 +102,10 @@ fun CadastroAcademiaView(
                     ),
                     shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                 )
-                .padding(24.dp)
+                .padding(vertical = 24.dp, horizontal = 16.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
@@ -128,29 +132,38 @@ fun CadastroAcademiaView(
 
         Card(
             modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
                 .offset(y = (-20).dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CampoDeTextoPadrao(
                     value = nome,
                     onValueChange = { nome = it },
-                    label = { Text("Nome da Academia *") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = "Nome da Academia *",
+                    placeholder = "Digite o nome",
+                    leadingIcon = Icons.Default.Add,
+                    focusRequester = focusNome,
                 )
 
-                OutlinedTextField(
+                CampoDeTextoPadrao(
                     value = descricao,
                     onValueChange = { descricao = it },
-                    label = { Text("Descrição (opcional)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = "Descrição (opcional)",
+                    placeholder = "Breve descrição",
+                    leadingIcon = Icons.Default.Add,
+                    focusRequester = focusDescricao
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     "Filiais",
                     style = MaterialTheme.typography.titleMedium,
@@ -158,26 +171,32 @@ fun CadastroAcademiaView(
                 )
                 filiais.forEachIndexed { index, filial ->
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                        OutlinedTextField(
+                        CampoDeTextoPadrao(
                             value = filial.nome,
                             onValueChange = { newNome ->
                                 filiais = filiais.toMutableList().apply {
                                     this[index] = this[index].copy(nome = newNome)
                                 }
                             },
-                            label = { Text("Nome da Filial") },
-                            modifier = Modifier.fillMaxWidth()
+                            label = "Nome da Filial",
+                            placeholder = "Digite o nome da filial",
+                            leadingIcon = Icons.Default.Add,
+                            focusRequester = remember { FocusRequester() }
                         )
 
-                        OutlinedTextField(
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        CampoDeTextoPadrao(
                             value = filial.endereco,
                             onValueChange = { newEndereco ->
                                 filiais = filiais.toMutableList().apply {
                                     this[index] = this[index].copy(endereco = newEndereco)
                                 }
                             },
-                            label = { Text("Endereço da Filial") },
-                            modifier = Modifier.fillMaxWidth()
+                            label = "Endereço da Filial",
+                            placeholder = "Digite o endereço",
+                            leadingIcon = Icons.Default.Add,
+                            focusRequester = remember { FocusRequester() }
                         )
 
                         TextButton(
@@ -263,5 +282,4 @@ fun CadastroAcademiaView(
             }
         )
     }
-
 }

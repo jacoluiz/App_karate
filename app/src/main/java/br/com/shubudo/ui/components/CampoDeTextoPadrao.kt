@@ -18,7 +18,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-
 @Composable
 fun CampoDeTextoPadrao(
     value: String,
@@ -32,7 +31,10 @@ fun CampoDeTextoPadrao(
     focusRequester: FocusRequester,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    onFocusChanged: ((Boolean) -> Unit)? = null
+    onFocusChanged: ((Boolean) -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    maxLines: Int = 1
 ) {
     Column {
         Text(
@@ -72,8 +74,9 @@ fun CampoDeTextoPadrao(
                 }
             },
             visualTransformation = visualTransformation,
-            singleLine = true,
-            modifier = Modifier
+            singleLine = singleLine,
+            maxLines = maxLines,
+            modifier = modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .onFocusChanged { onFocusChanged?.invoke(it.isFocused) },
@@ -87,3 +90,4 @@ fun CampoDeTextoPadrao(
         )
     }
 }
+

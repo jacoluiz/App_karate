@@ -108,7 +108,7 @@ fun AcademiasView(
                             Text(
                                 text = "Academias",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             if (usuarioLogado?.perfis?.contains("adm") == true) {

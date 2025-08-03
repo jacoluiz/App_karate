@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view.recursos.avisos
 
+import CampoDeTextoPadrao
 import LoadingButton
 import android.util.Log
 import androidx.compose.foundation.background
@@ -28,8 +29,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -78,6 +82,9 @@ fun CadastroAvisoView(
     var showUserDropdown by remember { mutableStateOf(false) }
     var dadosPreenchidos by remember { mutableStateOf(false) }
     var showLoading by remember { mutableStateOf(false) }
+    val focusTitulo = remember { FocusRequester() }
+    val focusConteudo = remember { FocusRequester() }
+    val focusSearch = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         viewModel.loadUsuarios()
@@ -105,7 +112,6 @@ fun CadastroAvisoView(
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Cabeçalho
-        Log.d("CadastroAvisoView", "usuários selecionados: $usuariosSelecionados")
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,58 +179,46 @@ fun CadastroAvisoView(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Campo Título
-                OutlinedTextField(
+                CampoDeTextoPadrao(
                     value = titulo,
                     onValueChange = { titulo = it },
-                    label = { Text("Título *") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    label = "Título *",
+                    placeholder = "Digite o título",
+                    leadingIcon = Icons.Default.Title,
+                    focusRequester = focusTitulo
                 )
 
-                // Campo Conteúdo
-                OutlinedTextField(
+                CampoDeTextoPadrao(
                     value = conteudo,
                     onValueChange = { conteudo = it },
-                    label = { Text("Conteúdo *") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 4,
-                    maxLines = 8
+                    label = "Conteúdo *",
+                    placeholder = "Digite o conteúdo",
+                    leadingIcon = Icons.Default.Description,
+                    focusRequester = focusConteudo,
+                    singleLine = false,
+                    maxLines = Int.MAX_VALUE,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 120.dp)
                 )
 
-                // Seção Público Alvo
-                Text(
-                    text = "Público Alvo",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Campo de busca de usuários
-                OutlinedTextField(
+                CampoDeTextoPadrao(
                     value = searchText,
                     onValueChange = {
                         searchText = it
                         viewModel.searchUsuarios(it)
                         showUserDropdown = it.isNotEmpty()
                     },
-                    label = { Text("Buscar usuários") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
+                    label = "Buscar usuários",
+                    placeholder = "Digite para buscar",
+                    leadingIcon = Icons.Default.Search,
+                    trailingIcon = Icons.Default.Clear,
+                    onTrailingIconClick = {
+                        searchText = ""
+                        showUserDropdown = false
+                        viewModel.searchUsuarios("")
                     },
-                    trailingIcon = {
-                        if (searchText.isNotEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    searchText = ""
-                                    showUserDropdown = false
-                                    viewModel.searchUsuarios("")
-                                }
-                            ) {
-                                Icon(Icons.Default.Clear, contentDescription = "Limpar")
-                            }
-                        }
-                    }
+                    focusRequester = focusSearch
                 )
 
                 // Lista de usuários filtrados
@@ -288,7 +282,7 @@ fun CadastroAvisoView(
                 Text(
                     text = "Atalhos por faixa:",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Row(
@@ -328,7 +322,7 @@ fun CadastroAvisoView(
                     Text(
                         text = "Usuários selecionados (${usuariosSelecionados.size})",
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     usuariosSelecionados.forEach { usuario ->

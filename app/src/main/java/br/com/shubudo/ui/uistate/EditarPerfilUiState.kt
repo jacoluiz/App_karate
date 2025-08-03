@@ -1,5 +1,7 @@
 package br.com.shubudo.ui.uistate
 
+import br.com.shubudo.model.Academia
+
 sealed class EditarPerfilUiState {
     // Estado de carregamento
     object Loading : EditarPerfilUiState()
@@ -24,6 +26,7 @@ sealed class EditarPerfilUiState {
         val registroAKSD: String? = "",
         val perfis: List<String> = listOf("aluno"),
         val status: String = "ativo",
-        val usuarioId: String? = null
+        val professorEm: List<String> = listOf(""),
+        val academias: List<Academia> = emptyList()
     ) : EditarPerfilUiState()
 }

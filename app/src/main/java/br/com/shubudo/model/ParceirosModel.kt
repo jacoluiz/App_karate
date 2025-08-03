@@ -7,6 +7,7 @@ data class Parceiro(
     val localizacao: String? = null,
     val telefone: String,
     val site: String? = null,
+    val ramo: String,
     val logomarca: String,
     val imagens: List<String> = emptyList()
 )

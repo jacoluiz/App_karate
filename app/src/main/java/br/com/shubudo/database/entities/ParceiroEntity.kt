@@ -16,6 +16,7 @@ data class ParceiroEntity(
     val telefone: String,
     val site: String? = null,
     val logomarca: String,
+    val ramo: String,
     val imagens: List<String> = emptyList()
 )
 
@@ -27,6 +28,7 @@ fun ParceiroEntity.toParceiro(): Parceiro {
         localizacao = localizacao,
         telefone = telefone,
         site = site,
+        ramo = ramo,
         logomarca = logomarca,
         imagens = imagens
     )

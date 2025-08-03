@@ -69,7 +69,7 @@ fun DetalheFaixaView(
                         Text(
                             text = "Selecione uma categoria",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 

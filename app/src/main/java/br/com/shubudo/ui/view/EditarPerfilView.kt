@@ -1,6 +1,8 @@
 package br.com.shubudo.ui.view
 
+import CampoDeTextoPadrao
 import LoadingButton
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -20,8 +22,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +42,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -46,10 +52,12 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -57,6 +65,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -78,6 +87,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
@@ -91,10 +101,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.SessionManager.usuarioLogado
+import br.com.shubudo.model.Academia
 import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.uistate.EditarPerfilUiState
 import br.com.shubudo.ui.view.recursos.programacao.selecionaCorIcone
@@ -163,6 +175,8 @@ fun EditarPerfilView(
                         status = uiState.status,
                         registroAKSD = registro,
                         perfis = uiState.perfis,
+                        professorEm = uiState.professorEm,
+                        academias = uiState.academias,
                     )
                 }
             }
@@ -270,6 +284,8 @@ fun EditarPerfilContent(
     registroAKSD: String,
     perfis: List<String>,
     status: String = "ativo",
+    professorEm: List<String>,
+    academias: List<Academia>,
     themeViewModel: ThemeViewModel,
     onSave: () -> Unit,
     onCancelar: () -> Unit
@@ -290,6 +306,7 @@ fun EditarPerfilContent(
     var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
     var currentPerfis by remember { mutableStateOf(perfis) }
     var currentStatus by remember { mutableStateOf(status) }
+    var currentProfessorEm by remember { mutableStateOf(professorEm.toSet()) }
 
     val isFormValid = currentNome.isNotBlank() &&
             currentUsername.isNotBlank() &&
@@ -308,10 +325,11 @@ fun EditarPerfilContent(
     var showFaixaDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDanDialog by remember { mutableStateOf(false) }
-    var showAcademiaDialog by remember { mutableStateOf(false) }
     var showTamanhoFaixaDialog by remember { mutableStateOf(false) }
     var showPerfisDialog by remember { mutableStateOf(false) }
-    var showLoading by remember { mutableStateOf(false) }
+
+    var showAcademiaModal by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
 
 
     val faixas = listOf(
@@ -645,6 +663,95 @@ fun EditarPerfilContent(
                         }
                     }
                 }
+                // Campo Professor em - só aparece se "professor" estiver nos perfis
+                if (currentPerfis.contains("professor")) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Professor em",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                Button(
+                                    onClick = { showAcademiaModal = true },
+                                    modifier = Modifier.size(40.dp),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Adicionar Academia"
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Lista das academias selecionadas
+                            if (currentProfessorEm.isNotEmpty()) {
+                                val academiasEscolhidas =
+                                    academias.filter { it._id in currentProfessorEm }
+
+                                academiasEscolhidas.forEach { academia ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = academia.nome,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.weight(1f)
+                                            )
+
+                                            IconButton(
+                                                onClick = {
+                                                    currentProfessorEm =
+                                                        currentProfessorEm - academia._id
+                                                },
+                                                modifier = Modifier.size(24.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = "Remover",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = "Nenhuma academia selecionada",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Row(
@@ -693,6 +800,7 @@ fun EditarPerfilContent(
                                     tamanhoFaixa = currentTamanhoFaixa,
                                     lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
                                     registroAKSD = currentRegistroAKSD,
+                                    professorEm = currentProfessorEm.toList(),
                                     perfis = currentPerfis,
                                     status = currentStatus,
                                     onSave = {
@@ -721,6 +829,25 @@ fun EditarPerfilContent(
                         .height(56.dp)
                 )
             }
+        }
+
+        // Modal de seleção de academias
+        if (showAcademiaModal) {
+            AcademiaSelectionModal(
+                academias = academias,
+                selectedIds = currentProfessorEm,
+                searchText = searchText,
+                onSearchTextChange = { searchText = it },
+                onAcademiaToggle = { academiaId ->
+                    currentProfessorEm = if (academiaId in currentProfessorEm) {
+                        currentProfessorEm - academiaId
+                    } else {
+                        currentProfessorEm + academiaId
+                    }
+                },
+                onDismiss = { showAcademiaModal = false },
+                onConfirm = { showAcademiaModal = false }
+            )
         }
 
         // Dialog para seleção de perfis
@@ -784,6 +911,144 @@ fun EditarPerfilContent(
                     showTamanhoFaixaDialog = false
                 },
                 onDismiss = { showTamanhoFaixaDialog = false })
+        }
+    }
+}
+
+@Composable
+private fun AcademiaSelectionModal(
+    academias: List<Academia>,
+    selectedIds: Set<String>,
+    searchText: String,
+    onSearchTextChange: (String) -> Unit,
+    onAcademiaToggle: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Cabeçalho
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Selecionar Academias",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Fechar"
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                CampoDeTextoPadrao(
+                    value = searchText,
+                    onValueChange = onSearchTextChange,
+                    label = "Buscar academia",
+                    placeholder = "Digite o nome da academia",
+                    leadingIcon = Icons.Default.Search,
+                    focusRequester = focusRequester
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Lista de academias
+                val filteredAcademias = academias.filter {
+                    it.nome.contains(searchText, ignoreCase = true)
+                }
+                Log.d("academias", "${academias.size}")
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredAcademias) { academia ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onAcademiaToggle(academia._id) },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (academia._id in selectedIds) {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                }
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = academia._id in selectedIds,
+                                    onCheckedChange = { onAcademiaToggle(academia._id) }
+                                )
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Column {
+                                    Text(
+                                        text = academia.nome,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    if (academia.descricao.isNotEmpty()) {
+                                        Text(
+                                            text = academia.descricao,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Botões
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancelar")
+                    }
+
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Confirmar (${selectedIds.size})")
+                    }
+                }
+            }
         }
     }
 }
