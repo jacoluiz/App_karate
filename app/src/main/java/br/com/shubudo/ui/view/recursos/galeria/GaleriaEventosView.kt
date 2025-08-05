@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.GaleriaEvento
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
@@ -85,38 +86,40 @@ fun GaleriaEventosView(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = {
-                        Text(
-                            "Buscar álbuns...",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
-                            alpha = 0.5f
-                        )
-                    ),
-                    singleLine = true
-                )
+            if (uiState is GaleriaEventosUiState.Success) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = {
+                            Text(
+                                "Buscar álbuns...",
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                alpha = 0.5f
+                            )
+                        ),
+                        singleLine = true
+                    )
+                }
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -150,7 +153,7 @@ fun GaleriaEventosView(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f)
                                 )
-                                if (usuarioLogado?.perfis?.contains("adm") == true) {
+                                if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                                     FloatingActionButton(
                                         onClick = onAddEventoClick,
                                         modifier = Modifier.size(48.dp),
@@ -206,7 +209,7 @@ fun GaleriaEventosView(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
 
-                                        if (usuarioLogado?.perfis?.contains("adm") == true) {
+                                        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                                             Spacer(modifier = Modifier.height(16.dp))
                                             Button(
                                                 onClick = {
@@ -274,7 +277,7 @@ fun GaleriaEventoItem(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (usuarioLogado?.perfis?.contains("adm") == true) {
+                    if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                         Box {
                             IconButton(
                                 onClick = { showMenu = true },

@@ -96,6 +96,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.GaleriaFoto
 import br.com.shubudo.ui.components.LoadingDialog
@@ -193,7 +195,7 @@ fun GaleriaFotosView(
 
                         }
 
-                        if (usuarioLogado?.perfis?.contains("adm") == true && !isSelectionMode) {
+                        if ((usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") && !isSelectionMode) {
                             IconButton(
                                 onClick = {
                                     showUploadModal = true
@@ -373,7 +375,7 @@ fun GaleriaFotosView(
                             contentDescription = "Download fotos selecionadas"
                         )
                     }
-                    if (usuarioLogado?.perfis?.contains("adm") == true) {
+                    if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                         // FAB Delete
                         SmallFloatingActionButton(
                             onClick = {
@@ -762,7 +764,7 @@ private fun FullScreenImageDialog(
                                 )
                             }
 
-                            if (usuarioLogado?.perfis?.contains("adm") == true) {
+                            if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                                 // Botão de deletar
                                 IconButton(
                                     onClick = {
@@ -1120,28 +1122,17 @@ private fun UploadModal(
                         onClick = {
                             if (selectedImages.isNotEmpty()) {
                                 coroutineScope.launch {
-                                    val academiaId = viewModel.obterFilialIdDoUsuarioLogado()
-                                    val usuarioId = usuarioLogado?._id ?: ""
-
-                                    if (academiaId != null && usuarioId.isNotBlank()) {
-                                        viewModel.uploadFotos(
-                                            context = context,
-                                            eventoId = eventoId,
-                                            academiaId = academiaId,
-                                            usuarioId = usuarioId,
-                                            imageUris = selectedImages,
-                                            onComplete = {
-                                                selectedImages = emptyList()
-                                                onDismiss()
-                                            }
-                                        )
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Não foi possível obter o ID da academia ou do usuário",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
+                                    viewModel.uploadFotos(
+                                        context = context,
+                                        eventoId = eventoId,
+                                        academiaId = idAcademiaVisualizacao,
+                                        usuarioId = usuarioLogado?._id ?: "",
+                                        imageUris = selectedImages,
+                                        onComplete = {
+                                            selectedImages = emptyList()
+                                            onDismiss()
+                                        }
+                                    )
                                 }
                             }
                         },

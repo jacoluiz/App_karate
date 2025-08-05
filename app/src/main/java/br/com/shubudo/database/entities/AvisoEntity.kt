@@ -14,7 +14,8 @@ data class AvisoEntity(
     val titulo: String,
     val conteudo: String,
     val dataHoraCriacao: String,
-    val publicoAlvo: List<String>
+    val publicoAlvo: List<String>,
+    val academia: String
 )
 
 // Conversão de Entity para Model
@@ -23,5 +24,6 @@ fun AvisoEntity.toAviso() = Aviso(
     titulo = titulo,
     conteudo = conteudo,
     dataHoraCriacao = dataHoraCriacao,
-    publicoAlvo = publicoAlvo
+    publicoAlvo = publicoAlvo,
+    academia = academia
 )

@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.repositories.AvisoRepository
 import br.com.shubudo.ui.uistate.AvisosUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AvisosViewModel @Inject constructor(
-    private val avisoRepository: AvisoRepository
+    private val avisoRepository: AvisoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AvisosUiState>(AvisosUiState.Loading)
@@ -35,27 +37,31 @@ class AvisosViewModel @Inject constructor(
             _uiState.value = AvisosUiState.Loading
 
             try {
-                // Tenta atualizar da API (ignora falha)
                 avisoRepository.refreshAvisos()
             } catch (_: Exception) {
             }
 
+            val usuario = SessionManager.usuarioLogado
+            val emailUsuario = usuario?.email.orEmpty()
+            val perfilUsuario = usuario?.perfis.orEmpty()
+
+            // Coleta os avisos
             avisoRepository.getAvisos()
                 .catch {
                     _uiState.value = AvisosUiState.Empty
                 }
                 .collect { avisos ->
-                    val usuario = SessionManager.usuarioLogado
-                    val emailUsuario = usuario?.email.orEmpty()
-                    val perfilUsuario = usuario?.perfis.orEmpty()
 
-                    val avisosFiltrados = if (perfilUsuario.contains("adm")) {
-                        avisos
-                    } else {
-                        avisos.filter { aviso ->
-                            aviso.publicoAlvo.isEmpty() || aviso.publicoAlvo.contains(emailUsuario)
+                    val avisosFiltrados = avisos
+                        .filter { aviso ->
+                            aviso.academia in idAcademiaVisualizacao
                         }
-                    }
+                        .filter { aviso ->
+                            perfilUsuario.contains("adm") ||
+                                    perfilAtivo == "professor" ||
+                                    aviso.publicoAlvo.isEmpty() ||
+                                    aviso.publicoAlvo.contains(emailUsuario)
+                        }
 
                     _uiState.value = if (avisosFiltrados.isEmpty()) {
                         AvisosUiState.Empty

@@ -13,7 +13,7 @@ data class AcademiaResponse(
     val _id: String,
     val nome: String,
     val descricao: String?,
-    val filiais: List<Filial>
+    val filiais: List<Filial>,
 )
 
 data class NovaAcademiaRequest(

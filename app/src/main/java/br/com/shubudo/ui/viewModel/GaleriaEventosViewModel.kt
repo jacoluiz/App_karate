@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.model.GaleriaEvento
 import br.com.shubudo.network.services.GaleriaEventoRequest
 import br.com.shubudo.repositories.AcademiaRepository
@@ -26,7 +28,6 @@ import javax.inject.Inject
 @HiltViewModel
 class GaleriaEventosViewModel @Inject constructor(
     private val eventoRepository: GaleriaEventoRepository,
-    private val academiaRepository: AcademiaRepository,
     private val galeriaFotoRepository: GaleriaFotoRepository
 ) : ViewModel() {
 
@@ -50,12 +51,15 @@ class GaleriaEventosViewModel @Inject constructor(
             try {
                 eventoRepository.refreshEventos()
                 eventoRepository.getEventos().collect { eventos ->
-                    _uiState.value = if (eventos.isEmpty()) {
+                    val eventosFiltrados = eventos.filter { it.academiaId == idAcademiaVisualizacao }
+
+                    _uiState.value = if (eventosFiltrados.isEmpty()) {
                         GaleriaEventosUiState.Empty
                     } else {
-                        GaleriaEventosUiState.Success(eventos)
+                        GaleriaEventosUiState.Success(eventosFiltrados)
                     }
                 }
+
             } catch (e: Exception) {
                 _uiState.value = GaleriaEventosUiState.Error(e.message ?: "Erro desconhecido")
             }
@@ -102,29 +106,12 @@ class GaleriaEventosViewModel @Inject constructor(
 
     fun salvarEvento(
         id: String?,
-        nomeFilial: String,
         criadoPor: String,
         onErro: () -> Unit = {},
         onSalvo: () -> Unit = {}
     ) {
         viewModelScope.launch {
             try {
-                val academias = academiaRepository.getAcademias().first()
-
-                // Buscar a academia e filial correspondente ao nome
-                val academiaEncontrada = academias.find { academia ->
-                    academia.filiais.any { it.nome == nomeFilial }
-                }
-
-                val filialEncontrada = academiaEncontrada?.filiais?.find { it.nome == nomeFilial }
-
-                if (academiaEncontrada == null || filialEncontrada == null) {
-                    _uiState.update {
-                        GaleriaEventosUiState.Error("Academia ou filial não encontrada")
-                    }
-                    return@launch
-                }
-
                 val entradaFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val saidaFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val dataConvertida = try {
@@ -137,12 +124,19 @@ class GaleriaEventosViewModel @Inject constructor(
                     return@launch
                 }
 
+                val filialId =
+                    if (idAcademiaVisualizacao == SessionManager.usuarioLogado?.academiaId) {
+                        SessionManager.usuarioLogado?.filialId
+                    } else {
+                        idAcademiaVisualizacao
+                    } ?: ""
+
                 val request = GaleriaEventoRequest(
                     titulo = titulo,
                     descricao = descricao,
                     data = dataConvertida,
-                    academiaId = academiaEncontrada._id,
-                    filialId = filialEncontrada._id!!,
+                    academiaId = idAcademiaVisualizacao,
+                    filialId = filialId,
                     criadoPor = criadoPor
                 )
 

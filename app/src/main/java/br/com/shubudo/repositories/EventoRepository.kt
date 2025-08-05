@@ -55,12 +55,19 @@ class EventoRepository @Inject constructor(
         eventoDao.deletarPorId(eventoId)
     }
 
-    suspend fun criarEvento(titulo: String, descricao: String, dataInicio: String, local: String) {
+    suspend fun criarEvento(
+        titulo: String,
+        descricao: String,
+        dataInicio: String,
+        local: String,
+        academia: String
+    ) {
         val novoEvento = NovoEventoRequest(
             titulo = titulo,
             descricao = descricao,
             dataInicio = dataInicio,
-            local = local
+            local = local,
+            academia = academia
         )
         eventoService.criarEvento(novoEvento)
         refreshEventos()
@@ -71,13 +78,15 @@ class EventoRepository @Inject constructor(
         titulo: String,
         descricao: String,
         dataInicio: String,
-        local: String
+        local: String,
+        academia: String
     ) {
         val eventoAtualizado = NovoEventoRequest(
             titulo = titulo,
             descricao = descricao,
             dataInicio = dataInicio,
-            local = local
+            local = local,
+            academia = academia
         )
         eventoService.editarEvento(eventoId, eventoAtualizado)
         refreshEventos()

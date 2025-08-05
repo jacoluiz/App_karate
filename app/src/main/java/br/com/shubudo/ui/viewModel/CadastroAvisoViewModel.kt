@@ -3,6 +3,7 @@ package br.com.shubudo.ui.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.AvisoRepository
 import br.com.shubudo.repositories.UsuarioRepository
@@ -29,19 +30,19 @@ class CadastroAvisoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = CadastroAvisoUiState.Loading
             try {
-                usuarioRepository.getUsuarios().collect { usuarios ->
-                    todosUsuarios = usuarios.filter { it.status == "ativo" }
-                    _uiState.value = CadastroAvisoUiState.Success(
-                        usuarios = todosUsuarios,
-                        usuariosFiltrados = emptyList()
-                    )
-                }
+                val usuarios = usuarioRepository.getUsuariosPorAcademia(idAcademiaVisualizacao)
+                todosUsuarios = usuarios.filter { it.status == "ativo" }
+                _uiState.value = CadastroAvisoUiState.Success(
+                    usuarios = todosUsuarios,
+                    usuariosFiltrados = emptyList()
+                )
             } catch (e: Exception) {
                 _uiState.value =
                     CadastroAvisoUiState.Error("Erro ao carregar usuários: ${e.message}")
             }
         }
     }
+
 
     fun selecionarUsuariosPorFaixa(corFaixa: String): Set<Usuario> {
         return todosUsuarios.filter {
@@ -76,21 +77,30 @@ class CadastroAvisoViewModel @Inject constructor(
             try {
                 _uiState.value = CadastroAvisoUiState.Loading
 
+                val destinatarios = publicoAlvo.ifEmpty {
+                    todosUsuarios
+                        .filter { it.academiaId == idAcademiaVisualizacao }
+                        .map { it.email }
+                }
+
                 val currentState = _uiState.value
                 if (currentState is CadastroAvisoUiState.Success && currentState.isEditando) {
                     avisoRepository.editarAviso(
                         id = currentState.avisoId ?: "",
                         titulo = titulo,
                         conteudo = conteudo,
-                        publicoAlvo = publicoAlvo
+                        publicoAlvo = destinatarios,
+                        academia = idAcademiaVisualizacao
                     )
                 } else {
                     avisoRepository.criarAviso(
                         titulo = titulo,
                         conteudo = conteudo,
-                        publicoAlvo = publicoAlvo
+                        publicoAlvo = destinatarios,
+                        academia = idAcademiaVisualizacao
                     )
                 }
+
 
                 onSuccess()
             } catch (e: Exception) {

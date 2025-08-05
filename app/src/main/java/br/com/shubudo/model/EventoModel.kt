@@ -6,5 +6,6 @@ data class Evento(
     val descricao: String,
     val dataInicio: String,
     val local: String,
-    val confirmados: List<String> = emptyList()
+    val confirmados: List<String> = emptyList(),
+    val academia: String
 )

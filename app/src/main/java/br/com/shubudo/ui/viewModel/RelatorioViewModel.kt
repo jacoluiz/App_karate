@@ -3,6 +3,7 @@ package br.com.shubudo.ui.viewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.model.Evento
 import br.com.shubudo.repositories.EventoRepository
 import br.com.shubudo.repositories.RelatorioRepository
@@ -46,11 +47,10 @@ class RelatorioViewModel @Inject constructor(
     fun buscarEventosFuturos() {
         viewModelScope.launch {
             try {
-                // 1) Faz refresh na API -> persiste no Room
                 eventosRepository.refreshEventos()
-                // 2) Coleta os eventos futuros do banco local (Flow)
                 eventosRepository.getEventosFuturos().collect { lista ->
-                    _eventosDisponiveis.value = lista
+                    val filtrados = lista.filter { it.academia == idAcademiaVisualizacao }
+                    _eventosDisponiveis.value = filtrados
                 }
             } catch (_: Exception) {
                 _eventosDisponiveis.value = emptyList()

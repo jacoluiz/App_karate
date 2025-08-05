@@ -68,6 +68,13 @@ fun BaseDeUsuariosView(
     val isLoading by viewModel.isLoading.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val academias by viewModel.academias.collectAsState()
+
+    fun buscarNomeFilialPorId(filialId: String): String {
+        return academias.firstOrNull { academia ->
+            academia.filiais.any { it._id == filialId }
+        }?.filiais?.firstOrNull { it._id == filialId }?.nome ?: "Filial desconhecida"
+    }
 
     // Filtrar usuários baseado na busca
     val usuariosFiltrados = remember(usuarios, searchQuery) {
@@ -76,7 +83,10 @@ fun BaseDeUsuariosView(
         } else {
             usuarios.filter { usuario ->
                 usuario.nome.contains(searchQuery, ignoreCase = true) ||
-                        usuario.academia.contains(searchQuery, ignoreCase = true) ||
+                        buscarNomeFilialPorId(usuario.filialId).contains(
+                            searchQuery,
+                            ignoreCase = true
+                        ) ||
                         usuario.corFaixa.contains(searchQuery, ignoreCase = true)
             }
         }
@@ -278,6 +288,7 @@ fun BaseDeUsuariosView(
                                 items(usuariosFiltrados.sortedBy { it.nome }) { usuario ->
                                     UsuarioCard(
                                         usuario = usuario,
+                                        nomeFilial = buscarNomeFilialPorId(usuario.filialId),
                                         onClick = {
                                             usuario._id?.let { id ->
                                                 onNavigateToEditarUsuario(id)
@@ -297,6 +308,7 @@ fun BaseDeUsuariosView(
 @Composable
 fun UsuarioCard(
     usuario: Usuario,
+    nomeFilial: String,
     onClick: () -> Unit = {}
 ) {
     Card(
@@ -414,7 +426,7 @@ fun UsuarioCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = usuario.academia,
+                            text = nomeFilial,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )

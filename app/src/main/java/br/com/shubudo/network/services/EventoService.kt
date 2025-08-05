@@ -17,25 +17,17 @@ data class EventoResponse(
     val descricao: String,
     val dataInicio: String,
     val local: String?,
-    val confirmados: List<String>? = emptyList()
+    val confirmados: List<String>? = emptyList(),
+    val academia: String
 )
 
 data class NovoEventoRequest(
     val titulo: String,
     val descricao: String,
     val dataInicio: String,
-    val local: String
+    val local: String,
+    val academia: String
 )
-fun EventoResponse.toEvento(): Evento {
-    return Evento(
-        _id = _id,
-        titulo = titulo,
-        descricao = descricao,
-        dataInicio = dataInicio,
-        local = local ?: "",
-        confirmados = confirmados ?: emptyList()
-    )
-}
 
 fun EventoResponse.toEventoEntity(): EventoEntity {
     return EventoEntity(
@@ -44,7 +36,8 @@ fun EventoResponse.toEventoEntity(): EventoEntity {
         descricao = descricao,
         dataInicio = dataInicio,
         local = local ?: "",
-        confirmados = confirmados ?: emptyList()
+        confirmados = confirmados ?: emptyList(),
+        academia = academia
     )
 }
 

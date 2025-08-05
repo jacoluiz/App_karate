@@ -5,5 +5,6 @@ data class Aviso(
     val titulo: String = "",
     val conteudo: String = "",
     val dataHoraCriacao: String = "",
-    val publicoAlvo: List<String> = emptyList()
+    val publicoAlvo: List<String> = emptyList(),
+    val academia: String
 )

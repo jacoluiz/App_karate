@@ -14,7 +14,9 @@ data class EventoEntity(
     val descricao: String,
     val dataInicio: String,
     val local: String,
-    val confirmados: List<String> = emptyList()
+    val confirmados: List<String> = emptyList(),
+    val academia: String
+
 )
 
 fun EventoEntity.toEvento(): Evento {
@@ -24,6 +26,7 @@ fun EventoEntity.toEvento(): Evento {
         descricao = descricao,
         dataInicio = dataInicio,
         local = local,
-        confirmados = confirmados
+        confirmados = confirmados,
+        academia = academia
     )
 }

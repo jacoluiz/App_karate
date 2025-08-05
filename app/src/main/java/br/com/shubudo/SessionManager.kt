@@ -14,16 +14,24 @@ object SessionManager {
         private set
 
     var perfilAtivo by mutableStateOf("aluno")
-        private set
+    var idAcademiaVisualizacao by mutableStateOf("")
 
-    fun alternarPerfil(novoPerfil: String) {
+    fun alternarPerfil(novoPerfil: String, novaAcademiaId: String? = null) {
         if (usuarioLogado?.perfis?.contains(novoPerfil) == true) {
             perfilAtivo = novoPerfil
+            idAcademiaVisualizacao = novaAcademiaId ?: when (novoPerfil) {
+                "aluno" -> usuarioLogado?.academiaId.orEmpty()
+                "professor" -> usuarioLogado?.professorEm?.firstOrNull().orEmpty()
+                else -> ""
+            }
+            Log.d("Perfil", "$idAcademiaVisualizacao  -  $perfilAtivo")
         }
     }
 
     fun limparSessao(context: Context) {
         usuarioLogado = null
+        idAcademiaVisualizacao = ""
+        perfilAtivo = "aluno"
         val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
         prefs.edit { clear() }
     }
@@ -44,7 +52,8 @@ object SessionManager {
             val corFaixa = getString("corFaixa", null)
             val status = getString("status", "ativo")
             val dan = getInt("dan", 0)
-            val academia = getString("academia", "")
+            val academiaId = getString("academiaId", "")
+            val filialId = getString("filialId", "")
             val tamanhoFaixa = getString("tamanhoFaixa", "")
             val lesaoOuLaudosMedicos = getString("lesaoOuLaudosMedicos", "")
             val registroAKSD = getString("registroAKSD", "")
@@ -54,6 +63,7 @@ object SessionManager {
 
             Log.d("MainActivity", "Dados carregados: _id=$_id, nome=$nome, email=$email")
 
+            Log.d("MainActivity", "${!nome.isNullOrBlank() && !email.isNullOrBlank()}")
             if (!nome.isNullOrBlank() && !email.isNullOrBlank()) {
                 Log.d("MainActivity", "Usuário logado: $nome")
                 usuarioLogado = Usuario(
@@ -68,7 +78,8 @@ object SessionManager {
                     corFaixa = corFaixa ?: "",
                     status = status ?: "ativo",
                     dan = dan,
-                    academia = academia ?: "",
+                    academiaId = academiaId ?: "",
+                    filialId = filialId ?: "",
                     tamanhoFaixa = tamanhoFaixa ?: "",
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
                     registroAKSD = registroAKSD ?: "",
@@ -78,9 +89,15 @@ object SessionManager {
             }
             Log.d("MainActivity", "Usuário logado: $usuarioLogado")
         }
+        idAcademiaVisualizacao = usuarioLogado?.academiaId ?: ""
+        Log.d("MainActivity", "usuarioLogado?.academiaId: ${usuarioLogado?.academiaId}")
+
+        Log.d("MainActivity", "idAcademiaVisualizacao: $idAcademiaVisualizacao")
     }
 
     fun salvarUsuario(context: Context, usuario: Usuario) {
+        Log.d("MainActivity", "usuario login: $usuario")
+
         val prefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
         prefs.edit {
             putString("_id", usuario._id)
@@ -90,14 +107,20 @@ object SessionManager {
             putString("corFaixa", usuario.corFaixa)
             putString("status", usuario.status)
             putInt("dan", usuario.dan)
-            putString("academia", usuario.academia)
+            putString("academiaId", usuario.academiaId)
+            putString("filialId", usuario.filialId)
             putString("tamanhoFaixa", usuario.tamanhoFaixa)
             putString("lesaoOuLaudosMedicos", usuario.lesaoOuLaudosMedicos)
             putString("registroAKSD", usuario.registroAKSD)
             putString("fcmToken", usuario.fcmToken)
             putString("professorEm", usuario.professorEm.joinToString(","))
         }
+        if (idAcademiaVisualizacao.isEmpty()) {
+            idAcademiaVisualizacao = usuarioLogado?.academiaId ?: ""
+        }
 
         usuarioLogado = usuario
+        Log.d("MainActivity", "usuarioLogado: $usuarioLogado")
+
     }
 }

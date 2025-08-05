@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import br.com.shubudo.model.Academia
+
 
 @HiltViewModel
 class NovoUsuarioViewModel @Inject constructor(
@@ -33,9 +35,18 @@ class NovoUsuarioViewModel @Inject constructor(
     var altura by mutableStateOf("0,00")
     var idade by mutableStateOf("")
     var dan by mutableIntStateOf(0)
-    var academia by mutableStateOf("") // Pode conter nome customizado quando "Outros"
+    var filialId by mutableStateOf("")
+    var academia by mutableStateOf<Academia?>(null)
     var tamanhoFaixa by mutableStateOf("")
     var senhaAtendeAosRequisitos by mutableStateOf(false)
+
+
+    fun atualizarAcademiaPorFilial(filialId: String, academias: List<Academia>) {
+        this.filialId = filialId
+        this.academia = academias.find { academia ->
+            academia.filiais.any { it._id == filialId }
+        }
+    }
 
     fun cadastrarUsuario(context: Context) {
 
@@ -63,8 +74,9 @@ class NovoUsuarioViewModel @Inject constructor(
                     idade = idade,
                     perfis = listOf("aluno"),
                     dan = dan,
-                    academia = academia,
-                    tamanhoFaixa = tamanhoFaixa
+                    tamanhoFaixa = tamanhoFaixa,
+                    academiaId = academia?._id ?: "",
+                    filialId = filialId,
                 )
 
                 val resultado = usuarioRepository.cadastrarUsuario(context, usuario, senha)

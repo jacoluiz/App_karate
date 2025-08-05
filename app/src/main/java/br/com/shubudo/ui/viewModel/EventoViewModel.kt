@@ -2,6 +2,7 @@ package br.com.shubudo.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.model.Evento
 import br.com.shubudo.repositories.EventoRepository
 import br.com.shubudo.ui.uistate.EventosUiState
@@ -35,11 +36,13 @@ class EventoViewModel @Inject constructor(
             eventoRepository.refreshEventos()
             eventoRepository.getEventos()
                 .collectLatest { eventos ->
-                    if (eventos.isEmpty()) {
+                    // Filtra eventos da academia atual
+                    val eventosDaAcademia = eventos.filter { it.academia == idAcademiaVisualizacao }
+
+                    if (eventosDaAcademia.isEmpty()) {
                         _eventosUiState.update { EventosUiState.Empty }
                     } else {
-                        // Agrupa por data (yyyy-MM-dd)
-                        val agrupadoPorData: Map<String, List<Evento>> = eventos.groupBy {
+                        val agrupadoPorData = eventosDaAcademia.groupBy {
                             it.dataInicio.substring(0, 10)
                         }
                         _eventosUiState.update {
@@ -49,6 +52,7 @@ class EventoViewModel @Inject constructor(
                 }
         }
     }
+
 
     fun deletarEvento(eventoId: String) {
         viewModelScope.launch {

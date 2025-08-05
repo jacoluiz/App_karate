@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Aviso
 import br.com.shubudo.model.Usuario
@@ -127,7 +128,7 @@ fun AvisosView(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        if (usuarioLogado?.perfis?.contains("adm") == true) {
+                        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { onNavigateToCadastroAviso("") }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
@@ -175,7 +176,7 @@ fun AvisosView(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            if (usuarioLogado?.perfis?.contains("adm") == true) {
+                            if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                                 FloatingActionButton(
                                     onClick = { onNavigateToCadastroAviso("") },
                                     modifier = Modifier.size(48.dp),
@@ -200,7 +201,7 @@ fun AvisosView(
                             items((uiState as AvisosUiState.Success).avisos.sortedByDescending { it.dataHoraCriacao }) { aviso ->
                                 AvisoCard(
                                     aviso = aviso,
-                                    isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
+                                    isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
                                     userEmail = usuarioLogado?.email ?: "",
                                     usuarios = usuarios,
                                     onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
@@ -398,7 +399,7 @@ fun AvisoCard(
                 }
 
                 // Indicador de público alvo
-                if (usuarioLogado?.perfis?.contains("adm") == true) {
+                if (isAdmin) {
                     if (aviso.publicoAlvo.isNotEmpty()) {
                         Text(
                             text = "${aviso.publicoAlvo.size} usuário(s)",

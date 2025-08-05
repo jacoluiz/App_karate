@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager.usuarioLogado
+import br.com.shubudo.model.Academia
 import br.com.shubudo.model.Usuario
 import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.UsuarioRepository
@@ -71,10 +72,10 @@ class EditarPerfilViewModel @Inject constructor(
                 peso = usuario.peso,
                 altura = usuario.altura,
                 dan = usuario.dan,
-                academia = usuario.academia,
                 tamanhoFaixa = usuario.tamanhoFaixa,
                 lesaoOuLaudosMedicos = usuario.lesaoOuLaudosMedicos,
                 registroAKSD = usuario.registroAKSD,
+                filialId = usuario.filialId,
                 perfis = usuario.perfis,
                 status = usuario.status,
                 professorEm = usuario.professorEm,
@@ -139,7 +140,8 @@ class EditarPerfilViewModel @Inject constructor(
         peso: String,
         altura: String,
         dan: Int,
-        academia: String,
+        academiaId: String,
+        filialId: String,
         tamanhoFaixa: String,
         lesaoOuLaudosMedicos: String,
         registroAKSD: String,
@@ -164,13 +166,14 @@ class EditarPerfilViewModel @Inject constructor(
                     peso = peso,
                     altura = altura,
                     dan = dan,
-                    academia = academia,
                     tamanhoFaixa = tamanhoFaixa,
                     lesaoOuLaudosMedicos = lesaoOuLaudosMedicos,
                     registroAKSD = registroAKSD,
                     perfis = perfis,
                     status = status,
-                    professorEm = professorEmFinal
+                    professorEm = professorEmFinal,
+                    academiaId = academiaId,
+                    filialId = filialId
                 )
                 val resultado: Usuario? = if (usuarioLogado?._id == usuarioAtualizado._id) {
                     repository.atualizarUsuario(context, usuarioAtualizado)

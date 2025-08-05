@@ -3,6 +3,7 @@ package br.com.shubudo.ui.viewModel
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.repositories.EventoRepository
 import br.com.shubudo.ui.uistate.CadastroEventoUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +36,6 @@ class CadastroEventoViewModel @Inject constructor(
             try {
                 val evento = eventoRepository.getEventoPorId(eventoId)
                 if (evento != null) {
-                    // Parse da data ISO para campos separados
                     val dateTime = LocalDateTime.parse(evento.dataInicio.substring(0, 19))
                     val data = dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     val horario = dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -45,7 +45,8 @@ class CadastroEventoViewModel @Inject constructor(
                         descricao = evento.descricao,
                         local = evento.local,
                         data = TextFieldValue(data),
-                        horario = TextFieldValue(horario)
+                        horario = TextFieldValue(horario),
+                        academia = evento.academia
                     )
                 } else {
 
@@ -166,14 +167,16 @@ class CadastroEventoViewModel @Inject constructor(
                         currentState.titulo,
                         currentState.descricao,
                         isoString,
-                        currentState.local
+                        currentState.local,
+                        currentState.academia
                     )
                 } else {
                     eventoRepository.criarEvento(
                         currentState.titulo,
                         currentState.descricao,
                         isoString,
-                        currentState.local
+                        currentState.local,
+                        idAcademiaVisualizacao
                     )
                 }
 

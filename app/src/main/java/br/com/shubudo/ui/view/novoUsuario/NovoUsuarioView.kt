@@ -448,7 +448,7 @@ fun validarPaginaUmCompleta(viewModel: NovoUsuarioViewModel): Boolean {
             viewModel.idade.isNotBlank() &&
             dataDeAniversarioValida(viewModel.idade) &&
             viewModel.faixa.isNotBlank() &&
-            viewModel.academia.isNotBlank() &&
+            viewModel.filialId.isNotBlank() &&
             viewModel.senha.isNotBlank() &&
             viewModel.confirmarSenha.isNotBlank() &&
             viewModel.senha == viewModel.confirmarSenha &&

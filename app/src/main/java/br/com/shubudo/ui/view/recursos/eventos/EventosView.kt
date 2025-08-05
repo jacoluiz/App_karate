@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view.recursos.eventos
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Evento
 import br.com.shubudo.model.Usuario
@@ -83,7 +86,7 @@ fun String.formatDate(): String {
     return try {
         val zdt = ZonedDateTime.parse(this)
         zdt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    } catch (e: DateTimeParseException) {
+    } catch (_: DateTimeParseException) {
         this
     }
 }
@@ -92,7 +95,7 @@ fun String.formatTime(): String {
     return try {
         val zdt = ZonedDateTime.parse(this)
         zdt.format(DateTimeFormatter.ofPattern("HH:mm"))
-    } catch (e: DateTimeParseException) {
+    } catch (_: DateTimeParseException) {
         this
     }
 }
@@ -100,7 +103,7 @@ fun String.formatTime(): String {
 fun String.isPastEvent(): Boolean {
     return try {
         ZonedDateTime.parse(this).isBefore(ZonedDateTime.now())
-    } catch (e: DateTimeParseException) {
+    } catch (_: DateTimeParseException) {
         false
     }
 }
@@ -109,7 +112,7 @@ fun String.formatDayMonth(): String {
     return try {
         val zdt = ZonedDateTime.parse(this)
         zdt.format(DateTimeFormatter.ofPattern("dd\nMMM", Locale("pt", "BR")))
-    } catch (e: DateTimeParseException) {
+    } catch (_: DateTimeParseException) {
         this
     }
 }
@@ -118,7 +121,7 @@ fun String.getDiaSemanaAbreviado(): String {
     return try {
         val zdt = ZonedDateTime.parse(this)
         zdt.format(DateTimeFormatter.ofPattern("EEE", Locale("pt", "BR")))
-    } catch (e: DateTimeParseException) {
+    } catch (_: DateTimeParseException) {
         this
     }
 }
@@ -150,16 +153,58 @@ fun EventosView(
 
                 }
 
-                is EventosUiState.Success, is EventosUiState.Empty -> {
+                is EventosUiState.Empty -> {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        CabecalhoComIconeCentralizado(
+                            titulo = "Eventos do karatê",
+                            subtitulo = "Fique por dentro de todas as atividades",
+                            iconeAndroid = Icons.Default.Event
+                        )
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .offset(y = (-20).dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Nenhum evento disponível no momento",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                                if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(onClick = { onAddEventoClick() }) {
+                                        Icon(Icons.Default.Add, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Criar Primeiro Evento")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is EventosUiState.Success -> {
                     val futuros = mutableListOf<Evento>()
                     val passados = mutableListOf<Evento>()
 
-                    if (uiState is EventosUiState.Success) {
-                        uiState.eventosAgrupados.values.flatten().forEach { evento ->
-                            if (evento.dataInicio.isPastEvent()) passados.add(evento) else futuros.add(
-                                evento
-                            )
-                        }
+                    uiState.eventosAgrupados.values.flatten().forEach { evento ->
+                        if (evento.dataInicio.isPastEvent()) passados.add(evento) else futuros.add(
+                            evento
+                        )
                     }
 
                     val filteredFuturos = futuros.filter {
@@ -254,7 +299,7 @@ fun EventosView(
                                             modifier = Modifier.weight(1f)
                                         )
 
-                                        if (usuarioLogado?.perfis?.contains("adm") == true) {
+                                        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
                                             FloatingActionButton(
                                                 onClick = onAddEventoClick,
                                                 modifier = Modifier.size(48.dp),
@@ -275,7 +320,7 @@ fun EventosView(
                                         evento = evento,
                                         isPast = false,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
+                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
                                         usuarios = usuarios,
                                         onDeleteEvento = onDeleteEvento,
                                         onEditEvento = onEditEventoClick
@@ -297,7 +342,7 @@ fun EventosView(
                                         evento = evento,
                                         isPast = true,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true,
+                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
                                         usuarios = usuarios,
                                         onDeleteEvento = onDeleteEvento,
                                         onEditEvento = onEditEventoClick
@@ -524,7 +569,7 @@ fun EventoItem(
 
         }
         // Indicador de público alvo
-        if (usuarioLogado?.perfis?.contains("adm") == true) {
+        if (isAdmin) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

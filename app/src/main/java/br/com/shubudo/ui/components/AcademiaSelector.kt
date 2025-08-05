@@ -13,10 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,11 +39,16 @@ import br.com.shubudo.ui.viewModel.components.AcademiaSelectorViewModel
 
 @Composable
 fun AcademiaSelector(
-    academia: String,
-    onAcademiaChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    filialIdSelecionado: String?,
+    onFilialSelecionada: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: AcademiaSelectorViewModel = hiltViewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val nomeFilialSelecionada = viewModel.academias.value
+        .flatMap { it.filiais }
+        .find { it._id == filialIdSelecionado }
+        ?.nome ?: "Selecionar Academia"
 
     Card(
         modifier = modifier
@@ -80,12 +83,12 @@ fun AcademiaSelector(
 
                 Column {
                     Text(
-                        text = "Academia",
+                        text = "Academia onde treina",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = academia.ifBlank { "Selecionar Academia" },
+                        text = nomeFilialSelecionada,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -103,142 +106,103 @@ fun AcademiaSelector(
 
     if (showDialog) {
         AcademiaDialog(
-            currentAcademia = academia,
-            onAcademiaSelected = {
-                onAcademiaChange(it)
+            filialSelecionada = filialIdSelecionado,
+            onFilialSelecionada = {
+                onFilialSelecionada(it)
                 showDialog = false
             },
-            onDismiss = { showDialog = false }
+            onDismiss = { showDialog = false },
+            viewModel = viewModel
         )
     }
 }
 
 @Composable
 fun AcademiaDialog(
-    currentAcademia: String,
-    onAcademiaSelected: (String) -> Unit,
+    filialSelecionada: String?,
+    onFilialSelecionada: (String) -> Unit,
     onDismiss: () -> Unit,
-    viewModel: AcademiaSelectorViewModel = hiltViewModel()
+    viewModel: AcademiaSelectorViewModel
 ) {
-    val filiais = viewModel.filiais.value
     var searchText by remember { mutableStateOf("") }
-    var showCustomField by remember { mutableStateOf(false) }
-    var customAcademia by remember { mutableStateOf("") }
-    val focusRequester = remember { FocusRequester() }
     val isLoading = viewModel.isLoading.value
 
-    val filteredFiliais = filiais.filter {
-        it.contains(searchText, ignoreCase = true)
+    val academias = viewModel.academias.value
+    val filiais = academias.flatMap { academia ->
+        academia.filiais.map { filial -> filial to academia }
     }
+
+    val filtered = filiais.filter { (filial, _) ->
+        filial.nome.contains(searchText, ignoreCase = true)
+    }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Selecione sua Academia", style = MaterialTheme.typography.headlineSmall) },
         text = {
-            when {
-                isLoading -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Text(
-                            text = "Carregando academias...",
-                            modifier = Modifier.padding(top = 16.dp)
-                        )
-                    }
+            if (isLoading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Text("Carregando academias...", modifier = Modifier.padding(top = 16.dp))
                 }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    CampoDeTextoPadrao(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        label = "Buscar Academia",
+                        placeholder = "Digite para buscar...",
+                        leadingIcon = Icons.Default.Search,
+                        focusRequester = remember { FocusRequester() }
+                    )
 
-                showCustomField -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        CampoDeTextoPadrao(
-                            value = customAcademia,
-                            onValueChange = { customAcademia = it },
-                            label = "Nome da Academia",
-                            placeholder = "Digite o nome da sua academia",
-                            leadingIcon = Icons.Default.Edit,
-                            focusRequester = focusRequester
-                        )
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(filtered.size) { index ->
+                            val (filial, academiaMatriz) = filtered[index]
 
-                        Row(Modifier.fillMaxWidth()) {
-                            TextButton(
-                                onClick = {
-                                    showCustomField = false
-                                    customAcademia = ""
-                                },
-                                modifier = Modifier.weight(1f)
+                            val isSelected = academiaMatriz._id == filialSelecionada
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        filial._id?.let {
+                                            onFilialSelecionada(it)
+                                        }
+                                    },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isSelected)
+                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                    else MaterialTheme.colorScheme.surface
+                                ),
+                                border = if (isSelected)
+                                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                else null
                             ) {
-                                Text("Voltar")
-                            }
-
-                            Button(
-                                onClick = {
-                                    if (customAcademia.isNotBlank()) {
-                                        onAcademiaSelected(customAcademia)
-                                    }
-                                },
-                                enabled = customAcademia.isNotBlank(),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text("Confirmar")
-                            }
-                        }
-                    }
-                }
-
-                else -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        CampoDeTextoPadrao(
-                            value = searchText,
-                            onValueChange = { searchText = it },
-                            label = "Buscar Academia",
-                            placeholder = "Digite para buscar...",
-                            leadingIcon = Icons.Default.Search,
-                            focusRequester = focusRequester
-                        )
-
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(filteredFiliais.size) { index ->
-                                val academia = filteredFiliais[index]
-                                val isSelected = academia == currentAcademia
-
-                                Card(
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable {
-                                            if (academia == "Outros") showCustomField = true
-                                            else onAcademiaSelected(academia)
-                                        },
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = if (isSelected)
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                        else MaterialTheme.colorScheme.surface
-                                    ),
-                                    border = if (isSelected)
-                                        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                                    else null
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_academia),
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            text = academia,
-                                            modifier = Modifier.padding(start = 12.dp),
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
-                                    }
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_academia),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Text(
+                                        text = filial.nome,
+                                        modifier = Modifier.padding(start = 12.dp),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             }
                         }
@@ -248,12 +212,9 @@ fun AcademiaDialog(
         },
         confirmButton = {},
         dismissButton = {
-            if (!showCustomField) {
-                TextButton(onClick = onDismiss) {
-                    Text("Cancelar")
-                }
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
             }
         }
     )
 }
-

@@ -67,14 +67,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
 import br.com.shubudo.ui.components.AcademiaSelector
 import br.com.shubudo.ui.components.PasswordRequirement
 import br.com.shubudo.ui.viewModel.NovoUsuarioViewModel
+import br.com.shubudo.ui.viewModel.components.AcademiaSelectorViewModel
 import br.com.shubudo.utils.aplicarMascaraDeDataParaAniversario
+import br.com.shubudo.utils.dataDeAniversarioValida
 import br.com.shubudo.utils.getCorDaFaixa
 import br.com.shubudo.utils.getDanOptions
-import br.com.shubudo.utils.dataDeAniversarioValida
 import br.com.shubudo.utils.senhaAtendeAosRequisitos
 import br.com.shubudo.utils.validarRequisitosSenha
 import kotlinx.coroutines.launch
@@ -436,6 +438,8 @@ fun PaginaUmCadastro(
 private fun AcademiaSection(
     viewModel: NovoUsuarioViewModel
 ) {
+    val academiaSelectorViewModel: AcademiaSelectorViewModel = hiltViewModel()
+
     Column {
         Text(
             text = "Academia",
@@ -447,8 +451,13 @@ private fun AcademiaSection(
         )
 
         AcademiaSelector(
-            academia = viewModel.academia,
-            onAcademiaChange = { viewModel.academia = it }
+            filialIdSelecionado = viewModel.filialId,
+            onFilialSelecionada = { filialId ->
+                viewModel.atualizarAcademiaPorFilial(
+                    filialId,
+                    academiaSelectorViewModel.academias.value
+                )
+            }
         )
     }
 }

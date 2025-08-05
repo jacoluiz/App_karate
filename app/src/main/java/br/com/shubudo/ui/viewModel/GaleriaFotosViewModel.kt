@@ -44,7 +44,6 @@ import javax.inject.Inject
 @HiltViewModel
 class GaleriaFotosViewModel @Inject constructor(
     private val galeriaRepository: GaleriaFotoRepository,
-    private val academiaRepository: AcademiaRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<GaleriaFotosUiState>(GaleriaFotosUiState.Loading)
@@ -52,22 +51,6 @@ class GaleriaFotosViewModel @Inject constructor(
 
     private val _uploadUiState = MutableStateFlow<Map<String, UploadUiState>>(emptyMap())
     val uploadUiState: StateFlow<Map<String, UploadUiState>> = _uploadUiState.asStateFlow()
-
-    suspend fun obterFilialIdDoUsuarioLogado(): String? {
-        val nomeFilialUsuario = SessionManager.usuarioLogado?.academia?.trim() ?: return null
-
-        return try {
-            val academias = academiaRepository.getAcademias().first()
-            val filial = academias
-                .flatMap { it.filiais }
-                .firstOrNull { it.nome.equals(nomeFilialUsuario, ignoreCase = true) }
-
-            filial?._id
-        } catch (e: Exception) {
-            Log.e("GaleriaFotosViewModel", "Erro ao obter filial do usuário: ${e.message}")
-            null
-        }
-    }
 
     fun carregarFotos(eventoId: String) {
         viewModelScope.launch {

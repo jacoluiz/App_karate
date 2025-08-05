@@ -105,6 +105,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.shubudo.R
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Academia
 import br.com.shubudo.ui.components.AcademiaSelector
@@ -169,18 +170,17 @@ fun EditarPerfilView(
                         onSave = onSave,
                         onCancelar = onCancelar,
                         dan = uiState.dan,
-                        academia = uiState.academia,
                         tamanhoFaixa = uiState.tamanhoFaixa,
                         lesoesOuLaudosMedicos = lesoes,
                         status = uiState.status,
                         registroAKSD = registro,
+                        filialId = uiState.filialId,
                         perfis = uiState.perfis,
                         professorEm = uiState.professorEm,
                         academias = uiState.academias,
                     )
                 }
             }
-
         }
     }
 }
@@ -277,11 +277,11 @@ fun EditarPerfilContent(
     altura: String,
     corFaixa: String,
     dan: Int,
-    academia: String,
     tamanhoFaixa: String,
     editarPerfilViewModel: EditarPerfilViewModel,
     lesoesOuLaudosMedicos: String,
     registroAKSD: String,
+    filialId: String,
     perfis: List<String>,
     status: String = "ativo",
     professorEm: List<String>,
@@ -300,7 +300,12 @@ fun EditarPerfilContent(
     var currentAltura by remember { mutableStateOf(altura) }
     var currentFaixa by remember { mutableStateOf(corFaixa) }
     var currentDan by remember { mutableIntStateOf(dan) }
-    var currentAcademia by remember { mutableStateOf(academia) }
+    var currentFilialId by remember { mutableStateOf(filialId) }
+    var currentAcademia by remember {
+        mutableStateOf(academias.find { academia ->
+            academia.filiais.any { filial -> filial._id == filialId }
+        })
+    }
     var currentTamanhoFaixa by remember { mutableStateOf(tamanhoFaixa) }
     var currentLesaoOuLaudosMedicos by remember { mutableStateOf(lesoesOuLaudosMedicos) }
     var currentRegistroAKSD by remember { mutableStateOf(registroAKSD) }
@@ -315,9 +320,8 @@ fun EditarPerfilContent(
             currentPeso.isNotBlank() &&
             currentAltura.isNotBlank() &&
             currentFaixa.isNotBlank() &&
-            currentAcademia.isNotBlank() &&
+            currentFilialId.isNotBlank() &&
             currentTamanhoFaixa.isNotBlank()
-
 
     val context = LocalContext.current
 
@@ -344,6 +348,13 @@ fun EditarPerfilContent(
     // Validação da data de nascimento
     val dateValidation = remember(currentDataNascimento) {
         validateBirthDate(currentDataNascimento)
+    }
+
+    LaunchedEffect(filialId, academias) {
+        currentAcademia = academias.find { academia ->
+            academia.filiais.any { filial -> filial._id == filialId }
+        }
+        Log.d("AcademiaLog", "Academia encontrada: $currentAcademia")
     }
 
     Box(
@@ -515,10 +526,15 @@ fun EditarPerfilContent(
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                     )
 
-                    // Academia Selection
                     AcademiaSelector(
-                        academia = currentAcademia,
-                        onAcademiaChange = { currentAcademia = it })
+                        filialIdSelecionado = currentFilialId,
+                        onFilialSelecionada = { filialId ->
+                            currentFilialId = filialId
+                            currentAcademia = academias.find { academia ->
+                                academia.filiais.any { it._id == filialId }
+                            }
+                        }
+                    )
 
                     // Tamanho da Faixa
                     TamanhoFaixaSelectionCard(
@@ -796,7 +812,8 @@ fun EditarPerfilContent(
                                     peso = currentPeso,
                                     altura = currentAltura,
                                     dan = currentDan,
-                                    academia = currentAcademia,
+                                    academiaId = currentAcademia?._id ?: "",
+                                    filialId = currentFilialId,
                                     tamanhoFaixa = currentTamanhoFaixa,
                                     lesaoOuLaudosMedicos = currentLesaoOuLaudosMedicos,
                                     registroAKSD = currentRegistroAKSD,
@@ -945,7 +962,7 @@ private fun AcademiaSelectionModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Selecionar Academias",
+                        text = "Selecionar Academias onde treina",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -975,8 +992,6 @@ private fun AcademiaSelectionModal(
                 val filteredAcademias = academias.filter {
                     it.nome.contains(searchText, ignoreCase = true)
                 }
-                Log.d("academias", "${academias.size}")
-
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -1801,7 +1816,11 @@ private fun TamanhoFaixaSelectionDialog(
 fun PerfisSelectionDialog(
     perfisAtuais: List<String>, onDismiss: () -> Unit, onConfirm: (List<String>) -> Unit
 ) {
-    val perfisDisponiveis = listOf("adm", "professor", "aluno")
+    val perfisDisponiveis = when (perfilAtivo) {
+        "adm" -> listOf("adm", "professor", "aluno")
+        else -> listOf("professor", "aluno")
+    }
+
     var perfisTemporarios by remember { mutableStateOf(perfisAtuais.toSet()) }
 
     AlertDialog(onDismissRequest = onDismiss, title = {

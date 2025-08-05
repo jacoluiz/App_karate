@@ -29,11 +29,12 @@ class AvisoRepository @Inject constructor(
     }
 
     // Cria um novo aviso
-    suspend fun criarAviso(titulo: String, conteudo: String, publicoAlvo: List<String>) {
+    suspend fun criarAviso(titulo: String, conteudo: String, publicoAlvo: List<String>, academia: String) {
         val novoAviso = NovoAvisoRequest(
             titulo = titulo,
             conteudo = conteudo,
-            publicoAlvo = publicoAlvo
+            publicoAlvo = publicoAlvo,
+            academia = academia
         )
         try {
             val avisoCriado = avisoService.criarAviso(novoAviso)
@@ -46,11 +47,12 @@ class AvisoRepository @Inject constructor(
     }
 
     // Edita um aviso existente
-    suspend fun editarAviso(id: String, titulo: String, conteudo: String, publicoAlvo: List<String>) {
+    suspend fun editarAviso(id: String, titulo: String, conteudo: String, publicoAlvo: List<String>,academia: String) {
         val avisoAtualizado = NovoAvisoRequest(
             titulo = titulo,
             conteudo = conteudo,
-            publicoAlvo = publicoAlvo
+            publicoAlvo = publicoAlvo,
+            academia = academia
         )
         try {
             avisoService.editarAviso(id, avisoAtualizado)

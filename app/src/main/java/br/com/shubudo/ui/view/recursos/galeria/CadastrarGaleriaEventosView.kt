@@ -211,7 +211,6 @@ fun CadastrarGaleriaEventosView(
                             },
                             id = eventoSelecionado?._id,
                             criadoPor = usuarioLogado?._id ?: "",
-                            nomeFilial = usuarioLogado?.academia ?: ""
                         )
                         focusManager.clearFocus()
                     },

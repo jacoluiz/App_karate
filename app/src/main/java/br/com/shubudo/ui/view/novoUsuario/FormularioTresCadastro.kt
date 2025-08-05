@@ -85,7 +85,10 @@ fun PaginaTresCadastro(
 
                     SummaryItem(
                         "Academia",
-                        novoUsuarioViewModel.academia.ifBlank { "Não informado" })
+                        novoUsuarioViewModel.academia?.filiais
+                            ?.find { it._id == novoUsuarioViewModel.filialId }
+                            ?.nome ?: "Não informado"
+                    )
                     SummaryItem("E-mail", novoUsuarioViewModel.email)
                     SummaryItem(
                         "Altura",

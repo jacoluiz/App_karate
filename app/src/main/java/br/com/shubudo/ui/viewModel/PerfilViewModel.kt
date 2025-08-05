@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
 import br.com.shubudo.model.Usuario
+import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.UsuarioRepository
 import br.com.shubudo.ui.uistate.PerfilUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PerfilViewModel @Inject constructor(
     private val repository: UsuarioRepository,
+    private val academiaRepository: AcademiaRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     private var currentUiStateJob: Job? = null
@@ -59,7 +62,20 @@ class PerfilViewModel @Inject constructor(
         }
     }
 
-    private fun loadUsuario(usuario: Usuario) {
+    private suspend fun buscarNomeFilial(idFilial: String): String {
+        return try {
+            val academias = academiaRepository.getAcademias().firstOrNull().orEmpty()
+            val filial = academias
+                .flatMap { it.filiais }
+                .find { it._id == idFilial }
+
+            filial?.nome ?: "Filial não encontrada"
+        } catch (e: Exception) {
+            "Erro ao buscar filial"
+        }
+    }
+
+    private suspend fun loadUsuario(usuario: Usuario) {
         _uiState.update {
             PerfilUiState.Success(
                 nome = usuario.nome,
@@ -70,7 +86,7 @@ class PerfilViewModel @Inject constructor(
                 peso = usuario.peso,
                 altura = usuario.altura,
                 dan = usuario.dan,
-                academia = usuario.academia,
+                academia = buscarNomeFilial(usuario.filialId),
                 tamanhoFaixa = usuario.tamanhoFaixa,
                 registroAKSD = usuario.registroAKSD,
             )

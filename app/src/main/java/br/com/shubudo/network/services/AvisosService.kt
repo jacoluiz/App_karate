@@ -15,25 +15,16 @@ data class AvisoResponse(
     val titulo: String,
     val conteudo: String,
     val dataHoraCriacao: String,
-    val publicoAlvo: List<String>
+    val publicoAlvo: List<String>,
+    val academia: String
 )
 
 data class NovoAvisoRequest(
     val titulo: String,
     val conteudo: String,
-    val publicoAlvo: List<String>
+    val publicoAlvo: List<String>,
+    val academia: String
 )
-
-// Conversão para model de domínio
-fun AvisoResponse.toAviso(): Aviso {
-    return Aviso(
-        id = _id,
-        titulo = titulo,
-        conteudo = conteudo,
-        dataHoraCriacao = dataHoraCriacao,
-        publicoAlvo = publicoAlvo
-    )
-}
 
 // Conversão para Entity (para Room)
 fun AvisoResponse.toAvisoEntity(): AvisoEntity {
@@ -42,7 +33,8 @@ fun AvisoResponse.toAvisoEntity(): AvisoEntity {
         titulo = titulo,
         conteudo = conteudo,
         dataHoraCriacao = dataHoraCriacao,
-        publicoAlvo = publicoAlvo
+        publicoAlvo = publicoAlvo,
+        academia = academia
     )
 }
 

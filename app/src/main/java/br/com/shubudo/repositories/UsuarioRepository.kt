@@ -66,6 +66,10 @@ class UsuarioRepository @Inject constructor(
         }
     )
 
+    suspend fun getUsuariosPorAcademia(academiaId: String): List<Usuario> {
+        return service.getUsuariosPorAcademia(academiaId).map { it.toUsuario() }
+    }
+
     suspend fun getUsuarioPorId(id: String): Usuario? = withContext(Dispatchers.IO) {
         return@withContext try {
             service.getUsuariosPorId(id).toUsuario()

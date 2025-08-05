@@ -25,7 +25,8 @@ data class UsuarioResponse(
     val corFaixa: String,
     val status: String?,
     val dan: Int?,
-    val academia: String?,
+    val academiaId: String,
+    val filialId: String,
     val tamanhoFaixa: String?,
     val lesaoOuLaudosMedicos: String? = null,
     val registroAKSD: String? = null,
@@ -45,7 +46,8 @@ fun UsuarioResponse.toUsuario(): Usuario {
         corFaixa = corFaixa,
         status = status ?: "ativo",
         dan = dan ?: 0,
-        academia = academia ?: "",
+        academiaId = academiaId,
+        filialId = filialId,
         tamanhoFaixa = tamanhoFaixa ?: "",
         lesaoOuLaudosMedicos = lesaoOuLaudosMedicos ?: "",
         registroAKSD = registroAKSD ?: "",
@@ -72,4 +74,10 @@ interface UsuarioService {
         @Path("id") id: String,
         @Body usuario: Usuario
     ): UsuarioResponse?
+
+    @GET("/usuarios/por-academia")
+    suspend fun getUsuariosPorAcademia(
+        @retrofit2.http.Query("academiaId") academiaId: String
+    ): List<UsuarioResponse>
+
 }

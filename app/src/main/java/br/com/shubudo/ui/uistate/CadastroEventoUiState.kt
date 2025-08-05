@@ -11,6 +11,7 @@ sealed class CadastroEventoUiState {
         val local: String = "",
         val data: TextFieldValue = TextFieldValue(""),
         val horario: TextFieldValue = TextFieldValue(""),
+        val academia: String = "",
         val tituloError: String? = null,
         val localError: String? = null,
         val dataError: String? = null,
