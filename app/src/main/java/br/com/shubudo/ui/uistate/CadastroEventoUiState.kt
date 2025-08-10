@@ -1,6 +1,7 @@
 package br.com.shubudo.ui.uistate
 
 import androidx.compose.ui.text.input.TextFieldValue
+import br.com.shubudo.model.Presenca
 
 sealed class CadastroEventoUiState {
     object Loading : CadastroEventoUiState()
@@ -12,6 +13,8 @@ sealed class CadastroEventoUiState {
         val data: TextFieldValue = TextFieldValue(""),
         val horario: TextFieldValue = TextFieldValue(""),
         val academia: String = "",
+        val eventoOficial: Boolean = false,
+        val presenca: List<Presenca> = emptyList(),
         val tituloError: String? = null,
         val localError: String? = null,
         val dataError: String? = null,

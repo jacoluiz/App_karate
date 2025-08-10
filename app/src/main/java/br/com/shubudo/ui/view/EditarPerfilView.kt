@@ -680,7 +680,7 @@ fun EditarPerfilContent(
                     }
                 }
                 // Campo Professor em - só aparece se "professor" estiver nos perfis
-                if (currentPerfis.contains("professor")) {
+                if (currentPerfis.contains("professor") ) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -850,8 +850,14 @@ fun EditarPerfilContent(
 
         // Modal de seleção de academias
         if (showAcademiaModal) {
+            val academiasFiltradas = if (perfilAtivo == "professor") {
+                val idsPermitidos = usuarioLogado?.professorEm.orEmpty()
+                academias.filter { it._id in idsPermitidos }
+            } else {
+                academias
+            }
             AcademiaSelectionModal(
-                academias = academias,
+                academias = academiasFiltradas,
                 selectedIds = currentProfessorEm,
                 searchText = searchText,
                 onSearchTextChange = { searchText = it },

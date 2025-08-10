@@ -3,6 +3,7 @@ package br.com.shubudo.repositories
 import br.com.shubudo.database.dao.EventoDao
 import br.com.shubudo.database.entities.toEvento
 import br.com.shubudo.model.Evento
+import br.com.shubudo.model.Presenca
 import br.com.shubudo.network.services.EventoResponse
 import br.com.shubudo.network.services.EventoService
 import br.com.shubudo.network.services.NovoEventoRequest
@@ -60,14 +61,20 @@ class EventoRepository @Inject constructor(
         descricao: String,
         dataInicio: String,
         local: String,
-        academia: String
+        academia: String,
+        eventoOficial: Boolean,
+        presensas: List<Presenca>
+
+
     ) {
         val novoEvento = NovoEventoRequest(
             titulo = titulo,
             descricao = descricao,
             dataInicio = dataInicio,
             local = local,
-            academia = academia
+            academia = academia,
+            eventoOficial = eventoOficial,
+            presencas = presensas
         )
         eventoService.criarEvento(novoEvento)
         refreshEventos()
@@ -79,14 +86,18 @@ class EventoRepository @Inject constructor(
         descricao: String,
         dataInicio: String,
         local: String,
-        academia: String
+        academia: String,
+        eventoOficial: Boolean,
+        presensas: List<Presenca>
     ) {
         val eventoAtualizado = NovoEventoRequest(
             titulo = titulo,
             descricao = descricao,
             dataInicio = dataInicio,
             local = local,
-            academia = academia
+            academia = academia,
+            eventoOficial = eventoOficial,
+            presencas = presensas
         )
         eventoService.editarEvento(eventoId, eventoAtualizado)
         refreshEventos()

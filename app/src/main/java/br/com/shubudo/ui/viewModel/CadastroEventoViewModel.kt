@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager.idAcademiaVisualizacao
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.repositories.EventoRepository
 import br.com.shubudo.ui.uistate.CadastroEventoUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -36,7 +38,10 @@ class CadastroEventoViewModel @Inject constructor(
             try {
                 val evento = eventoRepository.getEventoPorId(eventoId)
                 if (evento != null) {
-                    val dateTime = LocalDateTime.parse(evento.dataInicio.substring(0, 19))
+                    val instant = Instant.parse(evento.dataInicio)
+                    val zonaBrasil = ZoneId.of("America/Sao_Paulo")
+                    val dateTime = instant.atZone(zonaBrasil).toLocalDateTime()
+
                     val data = dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     val horario = dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
 
@@ -46,10 +51,10 @@ class CadastroEventoViewModel @Inject constructor(
                         local = evento.local,
                         data = TextFieldValue(data),
                         horario = TextFieldValue(horario),
-                        academia = evento.academia
+                        academia = evento.academia,
+                        eventoOficial = evento.eventoOficial,
+                        presenca = evento.presencas
                     )
-                } else {
-
                 }
             } catch (e: Exception) {
 
@@ -156,10 +161,16 @@ class CadastroEventoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = currentState.copy(isLoading = true)
             try {
-                val data = LocalDate.parse(currentState.data.text, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                val horario = LocalTime.parse(currentState.horario.text, DateTimeFormatter.ofPattern("HH:mm"))
-                val dateTime = LocalDateTime.of(data, horario)
-                val isoString = dateTime.atZone(ZoneId.systemDefault()).toInstant().toString()
+                val data = LocalDate.parse(
+                    currentState.data.text,
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                )
+                val horario =
+                    LocalTime.parse(currentState.horario.text, DateTimeFormatter.ofPattern("HH:mm"))
+                val zonaBrasil = ZoneId.of("America/Sao_Paulo")
+                val dateTimeLocal = LocalDateTime.of(data, horario)
+                val instantUtc = dateTimeLocal.atZone(zonaBrasil).toInstant()
+                val isoString = instantUtc.toString()  // Ex: "2025-08-05T13:00:00Z"
 
                 if (eventoIdParaEdicao != null) {
                     eventoRepository.editarEvento(
@@ -168,7 +179,9 @@ class CadastroEventoViewModel @Inject constructor(
                         currentState.descricao,
                         isoString,
                         currentState.local,
-                        currentState.academia
+                        currentState.academia,
+                        currentState.eventoOficial,
+                        currentState.presenca
                     )
                 } else {
                     eventoRepository.criarEvento(
@@ -176,7 +189,9 @@ class CadastroEventoViewModel @Inject constructor(
                         currentState.descricao,
                         isoString,
                         currentState.local,
-                        idAcademiaVisualizacao
+                        if (perfilAtivo == "adm") "0" else idAcademiaVisualizacao,
+                        perfilAtivo == "adm",
+                        currentState.presenca
                     )
                 }
 
@@ -188,5 +203,4 @@ class CadastroEventoViewModel @Inject constructor(
             }
         }
     }
-
 }

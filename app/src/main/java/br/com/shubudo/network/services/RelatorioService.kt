@@ -9,9 +9,13 @@ import retrofit2.http.Query
 
 interface RelatorioService {
 
-    @GET("/relatorios/organizacao")
+    @GET("/relatorios/organizacao/{eventoId}")
     @Streaming
-    suspend fun baixarRelatorioOrganizado(): Response<ResponseBody>
+    suspend fun baixarRelatorioOrganizado(
+        @Path("eventoId") eventoId: String,
+        @Query("ateCone") conesMax: Int? = null,
+        @Query("ateFila") filasMax: String? = null
+    ): Response<ResponseBody>
 
     // Relatório "normal" (adultos/adolescentes)
     @GET("/relatorios/exame/{eventoId}")

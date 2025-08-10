@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import br.com.shubudo.database.Convertes
 import br.com.shubudo.model.Evento
+import br.com.shubudo.model.Presenca
 
 @Entity(tableName = "Evento")
 @TypeConverters(Convertes::class)
@@ -15,8 +16,9 @@ data class EventoEntity(
     val dataInicio: String,
     val local: String,
     val confirmados: List<String> = emptyList(),
-    val academia: String
-
+    val academia: String,
+    val eventoOficial: Boolean = false,
+    val presencas: List<Presenca> = emptyList()
 )
 
 fun EventoEntity.toEvento(): Evento {
@@ -27,6 +29,8 @@ fun EventoEntity.toEvento(): Evento {
         dataInicio = dataInicio,
         local = local,
         confirmados = confirmados,
-        academia = academia
+        academia = academia,
+        eventoOficial = eventoOficial,
+        presencas = presencas
     )
 }

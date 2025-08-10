@@ -18,16 +18,24 @@ class RelatorioRepository @Inject constructor(
 ) {
 
     /**
-     * Baixa o relatório de organização (cones/filas) e salva em Downloads.
+     * Baixa o relatório de organização (cones/filas) por EVENTO e salva em Downloads.
      */
     suspend fun baixarESalvarRelatorioOrganizado(
         context: Context,
+        eventoId: String,
+        conesMax: Int? = null,
+        filasMax: String? = null,
         fileName: String = "relatorio-organizado.xlsx"
     ): Uri = withContext(Dispatchers.IO) {
-        val response = service.baixarRelatorioOrganizado()
+        val response = service.baixarRelatorioOrganizado(
+            eventoId = eventoId,
+            conesMax = conesMax,
+            filasMax = filasMax
+        )
         if (!response.isSuccessful) {
             throw Exception("Falha ao baixar relatório: ${response.code()} ${response.message()}")
         }
+
         val body = response.body() ?: throw Exception("Corpo da resposta vazio")
 
         try {
@@ -36,6 +44,7 @@ class RelatorioRepository @Inject constructor(
             body.close()
         }
     }
+
 
     /**
      * Baixa o relatório de EXAME por evento (adultos/adolescentes ou 1ª infância)

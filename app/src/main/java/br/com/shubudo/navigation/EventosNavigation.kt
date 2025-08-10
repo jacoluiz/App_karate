@@ -13,7 +13,6 @@ import br.com.shubudo.ui.viewModel.EventoViewModel
 internal const val eventosRoute = "eventos"
 
 fun NavGraphBuilder.eventosScreen(
-    onReload: () -> Unit,
     onEventClick: (String) -> Unit,
     onAddEventoClick: () -> Unit = {},
     onEditEventoClick: (String) -> Unit = {}

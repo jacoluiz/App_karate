@@ -61,6 +61,7 @@ fun AcademiasView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val usuarioLogado = SessionManager.usuarioLogado
+    var showDialogErro by remember { mutableStateOf(false) }
 
     when (uiState) {
         is AcademiaUiState.Loading -> {
@@ -68,7 +69,6 @@ fun AcademiasView(
         }
 
         is AcademiaUiState.Empty -> {
-            // Estrutura semelhante à tela de avisos
             Column(modifier = Modifier.fillMaxSize()) {
                 CabecalhoComIconeCentralizado(
                     titulo = "Academias",
@@ -132,18 +132,46 @@ fun AcademiasView(
                                     onEdit = {
                                         onNavigateToEditarAcademia(academia._id)
                                     },
-                                    onDelete = { viewModel.deletarAcademia(academia._id) }
+                                    onDelete = {
+                                        viewModel.deletarAcademiaComVerificacao(
+                                            academiaId = academia._id,
+                                            onFalha = {
+                                                showDialogErro = true
+                                            },
+                                            onSucesso = {
+                                                // sucesso, exibir snackbar ou atualizar lista
+                                            }
+                                        )
+                                    }
                                 )
                             }
                         }
                     }
                 }
             }
+            if (showDialogErro) {
+                AlertDialog(
+                    onDismissRequest = { showDialogErro = false },
+                    confirmButton = {
+                        Button(onClick = { showDialogErro = false }) {
+                            Text("OK")
+                        }
+                    },
+                    title = {
+                        Text("Não é possível deletar")
+                    },
+                    text = {
+                        Text("Existem usuários vinculados a esta academia.")
+                    }
+                )
+            }
+
         }
 
         else -> {}
     }
 }
+
 @Composable
 fun ConteudoVazioAcademia(isAdmin: Boolean, onAdd: () -> Unit) {
     Card(

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +38,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,8 +52,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,6 +66,7 @@ import br.com.shubudo.model.Usuario
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.AvisosUiState
+import br.com.shubudo.ui.view.recursos.eventos.SectionHeader
 import br.com.shubudo.ui.viewModel.AvisosViewModel
 import br.com.shubudo.ui.viewModel.components.UsuarioListViewModel
 import br.com.shubudo.utils.formatarDataHoraLocal
@@ -77,6 +80,12 @@ fun AvisosView(
     viewModel: AvisosViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
+    val avisosFiltrados = if (searchQuery.text.isNotBlank()) {
+        viewModel.filtrarPorNomeAcademia(searchQuery.text)
+    } else {
+        (uiState as? AvisosUiState.Success)?.avisos ?: emptyList()
+    }
     val usuarioLogado = usuarioLogado
     val usuarioListViewModel: UsuarioListViewModel = hiltViewModel()
     val usuarios by usuarioListViewModel.usuarios.collectAsState()
@@ -128,7 +137,7 @@ fun AvisosView(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
+                        if (perfilAtivo == "professor") {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { onNavigateToCadastroAviso("") }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
@@ -148,69 +157,96 @@ fun AvisosView(
                     titulo = "Avisos",
                     subtitulo = "Fique por dentro das últimas informações"
                 )
-
-                // Conteúdo principal
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .offset(y = (-20).dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
+                if (perfilAtivo.contains("adm")) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Avisos Recentes",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f)
-                            )
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = {
+                                Text(
+                                    "Buscar por academia",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Buscar",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                    alpha = 0.5f
+                                )
+                            ),
+                            singleLine = true
+                        )
+                    }
+                }
 
-                            if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
-                                FloatingActionButton(
-                                    onClick = { onNavigateToCadastroAviso("") },
-                                    modifier = Modifier.size(48.dp),
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        contentDescription = "Criar novo aviso",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                        }
+                // Conteúdo principal
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SectionHeader(
+                            title = "Avisos",
+                            subtitle = "Seus avisos",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                        LazyColumn(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items((uiState as AvisosUiState.Success).avisos.sortedByDescending { it.dataHoraCriacao }) { aviso ->
-                                AvisoCard(
-                                    aviso = aviso,
-                                    isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
-                                    userEmail = usuarioLogado?.email ?: "",
-                                    usuarios = usuarios,
-                                    onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
-                                    onEditAviso = { onNavigateToEditarAviso(aviso.id) }
+                        if (perfilAtivo == "professor") {
+                            FloatingActionButton(
+                                onClick = { onNavigateToCadastroAviso("") },
+                                modifier = Modifier.size(48.dp),
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Criar novo aviso",
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(avisosFiltrados.sortedByDescending { it.dataHoraCriacao }) { aviso ->
+                            AvisoCard(
+                                aviso = aviso,
+                                isAdmin = perfilAtivo.contains("adm") || perfilAtivo == "professor",
+                                userEmail = usuarioLogado?.email ?: "",
+                                usuarios = usuarios,
+                                onDeleteAviso = { viewModel.deletarAviso(aviso.id) },
+                                onEditAviso = { onNavigateToEditarAviso(aviso.id) }
+                            )
+                        }
+                    }
                 }
+
             }
         }
     }
@@ -321,44 +357,47 @@ fun AvisoCard(
                                         showUsersDialog = true
                                     }
                                 )
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Edit, // Adicione o ícone edit (você pode importar se não estiver)
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Editar aviso")
+                                if (perfilAtivo == "professor") {
+
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit, // Adicione o ícone edit (você pode importar se não estiver)
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text("Editar aviso")
+                                            }
+                                        },
+                                        onClick = {
+                                            showMenu = false
+                                            onEditAviso(aviso) // chama callback de edição
                                         }
-                                    },
-                                    onClick = {
-                                        showMenu = false
-                                        onEditAviso(aviso) // chama callback de edição
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(
-                                                "Excluir aviso",
-                                                color = MaterialTheme.colorScheme.error
-                                            )
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    "Excluir aviso",
+                                                    color = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            showMenu = false
+                                            showDeleteDialog = true
                                         }
-                                    },
-                                    onClick = {
-                                        showMenu = false
-                                        showDeleteDialog = true
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
@@ -528,7 +567,9 @@ fun AvisoCard(
                                                 Text(
                                                     text = usuario.email,
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                                    color = MaterialTheme.colorScheme.onPrimary.copy(
+                                                        alpha = 0.7f
+                                                    )
                                                 )
                                             }
                                             Card(
@@ -541,7 +582,10 @@ fun AvisoCard(
                                                     text = usuario.corFaixa,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = getCorOnPrimary(usuario.corFaixa),
-                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                    modifier = Modifier.padding(
+                                                        horizontal = 8.dp,
+                                                        vertical = 4.dp
+                                                    )
                                                 )
                                             }
                                         }

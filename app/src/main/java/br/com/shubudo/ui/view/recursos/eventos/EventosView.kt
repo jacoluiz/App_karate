@@ -1,7 +1,7 @@
 package br.com.shubudo.ui.view.recursos.eventos
 
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +17,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,38 +70,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.perfilAtivo
-import br.com.shubudo.SessionManager.usuarioLogado
 import br.com.shubudo.model.Evento
-import br.com.shubudo.model.Usuario
+import br.com.shubudo.model.Presenca
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.components.LoadingWrapper
 import br.com.shubudo.ui.uistate.EventosUiState
+import br.com.shubudo.ui.viewModel.EventoViewModel
 import br.com.shubudo.ui.viewModel.components.UsuarioListViewModel
+import br.com.shubudo.utils.formatarDataHoraLocal
 import br.com.shubudo.utils.getCorDaFaixa
-import br.com.shubudo.utils.getCorOnPrimary
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
-
-fun String.formatDate(): String {
-    return try {
-        val zdt = ZonedDateTime.parse(this)
-        zdt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    } catch (_: DateTimeParseException) {
-        this
-    }
-}
-
-fun String.formatTime(): String {
-    return try {
-        val zdt = ZonedDateTime.parse(this)
-        zdt.format(DateTimeFormatter.ofPattern("HH:mm"))
-    } catch (_: DateTimeParseException) {
-        this
-    }
-}
 
 fun String.isPastEvent(): Boolean {
     return try {
@@ -137,8 +123,14 @@ fun EventosView(
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
     val usuarioListViewModel: UsuarioListViewModel = hiltViewModel()
+    val viewModel: EventoViewModel = hiltViewModel()
     val usuarios by usuarioListViewModel.usuarios.collectAsState()
+    val academias by usuarioListViewModel.academias.collectAsState()
 
+    var showConfirmadosDialog by remember { mutableStateOf(false) }
+    var eventoSelecionado by remember { mutableStateOf<Evento?>(null) }
+    var showConfirmacaoEnvio by remember { mutableStateOf(false) }
+    var presencasEditaveis by remember { mutableStateOf<List<Presenca>>(emptyList()) }
 
     LoadingWrapper(
         isLoading = uiState is EventosUiState.Loading,
@@ -184,7 +176,7 @@ fun EventosView(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
 
-                                if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
+                                if (perfilAtivo == "professor" || perfilAtivo == "adm") {
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Button(onClick = { onAddEventoClick() }) {
                                         Icon(Icons.Default.Add, contentDescription = null)
@@ -208,13 +200,19 @@ fun EventosView(
                     }
 
                     val filteredFuturos = futuros.filter {
+                        val nomeAcademia = viewModel.idParaNomeAcademia.value[it.academia].orEmpty()
                         it.titulo.contains(searchQuery.text, ignoreCase = true) ||
-                                it.descricao.contains(searchQuery.text, ignoreCase = true)
+                                it.descricao.contains(searchQuery.text, ignoreCase = true) ||
+                                nomeAcademia.contains(searchQuery.text, ignoreCase = true)
                     }
+
                     val filteredPassados = passados.filter {
+                        val nomeAcademia = viewModel.idParaNomeAcademia.value[it.academia].orEmpty()
                         it.titulo.contains(searchQuery.text, ignoreCase = true) ||
-                                it.descricao.contains(searchQuery.text, ignoreCase = true)
+                                it.descricao.contains(searchQuery.text, ignoreCase = true) ||
+                                nomeAcademia.contains(searchQuery.text, ignoreCase = true)
                     }
+
 
                     Column(modifier = Modifier.fillMaxSize()) {
                         CabecalhoComIconeCentralizado(
@@ -299,7 +297,7 @@ fun EventosView(
                                             modifier = Modifier.weight(1f)
                                         )
 
-                                        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor") {
+                                        if (perfilAtivo == "professor" || perfilAtivo == "adm") {
                                             FloatingActionButton(
                                                 onClick = onAddEventoClick,
                                                 modifier = Modifier.size(48.dp),
@@ -318,12 +316,23 @@ fun EventosView(
                                 items(filteredFuturos) { evento ->
                                     EventoItem(
                                         evento = evento,
+                                        nomeAcademia = viewModel.idParaNomeAcademia.value[evento.academia]
+                                            ?: "Evento oficial",
                                         isPast = false,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
-                                        usuarios = usuarios,
+                                        isAdmin = perfilAtivo == "professor",
                                         onDeleteEvento = onDeleteEvento,
-                                        onEditEvento = onEditEventoClick
+                                        onEditEvento = onEditEventoClick,
+                                        onVerConfirmados = {
+                                            eventoSelecionado = evento
+                                            presencasEditaveis =
+                                                evento.presencas.filter { presenca ->
+                                                    val usuario =
+                                                        usuarios.find { it.email == presenca.email }
+                                                    usuario?.academiaId == SessionManager.idAcademiaVisualizacao
+                                                }
+                                            showConfirmadosDialog = true
+                                        },
                                     )
                                 }
                             }
@@ -340,16 +349,336 @@ fun EventosView(
                                 items(filteredPassados.sortedByDescending { it.dataInicio }) { evento ->
                                     EventoItem(
                                         evento = evento,
+                                        nomeAcademia = viewModel.idParaNomeAcademia.value[evento.academia]
+                                            ?: "Academia desconhecida",
                                         isPast = true,
                                         onClick = { onEventClick(evento._id) },
-                                        isAdmin = usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo == "professor",
-                                        usuarios = usuarios,
+                                        isAdmin = perfilAtivo == "professor",
                                         onDeleteEvento = onDeleteEvento,
-                                        onEditEvento = onEditEventoClick
+                                        onEditEvento = onEditEventoClick,
+                                        onVerConfirmados = {
+                                            eventoSelecionado = evento
+                                            presencasEditaveis =
+                                                evento.presencas.filter { presenca ->
+                                                    val usuario =
+                                                        usuarios.find { it.email == presenca.email }
+                                                    usuario?.academiaId == SessionManager.idAcademiaVisualizacao
+                                                }
+                                            showConfirmadosDialog = true
+                                        },
                                     )
                                 }
                             }
                         }
+                    }
+
+                    // Dialog para Ver Confirmados
+                    if (showConfirmadosDialog && eventoSelecionado != null) {
+                        Dialog(
+                            onDismissRequest = { showConfirmadosDialog = false }
+                        ) {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(0.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(24.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Confirmados",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        IconButton(onClick = { showConfirmadosDialog = false }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Fechar")
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    when {
+                                        // Professor em evento não oficial - lista simples
+                                        perfilAtivo == "professor" && !eventoSelecionado!!.eventoOficial -> {
+                                            LazyColumn(
+                                                modifier = Modifier.heightIn(max = 400.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                items(eventoSelecionado!!.presencas) { presenca ->
+                                                    val usuario =
+                                                        usuarios.find { it.email == presenca.email }
+                                                    if (usuario != null) {
+                                                        Card(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            colors = CardDefaults.cardColors(
+                                                                containerColor = MaterialTheme.colorScheme.primary.copy(
+                                                                    alpha = 0.6f
+                                                                )
+                                                            )
+                                                        ) {
+                                                            Row(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(16.dp),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(12.dp)
+                                                                        .clip(CircleShape)
+                                                                        .background(
+                                                                            getCorDaFaixa(
+                                                                                usuario.corFaixa
+                                                                            )
+                                                                        )
+                                                                )
+                                                                Spacer(modifier = Modifier.width(12.dp))
+                                                                Text(
+                                                                    text = usuario.nome,
+                                                                    style = MaterialTheme.typography.bodyMedium
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if (presencasEditaveis.isEmpty()) {
+                                                    item {
+                                                        Text("Sem alunos inscritos ainda")
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // Professor em evento oficial - lista editável
+                                        perfilAtivo == "professor" && eventoSelecionado!!.eventoOficial -> {
+                                            LazyColumn(
+                                                modifier = Modifier.heightIn(max = 400.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+
+                                                items(presencasEditaveis) { presenca ->
+                                                    val usuario =
+                                                        usuarios.find { it.email == presenca.email }
+                                                    if (usuario != null) {
+                                                        Card(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            colors = CardDefaults.cardColors(
+                                                                containerColor = MaterialTheme.colorScheme.surface
+                                                            )
+                                                        ) {
+                                                            Row(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(16.dp),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(12.dp)
+                                                                        .clip(CircleShape)
+                                                                        .background(
+                                                                            getCorDaFaixa(
+                                                                                usuario.corFaixa
+                                                                            )
+                                                                        )
+                                                                )
+                                                                Spacer(modifier = Modifier.width(12.dp))
+                                                                Column(modifier = Modifier.weight(1f)) {
+                                                                    Text(
+                                                                        text = usuario.nome,
+                                                                        style = MaterialTheme.typography.bodyMedium,
+                                                                        fontWeight = FontWeight.Medium
+                                                                    )
+                                                                    Text(
+                                                                        text = "Faixa: ${usuario.corFaixa}",
+                                                                        style = MaterialTheme.typography.bodySmall,
+                                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                                    )
+                                                                }
+                                                                Switch(
+                                                                    checked = presenca.confirmadoProfessor,
+                                                                    onCheckedChange = { isChecked ->
+                                                                        presencasEditaveis =
+                                                                            presencasEditaveis.map {
+                                                                                if (it.email == presenca.email) {
+                                                                                    it.copy(
+                                                                                        confirmadoProfessor = isChecked
+                                                                                    )
+                                                                                } else it
+                                                                            }
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            if (presencasEditaveis.isEmpty()) {
+                                                Text("Sem alunos inscritos ainda")
+                                            }
+                                            if (presencasEditaveis.isNotEmpty()) {
+                                                Button(
+                                                    onClick = { showConfirmacaoEnvio = true },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = MaterialTheme.colorScheme.primary
+                                                    )
+                                                ) {
+                                                    Icon(
+                                                        Icons.AutoMirrored.Filled.Send,
+                                                        contentDescription = null
+                                                    )
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Text("Enviar Lista de Confirmados")
+                                                }
+                                            }
+                                        }
+
+                                        // Administrador em evento oficial - visualização por academia
+                                        perfilAtivo == "adm" && eventoSelecionado!!.eventoOficial -> {
+                                            val presencasConfirmadas =
+                                                eventoSelecionado!!.presencas.filter { it.confirmadoProfessor }
+                                            val presencasPorAcademia =
+                                                presencasConfirmadas.groupBy { presenca ->
+                                                    val usuario =
+                                                        usuarios.find { it.email == presenca.email }
+                                                    usuario?.academiaId ?: ""
+                                                }
+
+                                            LazyColumn(
+                                                modifier = Modifier.heightIn(max = 400.dp),
+                                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                items(presencasPorAcademia.entries.toList()) { (academiaId, presencas) ->
+                                                    val nomeAcademia =
+                                                        academias.find { it._id == academiaId }?.nome
+                                                            ?: "Academia não encontrada"
+
+                                                    Card(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = MaterialTheme.colorScheme.surface
+                                                        )
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier.padding(16.dp)
+                                                        ) {
+                                                            Row(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Text(
+                                                                    text = nomeAcademia,
+                                                                    style = MaterialTheme.typography.titleMedium,
+                                                                    fontWeight = FontWeight.Bold
+                                                                )
+                                                                Badge(
+                                                                    containerColor = MaterialTheme.colorScheme.primary
+                                                                ) {
+                                                                    Text(
+                                                                        text = "${presencas.size}",
+                                                                        color = MaterialTheme.colorScheme.onPrimary
+                                                                    )
+                                                                }
+                                                            }
+
+                                                            Spacer(modifier = Modifier.height(12.dp))
+
+                                                            presencas.forEach { presenca ->
+                                                                val usuario =
+                                                                    usuarios.find { it.email == presenca.email }
+                                                                if (usuario != null) {
+                                                                    Row(
+                                                                        modifier = Modifier
+                                                                            .fillMaxWidth()
+                                                                            .padding(vertical = 4.dp),
+                                                                        verticalAlignment = Alignment.CenterVertically
+                                                                    ) {
+                                                                        Box(
+                                                                            modifier = Modifier
+                                                                                .size(8.dp)
+                                                                                .clip(CircleShape)
+                                                                                .background(
+                                                                                    getCorDaFaixa(
+                                                                                        usuario.corFaixa
+                                                                                    )
+                                                                                )
+                                                                        )
+                                                                        Spacer(
+                                                                            modifier = Modifier.width(
+                                                                                8.dp
+                                                                            )
+                                                                        )
+                                                                        Text(
+                                                                            text = "${usuario.nome} - ${usuario.corFaixa}",
+                                                                            style = MaterialTheme.typography.bodySmall
+                                                                        )
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Dialog de confirmação de envio
+                    if (showConfirmacaoEnvio) {
+                        AlertDialog(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            onDismissRequest = { showConfirmacaoEnvio = false },
+                            title = {
+                                Text("Confirmar Envio")
+                            },
+                            text = {
+                                Text("Deseja confirmar a presença dos alunos selecionados? Esta ação atualizará a lista de confirmados.")
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        // Atualizar as presenças do evento
+                                        eventoSelecionado?.let { evento ->
+                                            val presencasAtualizadas =
+                                                evento.presencas.map { presencaOriginal ->
+                                                    val presencaEditada =
+                                                        presencasEditaveis.find { it.email == presencaOriginal.email }
+                                                    presencaEditada ?: presencaOriginal
+                                                }
+                                            viewModel.confirmarPresencas(
+                                                evento._id,
+                                                presencasAtualizadas
+                                            )
+                                        }
+                                        showConfirmacaoEnvio = false
+                                        showConfirmadosDialog = false
+                                    }
+                                ) {
+                                    Text("Confirmar")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showConfirmacaoEnvio = false }) {
+                                    Text("Cancelar")
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -360,16 +689,16 @@ fun EventosView(
 @Composable
 fun EventoItem(
     evento: Evento,
+    nomeAcademia: String,
     isPast: Boolean = false,
     onClick: () -> Unit = {},
     isAdmin: Boolean = false,
-    usuarios: List<Usuario> = emptyList(),
     onDeleteEvento: (String) -> Unit = {},
-    onEditEvento: (String) -> Unit = {}
+    onEditEvento: (String) -> Unit = {},
+    onVerConfirmados: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var showUsersDialog by remember { mutableStateOf(false) }
 
     val cardColor = if (isPast) {
         MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
@@ -386,11 +715,23 @@ fun EventoItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (evento.eventoOficial) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor),
-        shape = RoundedCornerShape(16.dp)
-    ) {
+        shape = RoundedCornerShape(16.dp),
+
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -451,7 +792,12 @@ fun EventoItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${evento.dataInicio.formatDate()} um ${evento.dataInicio.getDiaSemanaAbreviado()} às ${evento.dataInicio.formatTime()}",
+                        text = "${
+                            formatarDataHoraLocal(
+                                evento.dataInicio,
+                                true
+                            )
+                        } uma ${evento.dataInicio.getDiaSemanaAbreviado()}",
                         style = MaterialTheme.typography.bodySmall,
                         color = textColor.copy(alpha = 0.7f)
                     )
@@ -490,8 +836,8 @@ fun EventoItem(
             }
 
             // Menu de 3 pontos para admin
-            if (isAdmin) {
-                Box {
+            if (isAdmin || perfilAtivo == "adm") {
+                Column {
                     IconButton(
                         onClick = { showMenu = true },
                         modifier = Modifier.size(32.dp)
@@ -522,51 +868,69 @@ fun EventoItem(
                             },
                             onClick = {
                                 showMenu = false
-                                showUsersDialog = true
+                                onVerConfirmados()
                             }
                         )
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Editar evento")
+                        if ((isAdmin && !evento.eventoOficial) || (evento.eventoOficial && perfilAtivo == "adm")) {
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Editar evento")
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onEditEvento(evento._id)
                                 }
-                            },
-                            onClick = {
-                                showMenu = false
-                                onEditEvento(evento._id)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        "Excluir evento",
-                                        color = MaterialTheme.colorScheme.error
-                                    )
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            "Excluir evento",
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    showDeleteDialog = true
                                 }
-                            },
-                            onClick = {
-                                showMenu = false
-                                showDeleteDialog = true
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
-
+        }
+        if (perfilAtivo == "adm" || evento.eventoOficial) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier
+                    .padding(bottom = 8.dp, end = 8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = nomeAcademia,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = textColor.copy(alpha = 0.7f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         // Indicador de público alvo
         if (isAdmin) {
@@ -578,9 +942,9 @@ fun EventoItem(
                 verticalAlignment = Alignment.CenterVertically
             )
             {
-                if (evento.confirmados.isNotEmpty()) {
+                if (evento.presencas.isNotEmpty()) {
                     Text(
-                        text = "${evento.confirmados.size} usuário(s) confirmado(s)",
+                        text = "${evento.presencas.size} usuário(s) confirmado(s)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     )
@@ -639,118 +1003,118 @@ fun EventoItem(
         }
 
         // Dialog de visualização de usuários confirmados
-        if (showUsersDialog) {
-            Dialog(
-                onDismissRequest = { showUsersDialog = false }
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Usuários confirmados",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        if (evento.confirmados.isEmpty()) {
-                            Text(
-                                text = "Nenhum usuário confirmou presença ainda.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(vertical = 16.dp)
-                            )
-                        } else {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(evento.confirmados) { email ->
-                                    val usuario = usuarios.find { it.email == email }
-                                    if (usuario != null) {
-                                        Card(
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.primary
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(12.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = usuario.nome,
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onPrimary
-
-                                                    )
-                                                    Text(
-                                                        text = usuario.email,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onPrimary.copy(
-                                                            alpha = 0.7f
-                                                        )
-                                                    )
-                                                }
-                                                Card(
-                                                    colors = CardDefaults.cardColors(
-                                                        containerColor = getCorDaFaixa(usuario.corFaixa)
-                                                    ),
-                                                    modifier = Modifier.wrapContentWidth()
-                                                ) {
-                                                    Text(
-                                                        text = usuario.corFaixa,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = getCorOnPrimary(usuario.corFaixa),
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 8.dp,
-                                                            vertical = 4.dp
-                                                        )
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        Card(
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                                            )
-                                        ) {
-                                            Text(
-                                                text = email,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                modifier = Modifier.padding(12.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            TextButton(
-                                onClick = { showUsersDialog = false }
-                            ) {
-                                Text("Fechar")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//        if (showUsersDialog) {
+//            Dialog(
+//                onDismissRequest = { showUsersDialog = false }
+//            ) {
+//                Card(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .heightIn(max = 400.dp),
+//                    shape = RoundedCornerShape(16.dp)
+//                ) {
+//                    Column(
+//                        modifier = Modifier.padding(16.dp)
+//                    ) {
+//                        Text(
+//                            text = "Usuários confirmados",
+//                            style = MaterialTheme.typography.titleMedium,
+//                            fontWeight = FontWeight.Bold,
+//                            modifier = Modifier.padding(bottom = 16.dp)
+//                        )
+//
+//                        if (evento.presencas.isEmpty() || (perfilAtivo == "adm" && evento.presencas.none { it.confirmadoProfessor })) {
+//                            Text(
+//                                text = "Nenhum usuário confirmou presença ainda.",
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+//                                modifier = Modifier.padding(vertical = 16.dp)
+//                            )
+//                        } else {
+//                            LazyColumn(
+//                                verticalArrangement = Arrangement.spacedBy(8.dp)
+//                            ) {
+//                                items(evento.presencas) { presenca ->
+//                                    val usuario = usuarios.find { it.email == presenca.email }
+//                                    if (usuario != null) {
+//                                        Card(
+//                                            colors = CardDefaults.cardColors(
+//                                                containerColor = MaterialTheme.colorScheme.primary
+//                                            )
+//                                        ) {
+//                                            Row(
+//                                                modifier = Modifier
+//                                                    .fillMaxWidth()
+//                                                    .padding(12.dp),
+//                                                verticalAlignment = Alignment.CenterVertically
+//                                            ) {
+//                                                Column(modifier = Modifier.weight(1f)) {
+//                                                    Text(
+//                                                        text = usuario.nome,
+//                                                        style = MaterialTheme.typography.bodyMedium,
+//                                                        fontWeight = FontWeight.Bold,
+//                                                        color = MaterialTheme.colorScheme.onPrimary
+//                                                    )
+//                                                    Text(
+//                                                        text = usuario.email,
+//                                                        style = MaterialTheme.typography.bodySmall,
+//                                                        color = MaterialTheme.colorScheme.onPrimary.copy(
+//                                                            alpha = 0.7f
+//                                                        )
+//                                                    )
+//                                                }
+//                                                Card(
+//                                                    colors = CardDefaults.cardColors(
+//                                                        containerColor = getCorDaFaixa(usuario.corFaixa)
+//                                                    ),
+//                                                    modifier = Modifier.wrapContentWidth()
+//                                                ) {
+//                                                    Text(
+//                                                        text = usuario.corFaixa,
+//                                                        style = MaterialTheme.typography.bodySmall,
+//                                                        color = getCorOnPrimary(usuario.corFaixa),
+//                                                        modifier = Modifier.padding(
+//                                                            horizontal = 8.dp,
+//                                                            vertical = 4.dp
+//                                                        )
+//                                                    )
+//                                                }
+//                                            }
+//                                        }
+//                                    } else {
+//                                        Card(
+//                                            colors = CardDefaults.cardColors(
+//                                                containerColor = MaterialTheme.colorScheme.primaryContainer
+//                                            )
+//                                        ) {
+//                                            Text(
+//                                                text = presenca.email,
+//                                                style = MaterialTheme.typography.bodyMedium,
+//                                                modifier = Modifier.padding(12.dp)
+//                                            )
+//                                        }
+//                                    }
+//                                }
+//
+//                            }
+//                        }
+//
+//                        Spacer(modifier = Modifier.height(16.dp))
+//
+//                        Row(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            horizontalArrangement = Arrangement.End
+//                        ) {
+//                            TextButton(
+//                                onClick = { showUsersDialog = false }
+//                            ) {
+//                                Text("Fechar")
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

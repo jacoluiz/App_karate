@@ -51,7 +51,6 @@ fun formatarDataHoraLocal(isoDate: String, comHoras: Boolean): String {
     }
 }
 
-
 // Função para aplicar máscara de altura no formato x,xx
 fun applyHeightMask(input: String, previousValue: String = ""): Pair<String, Int> {
     // Remove qualquer caractere que não seja dígito ou vírgula

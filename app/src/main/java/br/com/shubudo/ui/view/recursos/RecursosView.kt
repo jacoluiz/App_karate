@@ -125,15 +125,15 @@ fun RecursosView(
                     onNavigateToAvisos
                 )
             )
-
-            add(
-                RecursoItem(
-                    "Galeria",
-                    RecursoIcon.PainterIcon(painterResource(R.drawable.ic_galeria)),
-                    onNavigateToGaleria
+            if (perfilAtivo != "adm") {
+                add(
+                    RecursoItem(
+                        "Galeria",
+                        RecursoIcon.PainterIcon(painterResource(R.drawable.ic_galeria)),
+                        onNavigateToGaleria
+                    )
                 )
-            )
-
+            }
             add(
                 RecursoItem(
                     "Eventos",
@@ -144,7 +144,7 @@ fun RecursosView(
 
         }
 
-        if (usuarioLogado?.perfis?.contains("adm") == true) {
+        if (perfilAtivo.contains("adm")) {
             add(
                 RecursoItem(
                     "Academias",
@@ -154,7 +154,7 @@ fun RecursosView(
             )
         }
 
-        if (usuarioLogado?.perfis?.contains("adm") == true || perfilAtivo.contains("professor")) {
+        if (perfilAtivo.contains("adm") || perfilAtivo.contains("professor")) {
             add(
                 RecursoItem(
                     "Base de Usuários",
@@ -206,12 +206,20 @@ fun RecursosView(
                     val nomesAcademias by viewModel.nomesAcademias.collectAsState()
 
                     // Botão para alternar perfil - só mostra se o usuário tem perfil professor
-                    if (usuarioLogado?.perfis?.contains("professor") == true) {
+                    if (usuarioLogado?.perfis?.contains("professor") == true || usuarioLogado?.perfis?.contains(
+                            "adm"
+                        ) == true
+                    ) {
                         var showDialog by remember { mutableStateOf(false) }
                         var searchText by remember { mutableStateOf("") }
 
                         val opcoes = remember(usuarioLogado, nomesAcademias) {
                             val opcoesBase = mutableListOf<Pair<String, String>>()
+
+                            // Opção adm
+                            if (usuarioLogado?.perfis?.contains("adm") == true) {
+                                opcoesBase.add("Administrador" to usuarioLogado!!.academiaId)
+                            }
 
                             // Opção "aluno"
                             val nomeFilialAluno = usuarioLogado?.filialId?.let { id ->
@@ -234,7 +242,7 @@ fun RecursosView(
                                 showDialog = true
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                                 contentColor = MaterialTheme.colorScheme.primary
                             ),
                             modifier = Modifier
@@ -249,7 +257,11 @@ fun RecursosView(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "${perfilAtivo.replaceFirstChar { it.uppercase() }} - $nomeAcademiaSelecionada",
+                                text = if (perfilAtivo == "adm") {
+                                    "Administrador"
+                                } else {
+                                    "${perfilAtivo.replaceFirstChar { it.uppercase() }} - $nomeAcademiaSelecionada"
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -257,6 +269,7 @@ fun RecursosView(
 
                         if (showDialog) {
                             AlertDialog(
+                                containerColor = MaterialTheme.colorScheme.surface,
                                 onDismissRequest = { showDialog = false },
                                 title = { Text("Selecionar perfil") },
                                 text = {
@@ -286,8 +299,11 @@ fun RecursosView(
                                                         .padding(4.dp)
                                                         .fillMaxWidth()
                                                         .clickable {
-                                                            val tipo =
-                                                                if (perfil.startsWith("Prof.")) "professor" else "aluno"
+                                                            val tipo = when {
+                                                                perfil.startsWith("Prof.") -> "professor"
+                                                                perfil.startsWith("Adm") -> "adm"
+                                                                else -> "aluno"
+                                                            }
                                                             SessionManager.alternarPerfil(
                                                                 tipo,
                                                                 id
@@ -308,6 +324,14 @@ fun RecursosView(
                                                             .fillMaxWidth()
                                                             .padding(8.dp)
                                                     ) {
+
+                                                        Icon(
+                                                            imageVector = Icons.Default.Person,
+                                                            contentDescription = "Alternar perfil",
+                                                            modifier = Modifier.size(16.dp),
+                                                            tint = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Spacer(modifier = Modifier.padding(8.dp))
                                                         Text(
                                                             text = perfil.replace("_", " ")
                                                                 .replaceFirstChar { it.uppercase() },

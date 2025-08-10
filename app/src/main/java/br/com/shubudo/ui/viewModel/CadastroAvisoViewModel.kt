@@ -43,7 +43,6 @@ class CadastroAvisoViewModel @Inject constructor(
         }
     }
 
-
     fun selecionarUsuariosPorFaixa(corFaixa: String): Set<Usuario> {
         return todosUsuarios.filter {
             it.status == "ativo" && it.corFaixa.equals(corFaixa, ignoreCase = true)

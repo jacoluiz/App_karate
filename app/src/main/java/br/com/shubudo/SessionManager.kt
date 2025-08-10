@@ -17,11 +17,12 @@ object SessionManager {
     var idAcademiaVisualizacao by mutableStateOf("")
 
     fun alternarPerfil(novoPerfil: String, novaAcademiaId: String? = null) {
-        if (usuarioLogado?.perfis?.contains(novoPerfil) == true) {
+        if (novoPerfil == "adm" || usuarioLogado?.perfis?.contains(novoPerfil) == true) {
             perfilAtivo = novoPerfil
-            idAcademiaVisualizacao = novaAcademiaId ?: when (novoPerfil) {
+            idAcademiaVisualizacao = when (novoPerfil) {
+                "adm" -> usuarioLogado?.academiaId.orEmpty()
                 "aluno" -> usuarioLogado?.academiaId.orEmpty()
-                "professor" -> usuarioLogado?.professorEm?.firstOrNull().orEmpty()
+                "professor" -> novaAcademiaId ?: usuarioLogado?.professorEm?.firstOrNull().orEmpty()
                 else -> ""
             }
             Log.d("Perfil", "$idAcademiaVisualizacao  -  $perfilAtivo")

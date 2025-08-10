@@ -2,6 +2,7 @@ package br.com.shubudo.network.services
 
 import br.com.shubudo.database.entities.EventoEntity
 import br.com.shubudo.model.Evento
+import br.com.shubudo.model.Presenca
 import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.Body
@@ -11,6 +12,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
+
 data class EventoResponse(
     val _id: String,
     val titulo: String,
@@ -18,7 +20,9 @@ data class EventoResponse(
     val dataInicio: String,
     val local: String?,
     val confirmados: List<String>? = emptyList(),
-    val academia: String
+    val academia: String,
+    val eventoOficial: Boolean = false,
+    val presencas: List<Presenca>? = emptyList()
 )
 
 data class NovoEventoRequest(
@@ -26,7 +30,9 @@ data class NovoEventoRequest(
     val descricao: String,
     val dataInicio: String,
     val local: String,
-    val academia: String
+    val academia: String,
+    val eventoOficial: Boolean = false,
+    val presencas: List<Presenca> = emptyList()
 )
 
 fun EventoResponse.toEventoEntity(): EventoEntity {
@@ -37,7 +43,9 @@ fun EventoResponse.toEventoEntity(): EventoEntity {
         dataInicio = dataInicio,
         local = local ?: "",
         confirmados = confirmados ?: emptyList(),
-        academia = academia
+        academia = academia,
+        eventoOficial = eventoOficial,
+        presencas = presencas ?: emptyList()
     )
 }
 

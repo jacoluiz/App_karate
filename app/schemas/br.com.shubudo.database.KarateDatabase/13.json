@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "d800231cb4f20d0c9d22dcbe5f005e47",
+    "identityHash": "a9d5ca2171f8d1809ab5bab16cc8f471",
     "entities": [
       {
         "tableName": "Parceiro",
@@ -908,7 +908,7 @@
       },
       {
         "tableName": "Evento",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataInicio` TEXT NOT NULL, `local` TEXT NOT NULL, `confirmados` TEXT NOT NULL, `academia` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataInicio` TEXT NOT NULL, `local` TEXT NOT NULL, `confirmados` TEXT NOT NULL, `academia` TEXT NOT NULL, `eventoOficial` INTEGER NOT NULL, `presencas` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
@@ -951,6 +951,18 @@
             "columnName": "academia",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "eventoOficial",
+            "columnName": "eventoOficial",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "presencas",
+            "columnName": "presencas",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -966,7 +978,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd800231cb4f20d0c9d22dcbe5f005e47')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a9d5ca2171f8d1809ab5bab16cc8f471')"
     ]
   }
 }

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.SessionManager.perfilAtivo
+import br.com.shubudo.model.Aviso
+import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.AvisoRepository
 import br.com.shubudo.ui.uistate.AvisosUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AvisosViewModel @Inject constructor(
     private val avisoRepository: AvisoRepository,
+    private val academiaRepository: AcademiaRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AvisosUiState>(AvisosUiState.Loading)
@@ -28,8 +31,27 @@ class AvisosViewModel @Inject constructor(
     private val _avisoParaEditar = MutableSharedFlow<String>()
     val avisoParaEditar = _avisoParaEditar.asSharedFlow()
 
+    private var mapaAcademiaIdParaNome: Map<String, String> = emptyMap()
+
     init {
+        viewModelScope.launch {
+            academiaRepository.getAcademias().collect { academias ->
+                mapaAcademiaIdParaNome = academias.associate { it._id to it.nome }
+            }
+        }
         loadAvisos()
+    }
+
+    fun getNomeAcademiaPorId(id: String): String {
+        return mapaAcademiaIdParaNome[id] ?: "Academia desconhecida"
+    }
+
+    fun filtrarPorNomeAcademia(query: String): List<Aviso> {
+        val atual = _uiState.value as? AvisosUiState.Success ?: return emptyList()
+        return atual.avisos.filter { aviso ->
+            val nome = getNomeAcademiaPorId(aviso.academia)
+            nome.contains(query, ignoreCase = true)
+        }
     }
 
     private fun loadAvisos() {
@@ -45,19 +67,18 @@ class AvisosViewModel @Inject constructor(
             val emailUsuario = usuario?.email.orEmpty()
             val perfilUsuario = usuario?.perfis.orEmpty()
 
-            // Coleta os avisos
             avisoRepository.getAvisos()
                 .catch {
                     _uiState.value = AvisosUiState.Empty
                 }
                 .collect { avisos ->
-
                     val avisosFiltrados = avisos
                         .filter { aviso ->
-                            aviso.academia in idAcademiaVisualizacao
+                            // Só filtra por academia se o perfil não for "adm"
+                            perfilAtivo == "adm" || aviso.academia == idAcademiaVisualizacao
                         }
                         .filter { aviso ->
-                            perfilUsuario.contains("adm") ||
+                            perfilAtivo.contains("adm") ||
                                     perfilAtivo == "professor" ||
                                     aviso.publicoAlvo.isEmpty() ||
                                     aviso.publicoAlvo.contains(emailUsuario)

@@ -25,20 +25,23 @@ class RelatorioViewModel @Inject constructor(
     val uiState: StateFlow<RelatorioUiState> = _uiState.asStateFlow()
 
     // Modal de relatório por evento
-    private val _mostrarModal = MutableStateFlow(false)
-    val mostrarModal: StateFlow<Boolean> = _mostrarModal.asStateFlow()
+    private val _mostrarModalRelatorio = MutableStateFlow(false)
+    val mostrarModalRelatorio: StateFlow<Boolean> = _mostrarModalRelatorio.asStateFlow()
 
     private val _eventosDisponiveis = MutableStateFlow<List<Evento>>(emptyList())
     val eventosDisponiveis: StateFlow<List<Evento>> = _eventosDisponiveis.asStateFlow()
 
-    fun abrirModalRelatorioEvento() {
-        _mostrarModal.value = true
-        // Sempre que abrir a modal, atualiza a lista a partir do servidor:
-        buscarEventosFuturos()
+    fun abrirModalRelatorioEvento(fluxo: String) {
+        _mostrarModalRelatorio.value = true
+        if (fluxo == "exame") {
+            buscarEventosOficiais()
+        } else {
+            buscarEventosFuturos()
+        }
     }
 
     fun fecharModalRelatorioEvento() {
-        _mostrarModal.value = false
+        _mostrarModalRelatorio.value = false
     }
 
     /**
@@ -58,23 +61,50 @@ class RelatorioViewModel @Inject constructor(
         }
     }
 
+    fun buscarEventosOficiais() {
+        viewModelScope.launch {
+            try {
+                eventosRepository.refreshEventos()
+                eventosRepository.getEventosFuturos().collect { lista ->
+                    val filtrados = lista.filter {
+                        it.eventoOficial
+                    }
+                    _eventosDisponiveis.value = filtrados
+                }
+            } catch (_: Exception) {
+                _eventosDisponiveis.value = emptyList()
+            }
+        }
+    }
+
+
     /**
      * BAIXA o relatório básico de organização (cones/filas).
      */
     fun baixarRelatorioOrganizado(
         context: Context,
+        eventoId: String,
+        conesMax: String? = null,
+        filasMax: String? = null,
         fileName: String = "relatorio-organizado.xlsx"
     ) {
         _uiState.value = RelatorioUiState.Downloading
         viewModelScope.launch {
             try {
-                val uri = repository.baixarESalvarRelatorioOrganizado(context, fileName)
+                val uri = repository.baixarESalvarRelatorioOrganizado(
+                    context = context,
+                    eventoId = eventoId,
+                    conesMax = conesMax?.toInt(),
+                    filasMax = filasMax,
+                    fileName = fileName
+                )
                 _uiState.value = RelatorioUiState.Success(uri, fileName)
             } catch (e: Exception) {
                 _uiState.value = RelatorioUiState.Error(e.message ?: "Erro ao baixar o relatório")
             }
         }
     }
+
 
     /**
      * Gera e baixa o relatório por evento (adultos/adolescentes ou primeira infância).

@@ -102,7 +102,6 @@ fun KarateNavHost(
 
         // Tela de Eventos
         eventosScreen(
-            onReload = { navController.navigate(eventosRoute) },
             onEventClick = { eventoId ->
                 navController.navigateToEventoDetalhe(eventoId)
             },

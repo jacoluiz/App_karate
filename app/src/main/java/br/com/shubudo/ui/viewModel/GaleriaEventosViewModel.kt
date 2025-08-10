@@ -9,7 +9,6 @@ import br.com.shubudo.SessionManager
 import br.com.shubudo.SessionManager.idAcademiaVisualizacao
 import br.com.shubudo.model.GaleriaEvento
 import br.com.shubudo.network.services.GaleriaEventoRequest
-import br.com.shubudo.repositories.AcademiaRepository
 import br.com.shubudo.repositories.GaleriaEventoRepository
 import br.com.shubudo.repositories.GaleriaFotoRepository
 import br.com.shubudo.ui.uistate.GaleriaEventosUiState
@@ -22,6 +21,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
@@ -51,7 +54,8 @@ class GaleriaEventosViewModel @Inject constructor(
             try {
                 eventoRepository.refreshEventos()
                 eventoRepository.getEventos().collect { eventos ->
-                    val eventosFiltrados = eventos.filter { it.academiaId == idAcademiaVisualizacao }
+                    val eventosFiltrados =
+                        eventos.filter { it.academiaId == idAcademiaVisualizacao }
 
                     _uiState.value = if (eventosFiltrados.isEmpty()) {
                         GaleriaEventosUiState.Empty
@@ -113,10 +117,11 @@ class GaleriaEventosViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val entradaFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val saidaFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val dataConvertida = try {
-                    val parsedDate = entradaFormat.parse(data)
-                    saidaFormat.format(parsedDate!!)
+                    val localDate = LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    val zonedDateTime = localDate.atStartOfDay(ZoneId.of("America/Sao_Paulo"))
+                    val utcInstant = zonedDateTime.withZoneSameInstant(ZoneOffset.UTC).toInstant()
+                    DateTimeFormatter.ISO_INSTANT.format(utcInstant)
                 } catch (e: Exception) {
                     _uiState.update {
                         GaleriaEventosUiState.Error("Data inválida. Use o formato dd/MM/yyyy")

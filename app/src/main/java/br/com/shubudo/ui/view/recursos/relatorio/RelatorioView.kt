@@ -1,5 +1,6 @@
 package br.com.shubudo.ui.view.recursos.relatorio
 
+import CampoDeTextoPadrao
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,15 +17,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SortByAlpha
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -49,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,8 +66,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.shubudo.SessionManager.perfilAtivo
 import br.com.shubudo.ui.components.CabecalhoComIconeCentralizado
 import br.com.shubudo.ui.uistate.RelatorioUiState
 import br.com.shubudo.ui.viewModel.RelatorioViewModel
@@ -80,7 +89,7 @@ fun RelatoriosView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbar = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    var fluxo = ""
 
     // Feedback após sucesso/erro
     LaunchedEffect(uiState) {
@@ -105,27 +114,34 @@ fun RelatoriosView(
     val isDownloading = uiState is RelatorioUiState.Downloading
 
     // Defina os botões (relatórios) aqui
-    val acoes = listOf(
-        ReportAction(
-            titulo = "Distribuição Exame",
-            descricao = "Gera planilha com cones/filas e chamadas por faixa, altura e academia.",
-            onClick = {
-                viewModel.baixarRelatorioOrganizado(
-                    context = context
-                )
-            },
-            enabled = !isDownloading
-        ),
+    val acoes = mutableListOf<ReportAction>()
+
+    if (perfilAtivo == "adm") {
+        acoes.add(
+            ReportAction(
+                titulo = "Distribuição Exame",
+                descricao = "Gera planilha com cones/filas e chamadas por faixa, altura e academia.",
+                onClick = {
+                    fluxo = "exame"
+                    viewModel.abrirModalRelatorioEvento(fluxo)
+                },
+                enabled = !isDownloading
+            )
+        )
+    }
+
+    acoes.add(
         ReportAction(
             titulo = "Extração Exame de Faixa",
             descricao = "Gera planilha de exame a partir da lista de confirmados do evento.",
             onClick = {
-                viewModel.abrirModalRelatorioEvento()
+                fluxo = "requirimento"
+                viewModel.abrirModalRelatorioEvento(fluxo)
             },
             enabled = !isDownloading
         )
-
     )
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbar) }
@@ -193,15 +209,12 @@ fun RelatoriosView(
             }
         }
 
-        val mostrarModal by viewModel.mostrarModal.collectAsState()
+        val mostrarModal by viewModel.mostrarModalRelatorio.collectAsState()
 
         if (mostrarModal) {
             ModalRelatorioEventoDialog(
                 onDismiss = { viewModel.fecharModalRelatorioEvento() },
-                onConfirm = { eventoId, isPrimeiraInfancia ->
-                    viewModel.gerarRelatorioExamePorEvento(eventoId, isPrimeiraInfancia, context)
-                    viewModel.fecharModalRelatorioEvento()
-                },
+                fluxo = fluxo,
                 viewModel = viewModel
             )
         }
@@ -211,15 +224,20 @@ fun RelatoriosView(
 @Composable
 private fun ModalRelatorioEventoDialog(
     onDismiss: () -> Unit,
-    onConfirm: (eventoId: String, isPrimeiraInfancia: Boolean) -> Unit,
+    fluxo: String,
     viewModel: RelatorioViewModel
 ) {
     val eventos by viewModel.eventosDisponiveis.collectAsState()
     var isPrimeiraInfancia by remember { mutableStateOf(false) }
+    var cones by remember { mutableStateOf("1") }
+    var filas by remember { mutableStateOf("A") }
     var selecionadoId by remember { mutableStateOf<String?>(null) }
     var searchText by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    val context = LocalContext.current
+    val focusCone = remember { FocusRequester() }
+    val focusFila = remember { FocusRequester() }
 
     // Filtrar eventos baseado na pesquisa
     val eventosFiltrados = remember(eventos, searchText) {
@@ -236,7 +254,7 @@ private fun ModalRelatorioEventoDialog(
         }
     }
 
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -246,6 +264,7 @@ private fun ModalRelatorioEventoDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(24.dp)
             ) {
                 // Cabeçalho da modal
@@ -262,13 +281,13 @@ private fun ModalRelatorioEventoDialog(
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Extração para exame de faixa",
+                            text = "Extração por evento",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Selecione o exame de faixa para gerar o relatório",
+                            text = "Selecione o evento para gerar o relatório",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -282,41 +301,66 @@ private fun ModalRelatorioEventoDialog(
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                 )
                 Spacer(Modifier.height(20.dp))
+                if (fluxo == "exame") {
 
+                    CampoDeTextoPadrao(
+                        value = cones,
+                        onValueChange = { cones = it},
+                        label = "Cone maximo",
+                        placeholder = "Digite o cone",
+                        leadingIcon = Icons.Default.SwapHoriz,
+                        focusRequester = focusCone,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                        )
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    CampoDeTextoPadrao(
+                        value = filas,
+                        onValueChange = { filas = it },
+                        label = "Fila maxima",
+                        placeholder = "Digite a fila",
+                        leadingIcon = Icons.Default.SortByAlpha,
+                        focusRequester = focusFila,
+                    )
+                }
                 // Switch Primeira Infância
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    onClick = { isPrimeiraInfancia = !isPrimeiraInfancia },
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                if (fluxo == "requirimento") {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        onClick = { isPrimeiraInfancia = !isPrimeiraInfancia },
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Primeira infância",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "Ativar para gerar arquivo de primeira infância",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Primeira infância",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "Ativar para gerar arquivo de primeira infância",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                            Switch(
+                                checked = isPrimeiraInfancia,
+                                onCheckedChange = { isPrimeiraInfancia = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                )
                             )
                         }
-                        Switch(
-                            checked = isPrimeiraInfancia,
-                            onCheckedChange = { isPrimeiraInfancia = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                            )
-                        )
                     }
                 }
 
@@ -452,7 +496,18 @@ private fun ModalRelatorioEventoDialog(
                     }
                     Button(
                         onClick = {
-                            selecionadoId?.let { onConfirm(it, isPrimeiraInfancia) }
+                            selecionadoId?.let {
+                                if (fluxo == "requirimento") {
+                                    viewModel.gerarRelatorioExamePorEvento(
+                                        it,
+                                        isPrimeiraInfancia,
+                                        context
+                                    )
+                                } else if (fluxo == "exame") {
+                                    viewModel.baixarRelatorioOrganizado(context, it, cones, filas)
+                                }
+                            }
+                            viewModel.fecharModalRelatorioEvento()
                             keyboardController?.hide()
                         },
                         enabled = selecionadoId != null,
